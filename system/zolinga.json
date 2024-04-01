@@ -1,0 +1,306 @@
+{
+  "name": "Zolinga Framework",
+  "version": "1.0.3",
+  "description": "Zolinga PHP framework that makes sense.",
+  "authors": [
+    "Danny Sevcik <danny@zolinga.net>"
+  ],
+  "attributes": {},
+  "listen": [
+    {
+      "description": "Install the module using GIT.",
+      "event": "install",
+      "class": "\\Zolinga\\System\\Installer\\InstallModuleCli",
+      "method": "onInstall",
+      "origin": [
+        "cli"
+      ]
+    },
+    {
+      "description": "The system logger facility $api->log.",
+      "service": "log",
+      "class": "\\Zolinga\\System\\Logger\\LogService",
+      "origin": [
+        "internal"
+      ],
+      "priority": 0.5
+    },
+    {
+      "description": "Super low priority default page handler that displays a placeholder page if event has not status set/is not handled already.",
+      "event": "system:content",
+      "class": "\\Zolinga\\System\\Cms\\Page",
+      "method": "onContent",
+      "origin": [
+        "remote"
+      ],
+      "priority": 0.001
+    },
+    {
+      "description": "Provides support for the public://, private://, dist://, module:// and wiki:// URL schemes.",
+      "service": "fs",
+      "class": "\\Zolinga\\System\\Filesystem\\WrapperService",
+      "origin": [
+        "internal"
+      ],
+      "priority": 0.5
+    },
+    {
+      "description": "This is special service provided by bootstrap.",
+      "service": "manifest",
+      "class": "\\Zolinga\\System\\Config\\ManifestService",
+      "origin": [
+        "internal"
+      ],
+      "priority": 0.5
+    },
+    {
+      "description": "Installs or updates the new or changed modules. Dispatches events for update or installation scripts.",
+      "event": "system:install",
+      "class": "\\Zolinga\\System\\Installer\\InstallController",
+      "method": "onInstall",
+      "origin": [
+        "internal"
+      ],
+      "priority": 0.5
+    },
+    {
+      "description": "Executes *.php installation and update scripts.",
+      "event": "system:install:script:php",
+      "class": "\\Zolinga\\System\\Installer\\InstallPhpScript",
+      "method": "onInstall",
+      "origin": [
+        "internal"
+      ],
+      "priority": 0.5
+    },
+    {
+      "description": "Instantiation of the $api->config object with ArrayObject interface that holds all merged configs.",
+      "service": "config",
+      "class": "\\Zolinga\\System\\Config\\ConfigService",
+      "origin": [
+        "*",
+        "internal"
+      ],
+      "priority": 0.5
+    },
+    {
+      "description": "This listener hooks on WIKI URL and produces WIKI Documentation page.",
+      "event": "system:content",
+      "class": "\\Zolinga\\System\\Wiki\\WebServer",
+      "method": "onContent",
+      "origin": [
+        "remote"
+      ],
+      "priority": 0.9
+    },
+    {
+      "description": "WIKI Service",
+      "service": "wiki",
+      "class": "\\Zolinga\\System\\Wiki\\WikiService",
+      "origin": [
+        "*"
+      ]
+    },
+    {
+      "description": "Fetch WIKI TOC",
+      "event": "wiki:toc",
+      "class": "\\Zolinga\\System\\Wiki\\WebComponents\\WikiToc",
+      "method": "onToc",
+      "right": "system:wiki:read",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "description": "Search WIKI",
+      "event": "wiki:search",
+      "class": "\\Zolinga\\System\\Wiki\\WebComponents\\WikiSearch",
+      "method": "onSearch",
+      "right": "system:wiki:read",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "description": "Fetch WIKI Article",
+      "event": "wiki:article",
+      "class": "\\Zolinga\\System\\Wiki\\WebComponents\\WikiArticle",
+      "method": "onArticle",
+      "right": "system:wiki:read",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "description": "WIKI Authorization Provider",
+      "event": "system:authorize",
+      "class": "\\Zolinga\\System\\Wiki\\WikiAuth",
+      "method": "onAuthorize",
+      "origin": [
+        "internal"
+      ]
+    },
+    {
+      "event": "system:wiki:login",
+      "description": "WIKI login or authorization status inquiry request",
+      "class": "\\Zolinga\\System\\Wiki\\WikiAuth",
+      "method": "onLogin",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "event": "skeleton:module",
+      "description": "Create new module using a skeleton.",
+      "class": "\\Zolinga\\System\\Skeletons\\ModuleSkeleton",
+      "method": "onModule",
+      "origin": [
+        "cli"
+      ]
+    },
+    {
+      "event": "skeleton:apache",
+      "description": "Print Apache web server host file template.",
+      "class": "\\Zolinga\\System\\Skeletons\\ApacheSkeleton",
+      "method": "onApache",
+      "origin": [
+        "cli"
+      ]
+    }
+  ],
+  "emit": [
+    {
+      "event": "system:authorize",
+      "description": "\\Zolinga\\System\\Events\\AuthorizeEvent is dispatched when an Event is going to be processed by the Listener having the 'right' option set in zolinga.json. Authorization Providers are supposed to call $event->autorize() if the user has the $event->right permission.",
+      "class": "\\Zolinga\\System\\Events\\AuthorizeEvent",
+      "origin": [
+        "internal"
+      ]
+    },
+    {
+      "event": "system:content",
+      "description": "Event that is fired by index.php when content is requested.",
+      "class": "\\Zolinga\\System\\Events\\ContentEvent",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "event": "system:install:script:*",
+      "description": "Event that is fired by \\Zolinga\\System\\Installer\\InstallController for each new installation or patch file. The '*' suffix is the file extension. E.g. system:install:script:sql for each .sql installation or update file. Listeners that will take care of the patching are supposed to process the file and set the OK status on the event.",
+      "class": "\\Zolinga\\System\\Events\\InstallScriptEvent",
+      "origin": [
+        "internal"
+      ]
+    },
+    {
+      "event": "system:install",
+      "description": "Event that is fired by \\Zolinga\\System\\Loader\\Bootstrap when new module is detected or any zolinga.json config file changes.",
+      "class": "\\Zolinga\\System\\Events\\Event",
+      "origin": [
+        "internal"
+      ]
+    },
+    {
+      "event": "system:request:*",
+      "description": "Event that is fired by index.php for each $_REQUEST[*] for all POST and GET requests.",
+      "class": "\\Zolinga\\System\\Events\\RequestEvent",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "event": "system:service:*",
+      "description": "Service discovery event. The first listener with highest priority is installed as '*' service.",
+      "class": "\\Zolinga\\System\\Events\\Event",
+      "origin": [
+        "internal"
+      ]
+    },
+    {
+      "event": "wiki:search",
+      "description": "Search WIKI",
+      "class": "\\Zolinga\\System\\Events\\RequestResponseEvent",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "event": "wiki:article",
+      "description": "Fetch WIKI Article",
+      "class": "\\Zolinga\\System\\Events\\RequestResponseEvent",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "event": "wiki:toc",
+      "description": "Fetch WIKI TOC",
+      "class": "\\Zolinga\\System\\Events\\RequestResponseEvent",
+      "origin": [
+        "remote"
+      ]
+    }
+  ],
+  "webComponents": [
+    {
+      "tag": "wiki-toc",
+      "description": "WIKI table of contents",
+      "module": "wiki/wiki-toc.js"
+    },
+    {
+      "tag": "wiki-article",
+      "description": "WIKI article",
+      "module": "wiki/wiki-article.js"
+    },
+    {
+      "tag": "wiki-search",
+      "description": "WIKI search box",
+      "module": "wiki/wiki-search.js"
+    },
+    {
+      "tag": "wiki-color",
+      "description": "WIKI theme color picker",
+      "module": "wiki/wiki-color.js"
+    },
+    {
+      "tag": "wiki-login",
+      "description": "WIKI authorization",
+      "module": "wiki/wiki-login.js"
+    }
+  ],
+  "autoload": {
+    "Zolinga\\System\\": "src/",
+    "Parsedown": "vendor/parsedown/Parsedown.php"
+  },
+  "config": {
+    "wiki": {
+      "# urlPrefix": "WIKI URL prefix. If not set then wiki is disabled completely.",
+      "urlPrefix": "/wiki",
+      "# password": "WIKI password. If not set then wiki is disabled completely.",
+      "password": "ZOLINGA",
+      "# maxAttempts": "Maximum number of login attempts. When exceeded the user must wait.",
+      "maxAttempts": 5,
+      "# maxAttemptsTimeframe": "Timeframe in seconds for maxAttempts.",
+      "maxAttemptsTimeframe": 300,
+      "# allowedIps": "List of IP addresses that can see wiki or '*' for all. You can use '*' and '?' as wildcards. E.g. 192.168.* or 192.168.1.?",
+      "allowedIps": [
+        "*"
+      ]
+    },
+    "debug": {
+      "# allowedIps": "List of IP addresses that can see debug info or '*' for all, or 'cli' for command line interface.  You can use '*' and '?' as wildcards. E.g. 192.168.* or 192.168.1.?",
+      "allowedIps": [
+        "*"
+      ]
+    },
+    "logger": {
+      "# rotateSize": "Maximum log file size in bytes. When exceeded the log file is rotated.",
+      "rotateSize": 1048576,
+      "# maxFiles": "Maximum number of log files to keep.",
+      "maxFiles": 12,
+      "# rotate": "Log file rotation type: 'size': rotate by size (see rotateSize option), 'daily'|'weekly'|'monthly': rotate by time. Note: for time rotations the rotateSize is ignored.",
+      "rotate": "weekly"
+    }
+  }
+}

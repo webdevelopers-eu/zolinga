@@ -1,0 +1,18 @@
+parameters:
+    level: 7
+    paths:
+        - system/src
+        - system/vendor
+        - modules
+        - vendor
+
+    excludePaths:
+        - vendor
+        - system/vendor
+        - tmp
+    
+    stubFiles:
+        - data/system/api.stub.php
+
+    bootstrapFiles:
+        - system/loader.php

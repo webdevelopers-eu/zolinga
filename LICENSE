@@ -1,0 +1,37 @@
+ZOLINGA FRAMEWORK GNU GPL v3 LICENSE
+
+Copyright (C) 2024  Daniel Ševčík <danny@zolinga.net>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License 3.0 as published by
+the Free Software Foundation except as otherwise noted in the individual
+module directories and files of this project.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+The full text of GNU GPL v3 license is available at
+
+    ./licenses/gpl-3.0.txt
+
+or
+
+    https://www.gnu.org/licenses/gpl-3.0.html
+
+
+- For licenses of individual modules, see their respective directories.
+
+- For full text of GPL v3 license, see ./licenses directory.
+
+- For other software used in this project, see ./licenses directory.
+
+
+FUTURE
+
+The Zolinga Framework may be re-released also under other licenses in the future
+to fit the needs of the project and its users. In such case, the new license
+will be added to the ./licenses directory and the original GPL v3 license will
+remain in the ./licenses directory as well.
+

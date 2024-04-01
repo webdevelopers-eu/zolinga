@@ -1,0 +1,5 @@
+{
+    "# help": "This is the global configuration file that is used to override {module}/zolinga.json's config sections.",
+    "# requirements": "This file is optional.",
+    "# comments": "The '#' character in the key is used to denote a comment."
+}

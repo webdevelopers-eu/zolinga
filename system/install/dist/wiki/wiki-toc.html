@@ -1,0 +1,22 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <div class="toc-toolbar">
+        <span class="hint">Click to expand/collapse, double-click to open.</span>
+        <a href="javascript:" class="text-icon" role="wiki-toc-expand-all">⊞</a>
+        <a href="javascript:" class="text-icon" role="wiki-toc-collapse-all">⊟</a>
+    </div>
+
+    <menu class="toc z-template-n" z-var="children ?" id="toc-recursive-template">
+        <template template="[children]">
+            <li z-var="true call tocRecursion {children}">
+                <a href="javascript:" z-var="uri @href, uri @wiki-uri, title ." role="wiki-toc-toggle wiki-toc-link">[[title]]</a>
+            </li>
+        </template>
+    </menu>
+</body>
+
+</html>

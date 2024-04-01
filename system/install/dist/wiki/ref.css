@@ -1,0 +1,219 @@
+main, article {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.article-uri {
+    opacity: 0.4;
+    font-size: 0.8em;
+    display: block;
+    text-align: center;
+    padding: 0.4em 1em 0 1em;
+    user-select: all;
+
+    &::before {
+        content: "🔗";
+        margin-right: 0.2em;
+        display: inline-block;
+    }
+
+    &:is(:active, :focus, :focus-within):before {
+        content: "📋";
+        transform-origin: bottom right;
+        transform: scale(200%);
+    }
+}
+
+.pill,
+.public,
+.private,
+.protected,
+.static,
+.abstract,
+.readonly,
+.final {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    margin: 0.1rem 0.2rem;
+    border-radius: 1em;
+    background-color: color-mix(in oklab, rgb(var(--color-primary)) 40%, rgb(var(--color-bg)) 60%);
+    color: color-mix(in oklab, rgb(var(--color-fg)) 85%, rgb(var(--color-primary)) 15%);
+    border: 1px solid currentColor;
+}
+
+.origin {
+    background-color: color-mix(in oklab, rgb(var(--color-primary)) 80%, rgb(var(--color-fg)) 20%);
+    color: color-mix(in oklab, rgb(var(--color-bg)) 85%, rgb(var(--color-primary)) 15%);
+}
+
+.readonly {
+    background-color: color-mix(in oklab, rgb(var(--color-bg)) 80%, red 20%);
+}
+
+.final {
+    background-color: color-mix(in oklab, rgb(var(--color-bg)) 80%, black 20%);
+}
+
+.stoppable {
+    background-color: color-mix(in oklab, rgb(var(--color-bg)) 80%, white 20%);
+}
+
+.public {
+    background-color: color-mix(in oklab, rgb(var(--color-primary)) 50%, rgb(var(--color-fg)) 50%);
+    color: rgb(var(--color-bg));
+}
+
+.private {
+    background-color: color-mix(in oklab, rgb(var(--color-bg)) 85%, rgb(var(--color-fg)) 15%);
+}
+
+.protected {
+    background-color: color-mix(in oklab, rgb(var(--color-bg)) 85%, rgb(var(--color-primary)) 15%);
+}
+
+.module::before {
+    content: "📦";
+    margin-right: 0.2em;
+}
+
+.wiki-ref-class,
+.wiki-ref-event {
+    & .comment {
+        font-size: 0.8em;
+        white-space: pre-wrap;
+        background-color: color-mix(in oklab, rgb(var(--color-bg)) 85%, rgb(var(--color-fg)) 15%);
+        border: 1px solid rgb(var(--color-fg), 0.1);
+    }
+
+    & h2 {
+        text-align: right;
+        /* border-bottom: 1px solid rgb(var(--color-fg), 0.5); */
+        font-size: 1.2em;
+        font-style: italic;
+    }
+
+    & .params {
+        font-size: 0.8em;
+    }
+
+    .name {
+        color: color-mix(in oklab, rgb(var(--color-primary)), rgb(var(--color-fg)) 50%);
+    }
+
+    .type {
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+
+    & .wiki-ref-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4em;
+        padding: 0px;
+
+        &>li {
+            position: relative;
+            list-style: none;
+            margin: 0px;
+
+            & .comment-block {
+                display: inline-block;
+                cursor: help;
+                padding: 0px .4em;
+
+                &::after {
+                    content: "🛈";
+                    font-size: 0.8em;
+                    opacity: 0.5;
+                }
+
+                &:not(:hover, :active, :focus, :focus-within) .comment {
+                    display: none;
+                }
+
+                & .comment {
+                    position: absolute;
+                    right: 0;
+                    left: 0;
+                    bottom: 100%;
+                    z-index: 1;
+                    box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.3);
+                    margin: 0px;
+                }
+            }
+        }
+    }
+}
+
+
+.wiki-ref-event {
+
+    & .wiki-ref-event-chart {
+        display: grid;
+        grid-template-columns: 1fr 10fr;
+        grid-auto-rows: minmax(100px, min-content);
+        gap: 0em;
+
+        & .wiki-event-connector {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: center;
+
+            margin: 0px 0px 0px 2em;
+            &:not(:nth-last-child(2)) {
+               border-left: 1px solid rgb(var(--color-primary));
+            }
+            & .above {
+                align-items: end;
+                border-bottom: 1px solid rgb(var(--color-primary));
+                position: relative;
+
+                &::after {
+                    content: "➤";
+                    color: rgb(var(--color-primary));
+                    position: absolute;
+                    font-size: 1.2rem;
+                    line-height: 1em;
+                    right: 0px;
+                    bottom: 0px;
+                    transform: translate(0.1rem, 50%); 
+                }
+            }
+            &:nth-last-child(2) .above {
+                border-left: 1px solid rgb(var(--color-primary));
+                border-bottom-left-radius: var(--radius);
+            }
+            .bellow {
+                align-items: start;
+            }
+            .above, .bellow {
+                display: flex;
+                justify-content: center;
+                flex: 1;
+                padding-left: 2em;
+                padding-right: 2em;
+            }
+        }
+
+        & .listener {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: center;
+            padding: 1em;
+            margin: 2em 0.4em;
+            border: 1px solid rgb(var(--color-primary));
+            border-radius: var(--radius);
+            background-color: color-mix(in oklab, rgb(var(--color-primary)) 20%, rgb(var(--color-bg)) 80%);
+            color: color-mix(in oklab, rgb(var(--color-fg)) 85%, rgb(var(--color-primary)) 15%);
+
+            & .module {
+                font-size: 0.8em;
+            }
+        }
+    }
+
+}
