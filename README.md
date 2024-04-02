@@ -1,6 +1,28 @@
 # Zolinga PHP Framework
 *Etymology: In the Chichewa language of Africa, the word "zolinga" means "goals."*
 
+## But... why?
+
+I'm fully committed to a single project, and these components—framework, cron, translation module, database access, a database-less CMS, and simple Rights Management—are the vital building blocks needed for it. After two months of intense effort and drawing from twenty years of experience, I felt it was fitting to give back to the open-source community before delving into the closed-source aspect of the project.
+
+You might wonder why not opt for an existing solution? Well, the project I'm working on is anticipated to run for the next 10 years. For that reason, it needs to be both minimalistic and immutable. Minimalistic because fewer features equate to less maintenance and fewer upgrade issues. Immutable because it significantly reduces the cost of developing modules. The problem with all popular frameworks is their sheer popularity. They tend to be overwhelmed with competing needs, ideas, and requirements, resulting in a constant cycle of breaking compatibility, adding unnecessary features, and fixing bugs. My project isn't designed to be upgraded or rewritten every two years, which is the average lifespan of a major release in any popular framework. It needs to run for 10 years with minimal investment. Constantly working on the app to keep up with the long list of fixed bugs from vendors, for features you don't even use, is not a viable solution.
+
+So, that's how this minimalistic and maximally immutable project came to be.
+
+It had to meet the following criteria:
+
+- Be minimalistic, devoid of any unnecessary features
+- Have an immutable API wherever possible
+- Feature a plain-text CMS that can be updated using FTP or other means, supporting pluggable dynamic elements handled by modules
+- Include simple Rights Management
+- Offer Cron support to schedule and execute tasks
+- Provide unmatched language translation support (expecting usage in 8+ languages)
+- Offer a simple MySQL API
+- Have comprehensive documentation
+- Adhere to simple programming rules to ensure easy onboarding for professionals with varying skill levels
+
+Let me introduce you to Zolinga, a PHP framework that meets all these criteria.
+
 ## Introduction
 Zolinga is a minimalist and well-thought-out PHP framework. It does not require a database (although modules might). It encapsulates the distilled essence of practical experience gained over years of developing web applications. It offers a simple yet comprehensive API for building robust, efficient, and stable applications.
 
