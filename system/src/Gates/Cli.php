@@ -335,9 +335,9 @@ class Cli
                 --server[=[HOST:]PORT]
 
                         Run a PHP built-in web server on the specified port. 
-                        If no port is provided, 8001 is used.
+                        If no port is provided, 8888 is used.
                         Note: Only for development and debugging purposes!
-                        Default: 0.0.0.0:8001
+                        Default: 0.0.0.0:8888
 
                 --quiet, -q
 
