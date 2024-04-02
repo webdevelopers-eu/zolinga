@@ -15,7 +15,7 @@ It had to meet the following criteria:
 
 - Be minimalistic, devoid of any unnecessary features
 - Have an immutable API wherever possible (WHATWG Web Components, bare PHP, own modules)
-- Feature a plain-text CMS that can be updated using FTP or other means, supporting pluggable dynamic elements handled by modules
+- Feature a plain-text CMS that can be updated using FTP or other means, supporting pluggable dynamic elements handled by modules with basic templating system that can be easily extended
 - Include simple Rights Management
 - Offer Cron support to schedule and execute tasks
 - Provide unmatched language translation support (expecting usage in 8+ languages)
