@@ -89,7 +89,9 @@ class InstallModuleCli implements ListenerInterface
         }
 
         echo "Installing module: $module from {$info['source']}\n";
-        $cmd = "command -p git clone {$info['source']} " . ROOT_DIR . "/modules/{$module} > /dev/stderr";
+        // We use the command -p to use the system PATH variable.
+        // We redirect the output to stderr to avoid messing up default JSON output.
+        $cmd = "command -p git clone " . escapeshellarg($info['source']) . " " . escapeshellarg(ROOT_DIR . "/modules/{$module}") . " > /dev/stderr";
         if (passthru($cmd, $return) !== null || $return !== 0) {
             throw new \Exception("Could not install module: $module ($cmd)");
         }
