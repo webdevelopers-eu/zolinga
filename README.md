@@ -59,6 +59,8 @@ Don't expect the full experience of a massive dependency tree where you require 
 - PHP 8.2 or higher
 
 ## Installation
+
+### The Common Way
 To install Zolinga, follow these steps:
 
 1. Clone the repository to your local machine.
@@ -69,6 +71,18 @@ To install Zolinga, follow these steps:
 2. Configure your web server to serve the `public` directory. Alternatively, you can use the built-in PHP web server by running the following script `./bin/zolinga --server` inside the Zolinga directory.
 
 3. Navigate to the URL depending on how you started the server. If you ran `./bin/zolinga --server` then follow the instructions in the console. If you configured your web server to serve the `public` directory, then you know what to do. You should first visit the `/wiki/` URL. The WIKI page default password is `ZOLINGA` (Duh! 😜). Bundled Zolinga WIKI is the right place to start digging deeper into the Zolinga framework.
+
+### Docker Quick Test
+
+Pull the PHP image and run the Zolinga framework inside a container as fast as you can. 😜
+
+```bash
+$ docker pull php
+$ docker run -p 8888:8888 -it --name my_php_container php /bin/bash
+dock:$ apt update && apt install -y git
+dock:$ git clone https://github.com/webdevelopers-eu/zolinga.git /tmp/zolinga
+dock:$ /tmp/zolinga/bin/zolinga --server
+```
 
 ## Anatomy of a Module
 A module is a directory that contains a `zolinga.json` file, which describes the module's functionality to the system. This file specifies the script autoload rules and the events that the module listens to. The listener manifest section allows you to define event handlers that respond to various system events resulting in processing various types of requests, such as HTTP, AJAX, and command line. Special events can also instantiate your event handler as a system service to be directly accessed by other code through `$api->{serviceName}` syntax for maximum speed and versatility.
