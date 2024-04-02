@@ -1,7 +1,7 @@
 # Zolinga PHP Framework
 
 ## Introduction
-Zolinga is a minimalist and well-thought-through PHP framework. It does not require database (although some modules might). It contains the distiled essence of the practical experience that has been gained over the years of developing web applications. It offers a simple yet comprehensive API for building robust, efficient, and stable applications.
+Zolinga is a minimalist and well-thought-out PHP framework. It does not require a database (although modules might). It encapsulates the distilled essence of practical experience gained over years of developing web applications. It offers a simple yet comprehensive API for building robust, efficient, and stable applications.
 
 **This is an innovative addition to the PHP framework landscape, so I encourage you to approach it with a sense of adventure, albeit with caution. Dive in and discover the streamlined efficiency and robustness that Zolinga offers.**
 
