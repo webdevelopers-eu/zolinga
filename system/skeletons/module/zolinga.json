@@ -1,0 +1,75 @@
+{
+  "name": "{Module name}",
+  "version": "{Version}",
+  "description": "{Short module description}",
+  "authors": [
+    "John Doe <john@example.com>"
+  ],
+
+  "#-attributes": "-------------------------------------------------------------------",
+  "# attributes": "Optional. Custom. For modules to define their own attributes.",
+  "attributes": {},
+
+  "#-listen": "----------------------------------------------------------------------------",
+  "# listen": "Event listeners that your module listens to. This is a key section.",
+  "listen": [
+    {
+      "description": "Example event listener - listens to intenal, AJAX or command-line events and does something",
+      "event": "example:acme",
+      "class": "\\Example\\Acme\\AcmeListener",
+      "method": "onAcmeEvent",
+      "origin": [
+        "remote",
+        "internal",
+        "cli"
+      ],
+      "priority": 0.5
+    },
+    {
+      "description": "Example event listener - listens to POST/GET requests ?acme=... and does something",
+      "request": "acme",
+      "class": "\\Example\\Acme\\AcmeListener",
+      "method": "onAcmeRequest"
+    }
+  ],
+
+  "#-emit": "------------------------------------------------------------------------------",
+  "# emit": "Optional. Events that your module emits - WIKI documentation uses this section.",
+  "emit": [
+    {
+      "event": "{Event name that your module emits}",
+      "description": "{What your event expects from the listener}",
+      "class": "\\Zolinga\\System\\Events\\RequestResponseEvent",
+      "origin": [
+        "internal",
+        "remote"
+      ]
+    }
+  ],
+
+  "#-WebComponents": "---------------------------------------------------------------------",
+  "# webComponents": "Optional. Web components that your module provides.",
+  "webComponents": [
+    {
+      "tag": "example-acme-tag",
+      "description": "This is an example <example-acme-tag> tag",
+      "module": "web-components/example-acme.js"
+    }
+  ],
+
+  "#-autoload": "--------------------------------------------------------------------------",
+  "# autoload": "Optional. Autoload paths for your module",
+  "autoload": {
+    "Example\\Acme\\": "src/"
+  },
+
+  "#-config": "-----------------------------------------------------------------------",
+  "# config": "Optional. Configuration options for your module.",
+  "config": {
+    "example": {
+      "acme": {
+        "enabled": true
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+    "name": "Hello World",
+    "description": "A simple Hello World module.",
+    "version": "1.0.0",
+    "authors": ["John Doe <john@example.com>"],
+    "listen": [
+        {
+            "event": "system:content",
+            "class": "\\Example\\HelloWorld\\Page",
+            "method": "outputPage",
+            "priority": 0.8,
+            "origin": ["remote"]
+        },
+        {
+            "# 1": "'service':'timeService' a sugar syntax for 'event':'system:service:timeService'",
+            "# 2": "When using 'service' sugar syntax then 'origin':['internal'] is assumed.", 
+
+            "service": "time",
+            "class": "\\Example\\HelloWorld\\TimeService"
+        },
+        {
+            "# 1": "'request':'hello' is a sugar syntax for 'event':'system:request:hello'",
+            "# 2": "When using 'request' sugar syntax then 'origin':['remote'] is assumed.",
+
+            "request": "hello",
+            "class": "\\Example\\HelloWorld\\Server",
+            "method": "onHelloRequest"
+        }
+    ],
+    "autoload": {
+        "Example\\HelloWorld\\": "src/"
+    },
+    "config": {
+        "helloWorld": {
+            "myGreeting": "Hello World! :-)"
+        }
+    }
+}

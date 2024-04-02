@@ -1,0 +1,63 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * This is a CLI script for the Zolinga system.
+ * 
+ * Syntax: bin/zolinga [OPTIONS] EVENT [ARGUMENTS] EVENT [ARGUMENTS] ...
+ * 
+ * Arguments:
+ * 
+ * EVENT: The event type in the format of an URI. Example: example.org:api:myEvent
+ * 
+ * ARGUMENTS: Parameters to the event. The parameters can be in JSON format or in Javascript dot notation.
+ * 
+ *    - JSON formatted parameter to the event starts with '{' e.g. '{"system":{"db":{"password":"123"}}'
+ *     
+ *    - Parameter in Javascript dot notation to the event starts with '--' e.g. --system.db.password=123
+ * 
+ * Example:
+ * 
+ *     bin/zolinga example.org:api:myEvent --system.db.password=123 --system.db.user=me
+ * 
+ * is equivalent to
+ * 
+ *     bin/zolinga example.org:api:myEvent '{"system":{"db":{"password":"123","user":"me"}}'
+ * 
+ * You can chain more events with their parameters.
+ * 
+ *     bin/zolinga \
+ *          example.org:api:myEvent '{"system":{"db":{"password":"123","user":"me"}}' \
+ *          example.org:api:anotherEvent --test.param=123 \
+ *          example.org:api:yetAnotherEvent;
+ * 
+ * @author Daniel Sevcik <danny@zolinga.net>
+ * @date 2024-02-06
+ */
+
+namespace Zolinga\System\Gates;
+
+// Check that this is a running as a CLI script otherwise exit.
+if (php_sapi_name() !== 'cli') {
+    echo "This script can only be run from the command line.\n";
+    exit(1);
+}
+
+require(__DIR__ . '/../system/loader.php');
+
+/** @phpstan-ignore-next-line */
+set_error_handler(function ($errNo, $errStr, $errFile, $errLine) {
+    $severity = match($errNo) {
+        E_WARNING, E_USER_WARNING, E_CORE_WARNING, E_COMPILE_WARNING, E_USER_DEPRECATED, E_DEPRECATED => '🟧 WARNING',
+        E_NOTICE, E_USER_NOTICE => '🟦 NOTICE',
+        E_STRICT => '🟨 STRICT',
+        default => '🟥 ERROR',
+    };
+    file_put_contents("php://stderr", "$severity: $errStr [" . basename($errFile) . ":$errLine]\n");
+});
+
+(new Cli)->run($argv);
+
+// End of file

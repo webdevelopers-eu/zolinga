@@ -1,0 +1,50 @@
+.error {
+    background-color: color-mix(in oklab, red 40%, rgb(var(--color-bg)) 60%);
+    color: color-mix(in oklab, red 40%, rgb(var(--color-fg)) 60%);
+    padding: 1em;
+    margin: 1em;
+    border-radius: var(--radius);
+}
+
+.z-template-hidden {
+    display: none !important;
+}
+
+a {
+    color: var(--link-color-rgb);
+    text-decoration: none;
+
+    &:hover {
+        color: color-mix(in oklab, var(--link-color-rgb) 60%, rgb(var(--color-fg)) 40%);
+    }
+}
+
+button,
+input {
+    border-radius: var(--radius);
+    border: color-mix(in oklab, rgb(var(--color-bg)) 90%, rgb(var(--color-fg)) 10%) 1px solid;
+    cursor: pointer;
+    padding: 0.5em 1em;
+    font-size: inherit;
+
+    &:not(button, [type="submit"]) {
+        background-color: color-mix(in oklab, rgb(var(--color-bg)) 98%, rgb(var(--color-fg)) 2%);
+        color: rgb(var(--color-fg));
+    }
+
+    &[type="submit"] {
+        background-color: rgb(var(--color-primary));
+        color: rgb(var(--color-bg));
+    }
+
+    &::placeholder {
+        color: rgba(var(--color-fg), 50%);
+        font-weight: lighter;
+        font-style: italic;
+    }
+}
+
+b {
+    font-weight: bold;
+    color: color-mix(in oklab, currentColor 70%, rgb(var(--color-primary)) 30%);
+}

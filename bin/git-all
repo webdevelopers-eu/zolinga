@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# Run git command for all ZOLINGA modules including SYSTEM
+#
+# @module     System
+# @author     Daniel Sevcik <sevcik@webdevelopers.cz>
+# @copyright  2017 Daniel Sevcik
+# @since      2017-05-27 16:46:24 UTC
+
+BASE_DIR=$(readlink -f "`dirname "$0"`/../");
+
+if [ $# -eq 0 ]
+then
+    echo "Run git command in all modules. Syntax: $0 git-parameters"
+    echo 
+    exit;
+fi
+
+find "$BASE_DIR"/modules/* "$BASE_DIR" -maxdepth 0 -type d -print0 \
+    | grep -zvF ".example" \
+    | while read -d '' -r MODULE
+do
+    echo "[1;4m`basename "$MODULE" | tr '[:lower:]' '[:upper:]'`[0m";
+    echo 
+    git -C "$MODULE" "${@:1}";
+    echo 
+done
+

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+    <body>
+        <main>
+            <label><input type="search" placeholder="Search..."></label>
+            <ul class="search-results">
+                <li z-var="!results ?">
+                    <i translate-me=".">No results found. Press ENTER to start a new search.</i>
+                </li>
+                <template template="[results]">
+                    <li z-var="uri @data-uri, uri @title">
+                        <a href="javascript:" z-var="title .">[[title]]</a>
+                        <div class="search-snippet"><span z-var="snippet +"></span></div>
+                    </li>
+                </template>
+            </ul>
+        </main>
+    </body>
+</html>

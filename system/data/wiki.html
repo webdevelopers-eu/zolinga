@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <title>Wiki</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script type="module" src="/dist/system/api.js"></script>
+    <script type="module" src="/dist/system/web-components.js"></script>
+    <script type="module" src="/dist/system/wiki/wiki.js"></script>
+    <link rel="stylesheet" href="/dist/system/wiki/wiki.css" />
+    <link rel="stylesheet" href="/dist/system/wiki/common.css" />
+    <script>
+        // Load colors from local storage
+        function getStoredColorNames() {
+            let names = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('wiki:color:')) {
+                    names.push(key.replace('wiki:color:', ''));
+                }
+            };
+            return names;
+        }
+
+        getStoredColorNames().forEach(name => {
+            const value = localStorage.getItem(`wiki:color:${name}`)
+                .match(/[0-9a-z]{2}/gi)
+                .map(v => parseInt(v, 16));
+            document.documentElement.style.setProperty(`--${name}`, value.join(', '));
+        });
+    </script>
+    <base href="${urlPrefix}/" />
+</head>
+
+<body>
+    <div class="layout">
+        <a href=":" class="title">
+            <!-- <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <path fill="#005cb9" d="M0 0h100v100H0z" />
+                    <path fill="#fff" d="M70 35 45 63h14v-6h11v16H31V63l25-28H41v6H31V25h39z" />
+                </svg> -->
+            <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <path class="logo-bg" d="M0 0h100v100H0z" />
+                <path class="logo-fg" d="M70 35 45 63h14v-6h11v16H31V63l25-28H41v6H31V25h39z" />
+            </svg>
+
+            <span class="name">
+                <b>Zolinga</b> <span>Documentation</span>
+            </span>
+        </a>
+
+        <wiki-search disabled class="search box noprint"></wiki-search>
+
+        <div class="content box">
+            <wiki-login></wiki-login>
+            <wiki-article disabled></wiki-article>
+        </div>
+
+        <div class="menu noprint">
+            <!-- collapsed menu symbol -->
+            <button onclick="document.querySelector('.toc').classList.add('visible');">≡</button>
+        </div>
+
+        <div class="toc noprint box">
+            <wiki-toc disabled></wiki-toc>
+        </div>
+        <div class="curtain noprint" onclick="document.querySelector('.toc').classList.remove('visible');"></div>
+
+        <div class="footer fineprint">
+            <div>
+                &copy; 2024 Daniel Ševčík,
+                All rights reserved.
+                Powered By <a href="https://github.com/webdevelopers-eu/Zolinga">Zolinga</a>.
+            </div>
+            <div class="settings">
+                <wiki-color title="Foreground color" name="color-fg"></wiki-color>
+                <wiki-color title="Background color" name="color-bg"></wiki-color>
+                <wiki-color title="Primary color" name="color-primary"></wiki-color>
+                <span class="reset" 
+                    onclick="document.querySelectorAll('wiki-color').forEach(c => c.reset());"
+                    >❌</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

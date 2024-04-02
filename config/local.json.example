@@ -1,0 +1,6 @@
+{
+    "# how": "This file is used to override the global.json file. It is used to set the default values for the current machine.",
+    "# format": "The format is the same as the global.json file. See the global.json file for more information.",
+    "# why": "This file should not be synced or deployed to other machines. It is machine specific.",
+    "# optional": "This file is optional and therefore can be removed if needed."
+}
