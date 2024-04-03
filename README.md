@@ -13,7 +13,7 @@ So, that's how this minimalistic and maximally immutable project came to be.
 
 It had to meet the following criteria:
 
-- Be minimalistic, devoid of any unnecessary features
+- Be minimalistic, devoid of any unnecessary features, yet have a smart design to cover all current and future use cases
 - Have an immutable API wherever possible (WHATWG Web Components, bare PHP, own modules)
 - Feature a plain-text CMS that can be updated using FTP or other means, supporting pluggable dynamic elements handled by modules with basic templating system that can be easily extended
 - Include simple Rights Management
