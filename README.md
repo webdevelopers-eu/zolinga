@@ -1,4 +1,5 @@
 # Zolinga PHP Framework
+*Etymology: In the Chichewa language of Africa, the word "zolinga" means "goals."*
 
 ## Introduction
 Zolinga is a minimalist and well-thought-out PHP framework. It does not require a database (although modules might). It encapsulates the distilled essence of practical experience gained over years of developing web applications. It offers a simple yet comprehensive API for building robust, efficient, and stable applications.
