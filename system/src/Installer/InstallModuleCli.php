@@ -16,6 +16,7 @@ use const Zolinga\System\ROOT_DIR;
 class InstallModuleCli implements ListenerInterface
 {
     const REPO_URL = 'https://raw.githubusercontent.com/webdevelopers-eu/zolinga-repo/main/repositories/master.json';
+    const VERSION = '1.0';
 
     /**
      * Repository data.
@@ -26,6 +27,11 @@ class InstallModuleCli implements ListenerInterface
     public function __construct()
     {
         $this->data = $this->readDatabase();
+        $version = isset($this->data['meta'], $this->data['meta']['version']) ? $this->data['meta']['version'] : "0";
+
+        if (version_compare(self::VERSION, $version, '<')) {
+            $this->message("🟠 Warning: The repository version is newer (v$version) then the version supported by this installer (v" . self::VERSION . "). Some features may not work correctly.");
+        }
     }
 
     /**
@@ -38,12 +44,17 @@ class InstallModuleCli implements ListenerInterface
      */
     public function onInstall(RequestResponseEvent $event): void
     {
-        if (isset($event->request['help'])) {
-            file_put_contents(
-                'php://stderr',
-                "Usage: ./bin/zolinga install [--list] [--refresh] [--module=module-name[,module-name2,...]]\n" .
-                    "See more in WIKI.\n\n"
-            );
+        if (isset($event->request['help']) || !$event->request) {
+            $this->message(<<<'HELP'
+                Usage: ./bin/zolinga install [--list] [--refresh] [--module=module-name[,module-name2,...]]
+                See more in WIKI.
+
+                Options:
+                    --list          List all available modules.
+                    --refresh       Refresh the repository database.
+                    --module        Install the module from the repository.
+
+                HELP);
         }
         if (isset($event->request['refresh'])) {
             $this->downloadDatabase();
@@ -115,5 +126,10 @@ class InstallModuleCli implements ListenerInterface
         mkdir('private://system/repo', 0777, true);
         file_put_contents('private://system/repo/master.json', $repo)
             or throw new \Exception('Could not save repository database: private://system/repo/master.json');
+    }
+
+    private function message(string $msg): void
+    {
+        file_put_contents('php://stderr', "» $msg\n");
     }
 }
