@@ -22,6 +22,7 @@ It had to meet the following criteria:
 - Offer a simple MySQL API
 - Have comprehensive documentation
 - Adhere to simple programming rules to ensure easy onboarding for professionals with varying skill levels
+- Have an built-in git-controlled documentation system that can include private documentation without the need to maintain and update external documentation servers
 
 Let me introduce you to Zolinga, a PHP framework that meets all these criteria.
 
