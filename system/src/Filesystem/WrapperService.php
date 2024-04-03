@@ -206,4 +206,11 @@ class WrapperService implements ServiceInterface
         chdir($oldCwd ?: ROOT_DIR);
         return $ret;
     }
+
+    public function __destruct()
+    {
+        foreach (self::SCHEMES as $scheme) {
+            stream_wrapper_unregister($scheme);
+        }
+    }
 }

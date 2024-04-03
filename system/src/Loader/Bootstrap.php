@@ -15,6 +15,104 @@ use Zolinga\System\Events\Event;
  */
 class Bootstrap
 {
+    public function checkEnvironment() {
+        // 8.2.0
+        if (version_compare(PHP_VERSION, '8.2.0', '<')) {
+            throw new \Exception('PHP 8.2.0 or higher is required.');
+        }
+
+        // Check rw permissions on
+        // ROOT_DIR . '/data/'
+        // ROOT_DIR . '/public/data/'
+        // ROOT_DIR . '/public/dist/'
+        foreach(['/data/', '/public/data/', '/public/dist/'] as $dir) {
+            $path = ROOT_DIR . $dir;
+            if (!is_writable($path)) {
+                $this->throwNotWritableException($path);
+            }
+        }
+
+    }
+
+    private function throwNotWritableException(string $path): void {
+        $type = is_dir($path) ? 'directory' : 'file';
+
+        $message = "The $type $path is not writable. Please check the permissions. ";
+        $message .= "The $type should be writable by the user " . $this->getOsUser() . ". ";
+
+        $perms = fileperms($path);
+        $permsOcta = substr(sprintf('%o', $perms), -4);
+        $permsSymbolic = $this->getPermSymbolic($perms);
+        $owner = $this->getOsUser(fileowner($path), filegroup($path));
+        $message .= "The $type has permissions $permsSymbolic ($permsOcta) and is owned by $owner.";
+
+        throw new \Exception($message);
+    }
+
+    /**
+     * Return POSIX USER:GORUP string.
+     *
+     * @access private
+     * @param int $userId optional user id, otherwise current user id will be used
+     * @param int $groupId optional group id, otherwise current group id will be used
+     * @return string in format {USER}:{GROUP}
+     */
+    private function getOsUser(int $userId=null, int $groupId=null): string {
+        $u=posix_getpwuid($userId === null ? posix_geteuid() : $userId);
+        $g=posix_getgrgid($groupId === null ? posix_getegid() : $groupId);
+        return $u['name'].':'.$g['name'];
+    }
+
+    /**
+     * Return `ls` like file info.
+     *
+     * @access private
+     * @param string $filename
+     * @return string
+     */
+    private function getPermSymbolic(int $perms):string {
+        if (($perms & 0xC000) == 0xC000) { // Socket
+            $info='s';
+        } elseif (($perms & 0xA000) == 0xA000) { // Symbolic Link
+            $info='l';
+        } elseif (($perms & 0x8000) == 0x8000) { // Regular
+            $info='-';
+        } elseif (($perms & 0x6000) == 0x6000) { // Block special
+            $info='b';
+        } elseif (($perms & 0x4000) == 0x4000) { // Directory
+            $info='d';
+        } elseif (($perms & 0x2000) == 0x2000) { // Character special
+            $info='c';
+        } elseif (($perms & 0x1000) == 0x1000) { // FIFO pipe
+            $info='p';
+        } else { // Unknown
+            $info='u';
+        }
+
+        // Owner
+        $info.=(($perms & 0x0100) ? 'r' : '-');
+        $info.=(($perms & 0x0080) ? 'w' : '-');
+        $info.=(($perms & 0x0040) ?
+        (($perms & 0x0800) ? 's' : 'x' ) :
+        (($perms & 0x0800) ? 'S' : '-'));
+
+        // Group
+        $info.=(($perms & 0x0020) ? 'r' : '-');
+        $info.=(($perms & 0x0010) ? 'w' : '-');
+        $info.=(($perms & 0x0008) ?
+        (($perms & 0x0400) ? 's' : 'x' ) :
+        (($perms & 0x0400) ? 'S' : '-'));
+
+        // World
+        $info.=(($perms & 0x0004) ? 'r' : '-');
+        $info.=(($perms & 0x0002) ? 'w' : '-');
+        $info.=(($perms & 0x0001) ?
+        (($perms & 0x0200) ? 't' : 'x' ) :
+              (($perms & 0x0200) ? 'T' : '-'));
+
+        return $info;
+    }
+
     public function initSession(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
