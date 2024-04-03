@@ -42,7 +42,7 @@ Example of a `listen` section:
             "event": "system:content:created",
             "class": "\\Example\\System\\Events\\ContentCreatedListener",
             "method": "onContentCreated",
-            "origin": ["internal", "remote],
+            "origin": ["internal", "remote"],
             "priority": 0.6
         }
     ]
