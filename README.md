@@ -84,7 +84,7 @@ dock:$ git clone https://github.com/webdevelopers-eu/zolinga.git /tmp/zolinga
 dock:$ /tmp/zolinga/bin/zolinga --server
 ```
 
-Then visit `http://localhost:8888` in your browser.
+Then visit [http://localhost:8888](http://localhost:8888) in your browser.
 
 ## Anatomy of a Module
 A module is a directory that contains a `zolinga.json` file, which describes the module's functionality to the system. This file specifies the script autoload rules and the events that the module listens to. The listener manifest section allows you to define event handlers that respond to various system events resulting in processing various types of requests, such as HTTP, AJAX, and command line. Special events can also instantiate your event handler as a system service to be directly accessed by other code through `$api->{serviceName}` syntax for maximum speed and versatility.
