@@ -375,7 +375,8 @@ class ManifestService extends ArrayObject implements ServiceInterface
             }
             // Save the cache
             if (!is_dir(dirname($file))) {
-                mkdir(dirname($file), 0777, true);
+                mkdir(dirname($file), 0777, true)
+                    or throw new \Exception("Cannot create directory " . dirname($file));
             }
 
             if (count($keys) === 1) {

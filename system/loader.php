@@ -26,6 +26,8 @@ require(__DIR__.'/src/Loader/Bootstrap.php');
 // Bootstrap the system.
 (function () { // Anonymous function to prevent global variable pollution
     $bootstrap = new Loader\Bootstrap();
+    $bootstrap->checkEnvironment();
+
     $bootstrap->initSession();
     $bootstrap->initBaseAutoloader();
     $bootstrap->initApi();
