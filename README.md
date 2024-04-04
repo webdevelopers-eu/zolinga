@@ -37,6 +37,8 @@ If you're tired of overcomplicated and extensive solutions for simple problems a
 
 With Zolinga, you can craft your project with ease, focusing on coding essential features without the burden of unnecessary components. Zolinga's minimalist API design makes it perfect for those who prefer to use minimal features or are eager to add minimalistic components to their projects. Despite its minimalist approach, Zolinga is a powerful platform capable of handling even the largest projects, offering indefinite growth potential.
 
+Start small and easy and grow with your project at your own pace in any direction, thanks to Zolinga's smart flexibility and scalability. 
+
 ## Requirements
 - PHP 8.2 or higher
 
