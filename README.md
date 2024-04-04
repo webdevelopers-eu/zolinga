@@ -37,24 +37,6 @@ If you describe yourself as intermediate or expert PHP developer and you're emba
 
 Don't expect the full experience of a massive dependency tree where you require a single component using `composer require` and end up with ten thousand other components you don't need. We're not there yet, and I hope we never will be. ;-)
 
-## Why Use Zolinga?
-- **Stable API** 
-> Upgrading the Zolinga framework won't break your modules. Your module will continue to work seamlessly with future versions of the framework. We are confident that the API is complete, so you can rely on it for the long term.
-- **Minimalist API**
-> We don't do things more complicated than they need to be. A one carefuly chosen approach that can be applied to nearly all use cases is the core of Zolinga's design philosophy. Events, events, events! (Here, imagine [Steven Balmer](https://www.youtube.com/watch?v=Vhh_GeBPOhs) jumping and shouting "Events, events, events!") Sold, right?
-- **Robust API**
-> The API is meticulously designed to handle all possible use cases, leaving no room for ambiguity or confusion. It provides a solid foundation for building powerful applications.
-- **Speed**
-> Zolinga prioritizes speed, lightweightness, and minimalism. We avoid unnecessary bloat in the framework, ensuring optimal performance for your applications.
-- **No Dependencies**
-> Zolinga is a self-contained framework that does not rely on any external dependencies. This deliberate design choice gives developers complete control over the framework's API, ensuring stability and eliminating the risk of disruptions caused by external factors.
-- **Versatility**
-> Zolinga is designed to handle a wide range of use cases, from command-line applications to database-less projects, AJAX servers, document servers, and microservice servers. It provides the flexibility and adaptability that programmers need to tackle any project efficiently and effectively.
-- **Developer-Friendly**
-> Zolinga prioritizes developer experience by providing a clean and intuitive API. It aims to reduce the learning curve and make development tasks more enjoyable.
-- **Documentation**
-> Zolinga is the only self-documenting PHP framework. This feature enhances the developer experience by providing a convenient way to document and reference code within the framework. Stop googling documentation, it is right there. ;-)
-
 ## Requirements
 - PHP 8.2 or higher
 
