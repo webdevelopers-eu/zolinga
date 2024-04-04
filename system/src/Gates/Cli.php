@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Gates;
 
-use Zolinga\System\Events\RequestResponseEvent;
+use Zolinga\System\Events\CliRequestResponseEvent;
 use const Zolinga\System\ROOT_DIR;
 use const Zolinga\System\START_TIME;
 
@@ -73,7 +73,7 @@ class Cli
     /**
      * List of dispatched events.
      *
-     * @var array<RequestResponseEvent> $events
+     * @var array<CliRequestResponseEvent> $events
      */
     private array $events = [];
 
@@ -131,7 +131,7 @@ class Cli
 
         if ($this->options['timing']) {
             $last = START_TIME;
-            foreach($timing as $key => $time) {
+            foreach ($timing as $key => $time) {
                 $this->printError("🕒 $key: " . round($time - $last, 4) . "s");
                 $last = $time;
             }
@@ -241,7 +241,11 @@ class Cli
      */
     private function printResponses(): void
     {
+        /** @var CliRequestResponseEvent $event */
         foreach ($this->events as $event) {
+            if ($event->isDefaultPrevented()) {
+                continue;
+            }
             $this->printError("$event");
             echo json_encode($event, $this->jsonOptions) . "\n";
         }
@@ -255,8 +259,8 @@ class Cli
     public function printResponsesJSON(): void
     {
         if ($this->options['single']) { // Single request only
+            /** @var ?CliRequestResponseEvent $firstEvent */
             $firstEvent = array_shift($this->events);
-            $response = $firstEvent->response;
 
             // For single request only, we will print errors to stdout
             if (!$firstEvent) {
@@ -265,6 +269,7 @@ class Cli
                 $this->printError("Error #{$firstEvent->status->value} {$firstEvent->message}\n\n");
             }
 
+            $response = $firstEvent->response;
             $selector = ($this->options['single']);
             if ($selector !== true) { // is not -s or --single without selector
                 foreach (explode('.', "$selector") as $key) {
@@ -441,7 +446,7 @@ class Cli
     private function dispatchEvents(): void
     {
         foreach ($this->parsedArgs as $parsedArgs) {
-            $event = new RequestResponseEvent($parsedArgs['type'], RequestResponseEvent::ORIGIN_CLI, $parsedArgs['params'], []);
+            $event = new CliRequestResponseEvent($parsedArgs['type'], CliRequestResponseEvent::ORIGIN_CLI, $parsedArgs['params'], []);
             $event->dispatch();
             $this->events[] = $event;
         }
