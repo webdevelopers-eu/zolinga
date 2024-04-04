@@ -2,7 +2,7 @@
 
 You can dispatch any event from command line using the `bin/zolinga` script.
 
-After specifying the event type and optional parameters the script will dispatch the standard `Zolinga\System\Events\RequestResponseEvent` event with origin set to *cli*. The `$event->request` array will be filled with any parameters specified on command line and event listeners are expected to fill the array `$event->response` with the response data.
+After specifying the event type and optional parameters the script will dispatch the standard `Zolinga\System\Events\CliRequestResponseEvent` event with origin set to *cli*. The `$event->request` array will be filled with any parameters specified on command line and event listeners are expected to fill the array `$event->response` with the response data.
 
 The syntax of specifying events and optional parameters is fairly simple.
 ```
@@ -50,12 +50,12 @@ The implementation may look as follows:
 
 ```php
 namespace Example;
-use Zolinga\System\Events\RequestResponseEvent;
+use Zolinga\System\Events\CliRequestResponseEvent;
 use Zolinga\System\Events\ListenerInterface;
 
 class MyListener implements ListenerInterface
 {
-    public function onMyEvent(RequestResponseEvent $event)
+    public function onMyEvent(CliRequestResponseEvent $event)
     {
         if ($event->request['hello'] === 'zolinga') {
             $event->response["hello"] = "Hello world!";
@@ -66,6 +66,28 @@ class MyListener implements ListenerInterface
 ```
 
 Now when you run the `zolinga example.org:api:myEvent --hello=zolinga` the listener will be triggered and the response will be printed to the console.
+
+
+# Producing Output
+
+If your event listener is supposed to produce some output to stdout and you don't want it to be mixed with the default output that prints the response array, you can use the `$event->preventDefault()` method to stop the default output.
+
+```php
+namespace Example;
+use Zolinga\System\Events\CliRequestResponseEvent;
+use Zolinga\System\Events\ListenerInterface;
+
+class MyListener implements ListenerInterface
+{
+    public function onMyEvent(CliRequestResponseEvent $event)
+    {
+        echo "Hello world!";
+        $event->preventDefault();
+        $event->setStatus($event::STATUS_OK, "All good");
+    }
+}
+```
+
 
 # Related
 {{Running the System}}
