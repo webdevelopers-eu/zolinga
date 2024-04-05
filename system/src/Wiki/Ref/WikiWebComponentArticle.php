@@ -31,9 +31,6 @@ class WikiWebComponentArticle extends WikiArticle
 
         $jsFile = ROOT_DIR . '/public' . $wc['module'];
         $mdFile = preg_replace('/\.[a-z0-9]+$/', '.md', $jsFile);
-        if (!file_exists($jsFile)) {
-            throw new \Exception("Web component <{$wc['tag']}>'s handling ECMAScript module not found: $jsFile");
-        }
 
         if (file_exists($mdFile)) {
             $this->contentFiles[] = new WikiFile($mdFile);
@@ -43,13 +40,23 @@ class WikiWebComponentArticle extends WikiArticle
             $jsBasenameHtml = htmlspecialchars(basename($wc['module']));
             $zUri = $api->fs->toZolingaUri($mdFile);
             $zModuleName = parse_url($zUri, PHP_URL_HOST);
-            $this->contentFiles[] = new WikiText(
-                "<h1>Missing &lt;{$wc['tag']}&gt; Documentation</h1>" .
-                    "<p>To add a content to this page create a file named <code>{$mdBasenameHtml}</code> in the same directory " .
-                    "within the <code>{$zModuleName}</code> module as your ECMAScript module file " .
-                    "<a href='{$jsModuleHtml}'>{$jsBasenameHtml}</a>.</p>",
-                WikiText::MIME_HTML
-            );
+            $this->contentFiles[] = new WikiText(<<<HTML
+                <h1>Missing &lt;{$wc['tag']}&gt; Documentation</h1>
+                <p>
+                    To add a content to this page create a file named <code>{$mdBasenameHtml}</code> 
+                    in the same directory within the <code>{$zModuleName}</code> module 
+                    as your ECMAScript module file <a href='{$jsModuleHtml}'>{$jsBasenameHtml}</a>.
+                </p>
+                HTML, WikiText::MIME_HTML);
+        }
+
+        if (!file_exists($jsFile)) {
+            $this->contentFiles[] = new WikiText(<<<HTML
+                <h1>Missing ECMAScript Module</h1>
+                <p class="error">
+                    The ECMAScript module <code>{$jsFile}</code> is missing.
+                </p>
+                HTML, WikiText::MIME_HTML);
         }
     }
 
