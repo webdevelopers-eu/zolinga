@@ -33,9 +33,9 @@ Zolinga is a minimalist and well-thought-out PHP framework. It does not require 
 
 ## Target Audience
 
-If you describe yourself as intermediate or expert PHP developer and you're embarking on a project and absolutely refuse to deal with a bloated frameworks, if you're determined to code all the essential features yourself (except for CMS, rights, cron, translations) because no existing framework meets your requirements, if you're well aware that you need to document your work but can't be bothered with "external" solutions and clumsy "documentation generators", if you're looking for a framework that is both "lazy" and "ambitious" and that provides "self-documenting" and "self-explaining" features, if you're looking for a framework that is "stable" and "minimalist" that you can use for years to come... then Zolinga is the perfect match for your lazy yet ambitious self.
+If you're tired of overcomplicated and extensive solutions for simple problems and are eager to explore new approaches, Zolinga is for you. Whether you're a PHP developer at any level, Zolinga offers a refreshing alternative.
 
-Don't expect the full experience of a massive dependency tree where you require a single component using `composer require` and end up with ten thousand other components you don't need. We're not there yet, and I hope we never will be. ;-)
+With Zolinga, you can craft your project with ease, focusing on coding essential features without the burden of unnecessary components. Zolinga's minimalist design makes it perfect for those who prefer to use minimal features or are eager to add minimalistic components to their projects.
 
 ## Requirements
 - PHP 8.2 or higher
