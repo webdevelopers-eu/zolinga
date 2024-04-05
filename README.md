@@ -50,7 +50,7 @@ To install Zolinga, follow these steps:
     git clone https://github.com/webdevelopers-eu/zolinga.git
 ```
 
-2. Configure your web server to serve the `public` directory. Alternatively, you can use the built-in PHP web server by running the following script `./bin/zolinga --server` inside the Zolinga directory.
+2. Configure your web server to serve the `public` directory (see section Apache bellow as an example). Alternatively, you can use the built-in PHP web server by running the following script `./bin/zolinga --server` inside the Zolinga directory.
 
 3. Navigate to the URL depending on how you started the server. If you ran `./bin/zolinga --server` then follow the instructions in the console. If you configured your web server to serve the `public` directory, then you know what to do. You should first visit the `/wiki/` URL. The WIKI page default password is `ZOLINGA` (Duh! 😜). Bundled Zolinga WIKI is the right place to start digging deeper into the Zolinga framework.
 
@@ -67,6 +67,42 @@ dock:$ /tmp/zolinga/bin/zolinga --server
 ```
 
 Then visit [http://localhost:8888](http://localhost:8888) in your browser.
+
+### Apache
+
+This is an example how Apache on Debian can be configured to serve Zolinga.
+
+```bash
+# Checkout the repository into /var/www folder 
+$ git clone https://github.com/webdevelopers-eu/zolinga.git /var/www/zolinga.localhost
+
+# Set the correct permission - www-data user is the common user for Apache
+$ chown -R www-data.www-data /var/www/zolinga.localhost
+
+# Generate example Apache configuration file and put it into /etc/apache2/sites-available
+$ /var/www/zolinga.localhost/bin/zolinga skeleton:apache --serverName=zolinga.local --ip=127.0.0.1 > /etc/apache2/sites-available/010-zolinga.conf
+
+# Enable the newly created configuration file
+$ a2ensite 010-zolinga.conf
+
+# Restart Apache
+$ systemctl restart apache2
+```
+
+Now add the following line to your `/etc/hosts` file:
+
+```
+127.0.0.1 zolinga.localhost
+```
+
+Then visit [http://zolinga.localhost](http://zolinga.localhost) in your browser.
+
+Of course it presumes that PHP is already installed on your system. If not, you can install it by running the following commands:
+
+```bash
+apt install libapache2-mod-php8.2
+a2enmod php8.2
+```
 
 ## Anatomy of a Module
 A module is a directory that contains a `zolinga.json` file, which describes the module's functionality to the system. This file specifies the script autoload rules and the events that the module listens to. The listener manifest section allows you to define event handlers that respond to various system events resulting in processing various types of requests, such as HTTP, AJAX, and command line. Special events can also instantiate your event handler as a system service to be directly accessed by other code through `$api->{serviceName}` syntax for maximum speed and versatility.
