@@ -59,13 +59,13 @@ class InstallModuleCli implements ListenerInterface
             $event->response['log'] = [];
             $moduleList = explode(',', $event->request['module']);
             for ($i = 0; $i < count($moduleList); $i++) {
-                list($module, $branch) = explode('@', $moduleList[$i] . '@');
-                if ($this->checkModule($event, $module, $branch ?: null)) {
-                    $event->response['log'][] = "Installing module: $module";
-                    $this->installModule($event, $module, $branch ?: null);
+                $info = $this->parseModuleString($moduleList[$i]);
+                if ($this->checkModule($event, $info['id'], $info['branch'])) {
+                    $event->response['log'][] = "Installing module {$info['id']} from {$info['source']}, branch {$info['branch']}";
+                    $this->installModule($event, $info['source'], $info['id'], $info['branch']);
 
                     // Add dependencies
-                    $config = json_decode(file_get_contents(ROOT_DIR . "/modules/{$module}/zolinga.json") ?: 'null', true);
+                    $config = json_decode(file_get_contents(ROOT_DIR . "/modules/{$info['id']}/zolinga.json") ?: 'null', true);
                     if (isset($config['dependencies'])) {
                         foreach ($config['dependencies'] as $dep) {
                             if (!in_array($dep, $moduleList)) {
@@ -74,10 +74,52 @@ class InstallModuleCli implements ListenerInterface
                         }
                     }
                 } else {
-                    $event->response['log'][] = "Module $module is already installed.";
+                    $event->response['log'][] = "Module {$info['id']} is already installed.";
                 }
             }
         }
+    }
+
+    /**
+     * Return info about the module.
+     *
+     * @param string $moduleString
+     * @return array<mixed>
+     */
+    private function parseModuleString(string $moduleString): array
+    {
+        // If module is a URL it may contain "@" character in the URL so we need to parse it differently
+        if (!preg_match('/^(?<module>.+)(?:@(?<branch>[a-z0-9_-]+))?$/', $moduleString, $matches)) {
+            throw new \Exception("Invalid module string: $moduleString");
+        }
+
+        $module = $matches['module'];
+        $branch = $matches['branch'] ?? null;
+
+        // Dynamic info created from the URL
+        if (filter_var($module, FILTER_VALIDATE_URL)) {
+            $id = basename(parse_url($module, PHP_URL_PATH), '.git')
+                or throw new \Exception("Invalid module URL: $module");
+            return [
+                "id" => $id,
+                "name" => $id,
+                "description" => null,
+                "source" => $module,
+                "branch" => $branch ?: null
+            ];
+        }
+
+        // Static repository-based
+        list($info) = [...array_filter(
+            $this->data['list'],
+            fn ($item) => $item['id'] === $module
+        ), null];
+
+        if (!$info) {
+            throw new \Exception('Module not found: ' . $module . '. Check the repository database at ' . self::REPO_URL . ' or try to refresh local copy by running `bin/zolinga install --refresh`');
+        }
+        $info['branch'] = $branch;
+        return $info;
     }
 
     /**
@@ -102,7 +144,7 @@ class InstallModuleCli implements ListenerInterface
                 $event->setStatus($event::STATUS_OK, "Module is installed.");
                 return false;
             } else {
-                $event->setStatus($event::STATUS_PRECONDITION_FAILED, "Module $module (branch $branch) cannot be installed. There is already installed $module (branch $currentBranch)");
+                $event->setStatus($event::STATUS_PRECONDITION_FAILED, "Module $module (branch " . ($branch ?: 'not specified') . ") cannot be installed. There is already installed $module (branch $currentBranch)");
                 return false;
             }
         }
@@ -110,22 +152,12 @@ class InstallModuleCli implements ListenerInterface
         return true;
     }
 
-    private function installModule(RequestResponseEvent $event, string $module, ?string $branch): void
+    private function installModule(RequestResponseEvent $event, string $source, string $id, ?string $branch): void
     {
-        list($info) = [...array_filter(
-            $this->data['list'],
-            fn ($item) => $item['id'] === $module
-        ), null];
-
-        if (!$info) {
-            throw new \Exception('Module not found: ' . $module . '. Check the repository database at ' . self::REPO_URL . ' or try to refresh local copy by running `bin/zolinga install --refresh`');
-        }
-
-        echo "Installing module: $module from {$info['source']}\n";
-
+        $this->message("💿 Installing module $id from $source (branch " . ($branch ?: 'not specified') . ")");
         $params = [
-            $info['source'],
-            ROOT_DIR . "/modules/{$module}"
+            $source,
+            ROOT_DIR . "/modules/{$id}"
         ];
         if ($branch) $params = ["-b", $branch, ...$params];
 
@@ -135,9 +167,9 @@ class InstallModuleCli implements ListenerInterface
         $cmd = "command -p git clone $paramsEsc > /dev/stderr";
 
         if (passthru($cmd, $return) !== null || $return !== 0) {
-            throw new \Exception("Could not install module: $module ($cmd)");
+            throw new \Exception("Could not install module: $id ($cmd)");
         }
-        $event->setStatus($event::STATUS_OK, "Module installed: $module");
+        $event->setStatus($event::STATUS_OK, "Module installed: $id");
     }
 
 
