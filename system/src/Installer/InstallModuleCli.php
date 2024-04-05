@@ -46,13 +46,17 @@ class InstallModuleCli implements ListenerInterface
     {
         if (isset($event->request['help']) || !$event->request) {
             $this->message(<<<'HELP'
-                Usage: ./bin/zolinga install [--list] [--refresh] [--module=module-name[,module-name2,...]]
+                Usage: ./bin/zolinga install \
+                    [--list] \
+                    [--refresh] \
+                    [--module=module-id[|branch],...]]
+
                 See more in WIKI.
 
                 Options:
                     --list          List all available modules.
                     --refresh       Refresh the repository database.
-                    --module        Install the module from the repository.
+                    --module        Install the module from the GIT repository.
 
                 HELP);
         }
@@ -79,6 +83,8 @@ class InstallModuleCli implements ListenerInterface
      */
     private function installModule(RequestResponseEvent $event, string $module): void
     {
+        list($module, $branch) = explode('|', $module . '|');
+
         list($info) = [...array_filter(
             $this->data['list'],
             fn ($item) => $item['id'] === $module
@@ -89,9 +95,18 @@ class InstallModuleCli implements ListenerInterface
         }
 
         echo "Installing module: $module from {$info['source']}\n";
+
+        $params = [
+            $info['source'],
+            ROOT_DIR . "/modules/{$module}"
+        ];
+        if ($branch) $params = ["-b", $branch, ...$params];
+
+        $paramsEsc = implode(" ", array_map('escapeshellarg', $params));
         // We use the command -p to use the system PATH variable.
         // We redirect the output to stderr to avoid messing up default JSON output.
-        $cmd = "command -p git clone " . escapeshellarg($info['source']) . " " . escapeshellarg(ROOT_DIR . "/modules/{$module}") . " > /dev/stderr";
+        $cmd = "command -p git clone $paramsEsc > /dev/stderr";
+
         if (passthru($cmd, $return) !== null || $return !== 0) {
             throw new \Exception("Could not install module: $module ($cmd)");
         }

@@ -14,13 +14,14 @@ git clone https://github.com/webdevelopers-eu/zolinga-db
 Zolinga provides a simple way to install modules from the command line. To install a module run the following command:
 
 ```bash
-./bin/zolinga install --module={ID}
+./bin/zolinga install --module="{MODULE ID}[|{GIT BRANCH}][,...]"
 ```
 
 Example:
 
 ```bash
-./bin/zolinga install --module=zolinga-cms
+./bin/zolinga install --module="zolinga-cms,zolinga-db"
+./bin/zolinga install --module="zolinga-cms|v1.0,zolinga-db|master"
 ```
 
 To list all available modules run the following command:
