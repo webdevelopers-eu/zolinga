@@ -69,7 +69,10 @@ class InstallModuleCli implements ListenerInterface
         }
         if (!empty($event->request['module'])) {
             foreach (explode(',', $event->request['module']) as $module) {
-                $this->installModule($event, $module);
+                list($module, $branch) = explode('@', $module . '@');
+                if ($this->checkModule($event, $module, $branch ?: null)) {
+                    $this->installModule($event, $module, $branch ?: null);
+                }
             }
         }
     }
@@ -79,12 +82,33 @@ class InstallModuleCli implements ListenerInterface
      *
      * @param RequestResponseEvent $event
      * @param string $module
-     * @return void
+     * @return bool true all is ok, false if the module is already installed - $event->setStatus() is called automatically
      */
-    private function installModule(RequestResponseEvent $event, string $module): void
+    private function checkModule(RequestResponseEvent $event, string $module, ?string $branch): bool
     {
-        list($module, $branch) = explode('@', $module . '@');
+        $targetDir = ROOT_DIR . "/modules/{$module}";
 
+        // Check if the module is already installed and if so if the correct branch is checked out
+        if (is_dir($targetDir)) {
+            $currentBranch = null;
+            if (is_dir("$targetDir/.git")) {
+                $cmd = "command -p git --git-dir=" . escapeshellarg("$targetDir/.git") . " branch --show-current";
+                $currentBranch = trim(shell_exec($cmd) ?: 'unknown');
+            }
+            if ($currentBranch === $branch || !$branch) {
+                $event->setStatus($event::STATUS_OK, "Module $module is already installed: $module (branch $currentBranch)");
+                return false;
+            } else {
+                $event->setStatus($event::STATUS_PRECONDITION_FAILED, "Module $module (branch $branch) cannot be installed. There is already installed $module (branch $currentBranch)");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function installModule(RequestResponseEvent $event, string $module, ?string $branch): void
+    {
         list($info) = [...array_filter(
             $this->data['list'],
             fn ($item) => $item['id'] === $module

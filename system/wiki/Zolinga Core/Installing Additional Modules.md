@@ -21,7 +21,7 @@ Example:
 
 ```bash
 ./bin/zolinga install --module="zolinga-cms,zolinga-db"
-./bin/zolinga install --module="zolinga-cms@v1.0,zolinga-db@master"
+./bin/zolinga install --module="zolinga-cms@v1.0,zolinga-db@main"
 ```
 
 To list all available modules run the following command:
