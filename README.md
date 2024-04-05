@@ -168,3 +168,24 @@ To list all available modules run the following command:
 ```
 
 Enjoy! 🎉
+
+# Related Modules
+
+You may want to check also other modules. Just add them to Zolinga by running
+
+```bash
+./bin/zolinga install --module=ID[,ID,...]
+```
+
+E.g.
+
+```bash
+./bin/zolinga install --list
+./bin/zolinga install --module=zolinga-cron,zolinga-db,zolinga-rms,zolinga-intl,zolinga-cms
+```
+
+- [Zolinga CMS](https://github.com/webdevelopers-eu/zolinga-cms)
+- [Zolinga Cron](https://github.com/webdevelopers-eu/zolinga-cron)
+- [Zolinga DB](https://github.com/webdevelopers-eu/zolinga-db)
+- [Zolinga RMS](https://github.com/webdevelopers-eu/zolinga-rms)
+- [Zolinga Intl](https://github.com/webdevelopers-eu/zolinga-intl)
