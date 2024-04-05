@@ -16,7 +16,7 @@ It had to meet the following criteria:
 - Be minimalistic, devoid of any unnecessary features, yet have a smart design to cover all current and future use cases
 - Ensure strict, well-defined modularity to effortlessly incorporate new features and seamlessly expand the project. From front-end components and JavaScript to the backend with PHP.
 - Have an immutable API wherever possible (WHATWG Web Components, bare PHP, own modules - dependencies that are stable and/or under full control)
-- Feature a HTML file-based/database-less CMS that can be updated using FTP or other means, supporting pluggable dynamic elements handled by modules with templating system that can be easily extended (yet can be replaced anytime with full-blown database driven version)
+- Require a minimalistic, database-less CMS that facilitates updates via FTP or similar methods. It must support pluggable dynamic elements managed by other modules, with a customizable templating system that can be easily extended. Additionally, it must seamlessly integrate with the ability to be replaced with a full-blown, database-driven version when necessary.
 - Include simple Rights Management
 - Offer Cron support to schedule and execute tasks
 - Provide unmatched language translation support (expecting usage in 8+ languages)
