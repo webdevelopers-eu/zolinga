@@ -118,7 +118,7 @@ class InstallModuleCli implements ListenerInterface
         ), null];
 
         if (!$info) {
-            throw new \Exception('Module not found: ' . $module);
+            throw new \Exception('Module not found: ' . $module . '. Check the repository database or try to refresh it by running `bin/zolinga install --refresh`');
         }
 
         echo "Installing module: $module from {$info['source']}\n";
