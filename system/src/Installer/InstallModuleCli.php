@@ -89,7 +89,7 @@ class InstallModuleCli implements ListenerInterface
     private function parseModuleString(string $moduleString): array
     {
         // If module is a URL it may contain "@" character in the URL so we need to parse it differently
-        if (!preg_match('/^(?<module>.+)(?:@(?<branch>[a-z0-9_-]+))?$/', $moduleString, $matches)) {
+        if (!preg_match('/^(?<module>.+?)(?:@(?<branch>[a-z0-9_-]+))?$/', $moduleString, $matches)) {
             throw new \Exception("Invalid module string: $moduleString");
         }
 
