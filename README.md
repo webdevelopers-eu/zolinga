@@ -14,7 +14,7 @@ So, that's how this minimalistic and maximally immutable project came to be.
 It had to meet the following criteria:
 
 - Be minimalistic, devoid of any unnecessary features, yet have a smart design to cover all current and future use cases
-- Ensure strict well-defined modularity to facilitate seamless addition of new features and continual project expansion in both front-end part (Web Components/Javascript) and backend (PHP).
+- Ensure strict, well-defined modularity to effortlessly incorporate new features and seamlessly expand the project. From front-end components and JavaScript to the backend with PHP.
 - Have an immutable API wherever possible (WHATWG Web Components, bare PHP, own modules - dependencies that are stable and/or under full control)
 - Feature a HTML file-based/database-less CMS that can be updated using FTP or other means, supporting pluggable dynamic elements handled by modules with templating system that can be easily extended
 - Include simple Rights Management
