@@ -56,12 +56,13 @@ class InstallModuleCli implements ListenerInterface
             $this->listModules($event);
         }
         if (!empty($event->request['module'])) {
+            $event->response['log'] = [];
             $moduleList = explode(',', $event->request['module']);
             for ($i = 0; $i < count($moduleList); $i++) {
                 list($module, $branch) = explode('@', $moduleList[$i] . '@');
                 if ($this->checkModule($event, $module, $branch ?: null)) {
+                    $event->response['log'][] = "Installing module: $module";
                     $this->installModule($event, $module, $branch ?: null);
-
                     // Add dependencies
                     $config = json_decode(file_get_contents(ROOT_DIR . "/modules/{$module}/zolinga.json") ?: 'null', true);
                     if (isset($config['dependencies'])) {
@@ -71,6 +72,8 @@ class InstallModuleCli implements ListenerInterface
                             }
                         }
                     }
+                } else {
+                    $event->response['log'][] = "Module $module is already installed.";
                 }
             }
         }
