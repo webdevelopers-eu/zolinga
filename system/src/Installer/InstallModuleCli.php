@@ -49,7 +49,7 @@ class InstallModuleCli implements ListenerInterface
                 Usage: ./bin/zolinga install \
                     [--list] \
                     [--refresh] \
-                    [--module=module-id[|branch],...]]
+                    [--module=module-id[@branch],...]]
 
                 See more in WIKI.
 
@@ -83,7 +83,7 @@ class InstallModuleCli implements ListenerInterface
      */
     private function installModule(RequestResponseEvent $event, string $module): void
     {
-        list($module, $branch) = explode('|', $module . '|');
+        list($module, $branch) = explode('@', $module . '@');
 
         list($info) = [...array_filter(
             $this->data['list'],
