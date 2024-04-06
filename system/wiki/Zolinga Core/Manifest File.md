@@ -14,7 +14,7 @@ Each module has a `zolinga.json` file in its root that contains following inform
 - `autoload` - Array of PHP class name mappings to file paths. This is used by the Zolinga Core to autoload classes.
 - `config` - This section is used to define configuration options for the module. It is merged with the global and local configuration files. For details see `$api->config` service.
 - `webComponents` - this section declares what [HTML Web Component](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) names are registered by the module.
-
+- `dependencies` - Array of module names that this module depends on. The modules are installed automatically when this module is installed.
 
 ## Listen Section
 
@@ -165,3 +165,32 @@ The syntax is simple:
 - `module` property is the path to the ECMAScript module file that contains a default export class which will be registered as a web component. The path is relative to module's "dist" folder `{MODULE}/install/dist/` which is mapped to web server as `https://{DOMAIN}/dist/{MODULE}/`. 
 
 For more information about web components see [MDN Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) and Zolinga [Web Components](:Zolinga Core:Web Components) article.
+
+## Dependencies Section
+
+The `dependencies` section is an array of module names that this module depends on. The modules are installed automatically when this module is installed. To list all available modules run `./bin/zolinga install --list` .
+
+The format is simple:
+
+```json
+{
+  "dependencies": [
+    "{module id}@{branch}",
+    "{module id}"
+  ]
+}
+```
+
+If the branch is not specified the default branch is used.
+
+Example:
+  
+```json
+{
+  "dependencies": [
+    "zolinga-cms@v1.0",
+    "zolinga-db"
+  ]
+}
+```
+
