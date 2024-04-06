@@ -96,7 +96,7 @@ class InstallModuleCli implements ListenerInterface
                 $currentBranch = trim(shell_exec($cmd) ?: 'unknown');
             }
             if ($currentBranch === $branch || !$branch) {
-                $event->setStatus($event::STATUS_OK, "Module $module is already installed: $module (branch $currentBranch)");
+                $event->setStatus($event::STATUS_OK, "Module is installed.");
                 return false;
             } else {
                 $event->setStatus($event::STATUS_PRECONDITION_FAILED, "Module $module (branch $branch) cannot be installed. There is already installed $module (branch $currentBranch)");
