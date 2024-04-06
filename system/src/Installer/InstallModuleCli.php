@@ -45,20 +45,8 @@ class InstallModuleCli implements ListenerInterface
     public function onInstall(RequestResponseEvent $event): void
     {
         if (isset($event->request['help']) || !$event->request) {
-            $this->message(<<<'HELP'
-                Usage: ./bin/zolinga install \
-                    [--list] \
-                    [--refresh] \
-                    [--module=module-id[@branch],...]]
-
-                See more in WIKI.
-
-                Options:
-                    --list          List all available modules.
-                    --refresh       Refresh the repository database.
-                    --module        Install the module from the GIT repository.
-
-                HELP);
+            $this->printHelp();
+            return;
         }
         if (isset($event->request['refresh'])) {
             $this->downloadDatabase();
@@ -183,5 +171,23 @@ class InstallModuleCli implements ListenerInterface
     private function message(string $msg): void
     {
         file_put_contents('php://stderr', "» $msg\n");
+    }
+
+    private function printHelp()
+    {
+        $this->message(<<<'HELP'
+            Usage: ./bin/zolinga install \
+                [--list] \
+                [--refresh] \
+                [--module=module-id[@branch],...]]
+
+            See more in WIKI.
+
+            Options:
+                --list          List all available modules.
+                --refresh       Refresh the repository database.
+                --module        Install the module from the GIT repository.
+
+            HELP);
     }
 }
