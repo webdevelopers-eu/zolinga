@@ -63,6 +63,7 @@ class InstallModuleCli implements ListenerInterface
                 if ($this->checkModule($event, $module, $branch ?: null)) {
                     $event->response['log'][] = "Installing module: $module";
                     $this->installModule($event, $module, $branch ?: null);
+
                     // Add dependencies
                     $config = json_decode(file_get_contents(ROOT_DIR . "/modules/{$module}/zolinga.json") ?: 'null', true);
                     if (isset($config['dependencies'])) {
