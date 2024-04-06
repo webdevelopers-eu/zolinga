@@ -36,6 +36,20 @@ To refresh the list of available modules run the following command:
 ./bin/zolinga install --refresh
 ```
 
+# Private GIT Repositories
+
+If you have a private GIT repository you can use the following syntax to install the module:
+
+```bash 
+./bin/zolinga install --module=URL[@BRANCH]
+```
+
+Example:
+
+```bash
+./bin/zolinga install --module=https://github.com/webdevelopers-eu/zolinga-rms.git
+```
+
 # Other Zolinga Modules
 
 Since this whole project is a preparation for my next big project I started with key modules that I will need for the project. I deem them absolute essentials. Here is the list.

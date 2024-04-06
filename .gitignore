@@ -18,6 +18,7 @@ locale/
 /modules/*
 !/modules/README.txt
 !/modules/*.example
+!/modules/.gitkeep
 /.gitmodules
 
 /config/*
