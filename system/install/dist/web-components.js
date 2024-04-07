@@ -34,6 +34,9 @@
  *  customElements.define('new-element', importedConstructor).  
  * 
  * Each custom element is supposed to set element.dataset.ready = true when it is ready to be used.
+ * If you use the WebComponent class then you should call ready() method instead.
+ * 
+ * 
  * When it fails to initialize it should set the error on element.dataset.error.
  * 
  * When element.dataset.ready or element.dataset.error is set the events 'web-component-ready' or

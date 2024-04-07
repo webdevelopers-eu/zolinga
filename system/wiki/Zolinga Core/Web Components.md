@@ -78,7 +78,24 @@ Tip: If you are reading this article using web interface then you can use DOM In
 
 # Extending the Base Component Class
 
-Zolinga provides a base class `WebComponents` that you can extend to create your components. This class provides a number of useful methods and properties that you can use in your components. For more information refer to the [WebComponent Class](:Zolinga Core:Web Components :WebComponent Class) article.
+Zolinga provides a base class `WebComponent` that you can extend to create your components. This class provides a number of useful methods and properties that you can use in your components. For more information refer to the [WebComponent Class](:Zolinga Core:Web Components:WebComponent Class) article.
+
+When use `WebComponent` class you should call `this.ready()` method after you are done initializing your component. You can pass optional `Promise` as an argument to the `ready()` method. The `ready()` method will wait for the `Promise` to resolve before marking the component as ready.
+
+```javascript
+import WebComponent from '/dist/system/lib/web-component.js';
+
+export default class MyExample extends WebComponent {
+    constructor() {
+        super();
+        this.ready(this.#init());
+    }
+
+    async #init() {
+        // my initialization
+    }
+}
+```
 
 # Related
 
