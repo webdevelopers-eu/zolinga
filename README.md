@@ -92,12 +92,6 @@ $ a2ensite 010-zolinga.conf
 $ systemctl restart apache2
 ```
 
-Now add the following line to your `/etc/hosts` file:
-
-```
-127.0.0.1 zolinga.localhost
-```
-
 Then visit [http://zolinga.localhost](http://zolinga.localhost) in your browser.
 
 Of course it presumes that PHP is already installed on your system. If not, you can install it by running the following commands:
