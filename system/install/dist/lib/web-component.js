@@ -34,6 +34,14 @@ export default class WebComponent extends HTMLElement {
   #enabledPromise;
 
   /**
+   * The promise that resolves when the component is ready.
+   * @type {Promise}
+   */
+  #readyPromiseCumulative;
+  #readyPromise;
+  #readyResolve;
+
+  /**
      * The broadcast channel to send and receive messages.
      */
   #broadcast;
@@ -45,6 +53,11 @@ export default class WebComponent extends HTMLElement {
 
   constructor() {
     super();
+
+    // This promise is returned from this.ready() and resolves when the component is ready.
+    const {promise, resolve} = Promise.withResolvers();
+    this.#readyPromise = promise.then(() => this.dataset.ready = 'true');
+    this.#readyResolve = resolve;
 
     if (this.hasAttribute('disabled')) {
       this.#installWaitEnabledPromise();
@@ -65,6 +78,35 @@ export default class WebComponent extends HTMLElement {
   }
 
   /**
+   * Mark the component as ready.
+   * 
+   * Promise can be Promise or anything that can be converted to Promise.
+   * 
+   * If the parameter is a Promise the component will be set as ready when the Promise is resolved.
+   * 
+   * this.ready(new Promise((accept) => setTimeout(accept, 1000)));
+   * this.ready(new Promise((accept) => setTimeout(accept, 3000)));
+   * await this.ready();
+   * 
+   * @param {Promise|any} promise - Promise that resolves when the component is ready.
+   * @return {Promise} - Promise that resolves when the component is ready.
+   */
+  async ready(promise) {
+    if (this.#readyPromiseCumulative) {
+      this.#readyPromiseCumulative.makeReady = function () { };
+    }
+    let newPromise = new Promise((accept, reject) => {
+      Promise.all([this.#readyPromiseCumulative, promise]).then(accept, reject);
+    }
+    );
+    newPromise.makeReady = this.#readyResolve;
+    newPromise.then(() => newPromise.makeReady());
+
+    this.#readyPromiseCumulative = newPromise;
+    return this.#readyPromise;
+  }
+
+  /**
      * Load the content of an HTML file into the component.
      * If it contains <script> tags, they will be executed.
      * It will automatically call components.observe() on the content
@@ -81,34 +123,34 @@ export default class WebComponent extends HTMLElement {
      * @return {Promise} - Promise that resolves when the content is loaded and all scripts and styles are ready.
      *                      Promise will resolve to the Shadow Root or the component itself if mode is 'seamless'.
      */
-  async loadContent(url, options = {mode: 'open', allowScripts: false, timeout: 60000}) {
+  async loadContent(url, options = { mode: 'open', allowScripts: false, timeout: 60000 }) {
     await this.waitEnabled();
     return fetch(url)
-        .then((response) => response.text())
-        .then((html) => this.#parseHtmlResolveLinks(html, url))
-        .then((html) => {
-          let root;
-          if (options.mode === 'seamless') {
-            root = this;
-            root.innerHTML = html;
-          } else {
-            root = this.attachShadow({mode: options.mode});
-            root.innerHTML = html;
-            components.observe(root);
-          }
+      .then((response) => response.text())
+      .then((html) => this.#parseHtmlResolveLinks(html, url))
+      .then((html) => {
+        let root;
+        if (options.mode === 'seamless') {
+          root = this;
+          root.innerHTML = html;
+        } else {
+          root = this.attachShadow({ mode: options.mode });
+          root.innerHTML = html;
+          components.observe(root);
+        }
 
-          // Wait for styles and scripts to load
-          const promises = [this.#waitForStyles(root, options.timeout)];
-          if (options.allowScripts) {
-            promises.push(this.#execScripts(root, options.timeout));
-          }
+        // Wait for styles and scripts to load
+        const promises = [this.#waitForStyles(root, options.timeout)];
+        if (options.allowScripts) {
+          promises.push(this.#execScripts(root, options.timeout));
+        }
 
-          return Promise.all(promises)
-              .then(() => root);
-        })
-        .catch((error) => {
-          this.dataset.error = error;
-        });
+        return Promise.all(promises)
+          .then(() => root);
+      })
+      .catch((error) => {
+        this.dataset.error = error;
+      });
   }
 
   /**
@@ -134,7 +176,7 @@ export default class WebComponent extends HTMLElement {
      * @param {Function} callback the callback function that will be called when the broadcast message is received.
      */
   listen(name, callback) {
-    this.#listeners.add({name, callback});
+    this.#listeners.add({ name, callback });
   }
 
   /**
@@ -157,7 +199,7 @@ export default class WebComponent extends HTMLElement {
 
   #installWaitEnabledPromise() {
     if (!this.#enabledPromise) {
-      const {promise, resolve} = Promise.withResolvers();
+      const { promise, resolve } = Promise.withResolvers();
       this.#enabledPromise = promise;
       this.#enabledPromise.resolve = resolve;
     }

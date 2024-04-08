@@ -3,7 +3,9 @@
 The [WebComponent Class](/dist/system/lib/web-component.js) is the optional base class for your web components that you can extend instead of `HTMLElement`. This class provides a number of useful methods and properties that you can use in your components.
 
 You will get following benefits by extending this class:
-
+- `this.ready(promise)` method to mark the component as ready after the initialization is done
+    - waits for the `Promise` to resolve before marking the component as ready
+    - if `Promise` is not provided the component is marked as ready immediately unless other calls to `this.ready()` are pending with `Promise`. E.g. you can make multiple calls to `this.ready()` with `Promise` and the component will be marked as ready only after all `Promise`s are resolved.
 - `this.loadContent()` method to load HTML and embed it in your component
     - optionally executes embedded JavaScripts
     - autoload linked CSS files
