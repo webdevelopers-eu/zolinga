@@ -192,10 +192,11 @@ E.g.
 ./bin/zolinga install --module=zolinga-cron,zolinga-db,zolinga-rms,zolinga-intl,zolinga-cms
 ```
 
-- [Zolinga CMS](https://github.com/webdevelopers-eu/zolinga-cms) - databaseless content management system
-- [Zolinga Cron](https://github.com/webdevelopers-eu/zolinga-cron) - cron jobs
-- [Zolinga DB](https://github.com/webdevelopers-eu/zolinga-db) - simple MySQL API
-- [Zolinga RMS](https://github.com/webdevelopers-eu/zolinga-rms) - simple Rights Management
-- [Zolinga Intl](https://github.com/webdevelopers-eu/zolinga-intl) - language translation support
+- [Zolinga CMS](https://github.com/webdevelopers-eu/zolinga-cms) - databaseless content management system, id `zolinga-cms`
+- [Zolinga Cron](https://github.com/webdevelopers-eu/zolinga-cron) - cron jobs, id `zolinga-cron`
+- [Zolinga DB](https://github.com/webdevelopers-eu/zolinga-db) - simple MySQL API, id `zolinga-db`
+- [Zolinga RMS](https://github.com/webdevelopers-eu/zolinga-rms) - simple Rights Management, id `zolinga-rms`
+- [Zolinga Commons](https://github.com/webdevelopers-eu/zolinga-commons) - contains common widgets and other goodies, id `zolinga-commons`
+
 
 When you install a module, it will be automatically added to the `modules` directory and its documentation will be merged into inbuilt Zolinga WIKI Documentation right in your Zolinga installation.
