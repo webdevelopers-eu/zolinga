@@ -59,7 +59,8 @@ To install Zolinga, follow these steps:
 
 ### Docker Quick Test
 
-Pull the PHP image and run the Zolinga framework inside a container as fast as you can. 😜
+If you prefer testing a new project inside Docker, here is a quick *2-minute* installation guide to
+pull the PHP image and run the Zolinga framework inside a container. 😜
 
 ```bash
 $ docker pull php
