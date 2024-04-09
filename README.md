@@ -1,3 +1,24 @@
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [Zolinga PHP Framework](#zolinga-php-framework)
+    - [But... why?](#but-why)
+    - [Introduction](#introduction)
+    - [Target Audience](#target-audience)
+    - [Requirements](#requirements)
+    - [Installation](#installation)
+        - [The Common Way](#the-common-way)
+        - [Docker Quick Test](#docker-quick-test)
+        - [Apache](#apache)
+    - [Anatomy of a Module](#anatomy-of-a-module)
+        - [Manifest File](#manifest-file)
+    - [Installing Modules](#installing-modules)
+- [Documentation](#documentation)
+- [Related Modules](#related-modules)
+
+<!-- markdown-toc end -->
+
+
 # Zolinga PHP Framework
 *Etymology: In the Chichewa language of Africa, the word "zolinga" means "goals."*
 
