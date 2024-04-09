@@ -125,7 +125,7 @@ class Bootstrap
         ]);
 
         if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+            session_start() or throw new \Exception('Cannot start session.');
         }
 
         if (isset($_REQUEST['destroy'])) {
