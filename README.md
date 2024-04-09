@@ -1,3 +1,7 @@
+# Zolinga PHP Framework
+*Etymology: In the Chichewa language of Africa, the word "zolinga" means "goals."*
+
+
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
@@ -17,10 +21,6 @@
 - [Related Modules](#related-modules)
 
 <!-- markdown-toc end -->
-
-
-# Zolinga PHP Framework
-*Etymology: In the Chichewa language of Africa, the word "zolinga" means "goals."*
 
 ## But... why?
 
