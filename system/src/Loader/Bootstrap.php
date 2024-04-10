@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 namespace Zolinga\System\Loader;
+
+use const Zolinga\System\IS_HTTPS;
 use const Zolinga\System\ROOT_DIR;
 use Zolinga\System\Events\Event;
 
@@ -115,6 +117,13 @@ class Bootstrap
 
     public function initSession(): void
     {
+        // Make sure SESSION cookie is secure, uses HTTPOnly and SameSite=Strict
+        session_set_cookie_params([
+            'secure' => IS_HTTPS, // set to true when HTTPS is available
+            'httponly' => true,
+            'samesite' => 'Strict'
+        ]);
+
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
