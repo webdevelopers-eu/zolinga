@@ -102,11 +102,15 @@ class WebComponentLoader {
             *:is(${customElements.join(',')}) {
                 --web-component-loader: url("data:image/svg+xml;random=0,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMidYMid meet' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='0' fill='none' stroke='%23888888' stroke-width='.5' opacity='0' %3E%3Canimate restart='always' attributeName='opacity' dur='5s' from='0' to='1' fill='freeze' begin='.5s' /%3E%3Canimate restart='always' attributeName='r' calcMode='spline' dur='2' keySplines='0 .2 .5 1' keyTimes='0;1' repeatCount='indefinite' values='1;80'/%3E%3Canimate restart='always' attributeName='stroke-width' calcMode='spline' dur='2' keySplines='0 .2 .5 1' keyTimes='0;1' repeatCount='indefinite' values='0;25'/%3E%3Canimate restart='always' attributeName='stroke-opacity' calcMode='spline' dur='2' keySplines='0 .2 .5 1' keyTimes='0;1' repeatCount='indefinite' values='1;0'/%3E%3C/circle%3E%3C/svg%3E%0A");
 
+                &:not([data-ready]) [slot] {
+                    display: none !important;
+                }
+
                 &[hidden] {
                     display: none !important;
                 }
 
-                &:not([data-error], [data-ready], [disabled]) {
+                &:not(:defined), &:not([data-error], [data-ready], [disabled]) {
                     cursor: wait;
                     background-position: center;
                     background-repeat: no-repeat;

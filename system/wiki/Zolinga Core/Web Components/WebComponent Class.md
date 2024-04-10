@@ -1,5 +1,7 @@
 # WebComponent Class
 
+## Overview
+
 The [WebComponent Class](/dist/system/lib/web-component.js) is the optional base class for your web components that you can extend instead of `HTMLElement`. This class provides a number of useful methods and properties that you can use in your components.
 
 You will get following benefits by extending this class:
@@ -17,6 +19,8 @@ You will get following benefits by extending this class:
 - `this.listen()` method to listen to events from all components
     - allows to listen to events broadcasted using `this.broadcast()`
 
+## Usage
+
 To use it import it and extend it in your component class:
 
 ```javascript
@@ -31,6 +35,61 @@ class MyComponent extends WebComponent {
 ```
 
 Tip: If you are reading this article using web interface then you can use DOM Inspector in your browser to see the content. The page is using web components to render the content.
+
+## Methods
+
+### loadContent() 
+
+```
+  async loadContent(url, options = { mode: 'open', allowScripts: false, timeout: 60000 })
+```
+
+The loadContent function loads the content of an HTML file into the component. It provides options for handling scripts, initializing web components, and resolving relative links.
+
+#### Parameters
+
+- `url` (string): URL of the HTML file to load. Usually something like `new URL('wiki-article.html', import.meta.url)` will be used to load .html from the same directory as loading script.
+- `options` (Object): Options for loading the content.
+  - `mode` (string): Specifies the mode of loading the content. Possible values are:
+    - `"open"`: Create a Shadow Root in this mode and append it.
+    - `"closed"`: Create a Shadow Root in this mode and append it.
+    - `"seamless"`: Append the content directly.
+  - `allowScripts` (boolean): Indicates whether to allow executing scripts in the loaded content.
+  - `timeout` (number): Timeout in milliseconds for loading the content.
+
+#### Return Value
+
+Returns a `Promise` that resolves when the content is loaded and all scripts and styles are ready. The Promise will resolve to the Shadow Root or the component itself if the mode is 'seamless'.
+
+#### Behavior
+
+If the loaded HTML file contains `<script>` tags, they will be executed if the allowScripts option is set to true. 
+
+The function automatically calls components.observe() on the content so that any web components in the content are initialized.
+
+Relative links in src and href attributes of the content will be resolved against the URL of the HTML file.
+
+#### Example Usage
+
+```javascript
+async function exampleUsage() {
+  try {
+    const content = await loadContent('example.html', {
+      mode: 'open',
+      allowScripts: true,
+      timeout: 10000
+    });
+    console.log('Content loaded successfully:', content);
+  } catch (error) {
+    console.error('Error loading content:', error);
+  }
+}
+```
+#### Notes
+
+The function expects the component to be enabled before loading content (`await this.waitEnabled()`). If the component is disabled (has the "disabled" attribute set), the function will postpone loading the content until the component is enabled.
+
+The function handles errors by setting the dataset error attribute.
 
 # Related
 
