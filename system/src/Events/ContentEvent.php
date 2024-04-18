@@ -67,6 +67,7 @@ class ContentEvent extends Event implements StoppableInterface
         $this->content->resolveExternals = false;
         $this->content->validateOnParse = false;
         $this->content->xmlStandalone = true;
+        $this->content->loadHTML('<!DOCTYPE html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET | LIBXML_NOWARNING | LIBXML_NOERROR);
 
         $this->path = rtrim($path ?: '', '/');
     }
@@ -90,8 +91,12 @@ class ContentEvent extends Event implements StoppableInterface
      */
     public function setContentHTML(string $content): void {
         // LIBXML_NOERROR to suppress custom HTML tag warnings: Warning: DOMDocument::loadHTML(): Tag invalid wiki-search in Entity
-        $content='<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$content; // Add meta tag to force UTF-8 encoding
-        $this->content->loadHTML($content, LIBXML_HTML_NODEFDTD | LIBXML_NOERROR | LIBXML_NONET | LIBXML_COMPACT | LIBXML_NOWARNING) or throw new \Exception("Invalid HTML content");
+        $content = <<<HTML
+            <!DOCTYPE html>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+            $content
+            HTML; // Add meta tag to force UTF-8 encoding
+        $this->content->loadHTML($content, LIBXML_NOERROR | LIBXML_NONET | LIBXML_NOWARNING) or throw new \Exception("Invalid HTML content");
     }
 
     /**
