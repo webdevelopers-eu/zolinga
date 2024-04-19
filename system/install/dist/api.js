@@ -19,6 +19,16 @@ class Api {
     API_GATE = '/dist/system/gate/';
 
     /**
+       * The broadcast channel to send and receive messages.
+       */
+    #broadcast;
+
+    /**
+       * The list of listeners for broadcast messages.
+       */
+    #listeners = new Set();
+
+    /**
      * Event class used to instantiate new events.
      */
     // Event = Event;
@@ -30,6 +40,17 @@ class Api {
     constructor() {
         this.Event = Event;
         this.Event.api = this;
+
+        this.#broadcast = new BroadcastChannel('zolinga');
+        this.#broadcast.addEventListener('message', (ev) => {
+            const name = ev.data.name;
+            const detail = ev.data.detail;
+            this.#listeners.forEach((listener) => {
+                if (listener.name === name) {
+                    listener.callback(detail);
+                }
+            });
+        });
     }
 
     /**
@@ -88,12 +109,46 @@ class Api {
             event.response = responseData.response;
 
             console.log('AJAX API Response:', responseData);
+            this.broadcast('event-response:' + event.type, event);
+
             return event;
         } catch (error) {
             // Print raw output
             console.error('AJAX API Error:', error, event, data);
             throw error;
         }
+    }
+
+    /**
+       * Send a broadcast message to all subscribers globally.
+       * Same mechanism as WebComponent.broadcast() but always global broadcast.
+       * 
+       * @param {String} name Event name that will be broadcasted.
+       * @param {Object} detail Serializable object that will be broadcasted. See BroadcastChannel.postMessage() for more information.
+       * @returns {Api} this object for chaining
+       */
+    broadcast(name, detail = null) {
+        // this.#broadcast cannot receive its own messages
+        // we need to create new object.
+        const broadcast = new BroadcastChannel('zolinga'); 
+        broadcast.postMessage({
+            name,
+            "detail": typeof detail?.toJSON === 'function' ? detail.toJSON() : detail,
+            "scope": null
+        });
+        return this;
+    }
+
+    /**
+       * Listen to a broadcast message with the given name.
+       *
+       * @param {String} name Broadcast name to listen to.
+       * @param {Function} callback the callback function that will be called when the broadcast message is received.
+       * @returns {Api} this object for chaining
+       */
+    listen(name, callback) {
+        this.#listeners.add({ name, callback });
+        return this;
     }
 };
 

@@ -55,7 +55,7 @@ export default class WebComponent extends HTMLElement {
     super();
 
     // This promise is returned from this.ready() and resolves when the component is ready.
-    const {promise, resolve} = Promise.withResolvers();
+    const { promise, resolve } = Promise.withResolvers();
     this.#readyPromise = promise.then(() => this.dataset.ready = 'true');
     this.#readyResolve = resolve;
 
@@ -160,13 +160,15 @@ export default class WebComponent extends HTMLElement {
      * @param {String} name Event name that will be broadcasted.
      * @param {Object} detail Serializable object that will be broadcasted. See BroadcastChannel.postMessage() for more information.
      * @param {boolean} global Send the name to all subscribers in all windows, not just in the current window.
+     * @returns {WebComponent} this object for chaining
      */
   broadcast(name, detail = null, global = false) {
     this.#broadcast.postMessage({
       name,
-      detail,
-      "scope": global ? null : WebComponent.#scopeId,
+      "detail": typeof detail?.toJSON === 'function' ? detail.toJSON() : detail,
+      "scope": global ? null : WebComponent.#scopeId
     });
+    return this;
   }
 
   /**
@@ -174,9 +176,11 @@ export default class WebComponent extends HTMLElement {
      *
      * @param {String} name Broadcast name to listen to.
      * @param {Function} callback the callback function that will be called when the broadcast message is received.
+     * @returns {WebComponent} this object for chaining
      */
   listen(name, callback) {
     this.#listeners.add({ name, callback });
+    return this;
   }
 
   /**

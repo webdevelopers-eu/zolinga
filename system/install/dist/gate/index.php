@@ -51,6 +51,7 @@ foreach ($requests as $data) {
         "message" => $event->message,
         "response" => $event->response,
         "time" => microtime(true) - $time,
+        "ok" => $event->isOK()
     );
 }
 
