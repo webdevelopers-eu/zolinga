@@ -28,6 +28,41 @@ dispatchEvent('example:test', { data: 'Hello, World!' })
     });
 ```
 
+## Listening To Event Responses
+
+After the server processes the request, it will dispatch a response event back to the client. You can listen to the response event the same way you would listen to any Web Component events either using
+`WebComponent.listen("event-response:" + eventType, callback)` or `API.listen("event-response:" + eventType, callback)`. E.g.:
+
+```javascript
+import api from '/dist/system/api.js';
+
+api.listen("event-response:example:test", eventData => {
+    console.log("GLOBAL LISTENER RECEIVED", eventData.status, eventData.message, eventData.response);
+});
+
+api
+    .dispatchEvent('example:test', { data: 'Hello, World!' })
+    .then(event => {
+        console.log("INITIATOR RECEIVED", event.status, event.message, event.response);
+    });
+```
+
+Refer to [WebComponent](:Zolinga Core:Web Components:WebComponent Class) for more information on how to listen to events.
+
+## Global Broadasting
+
+The [WebComponent](:Zolinga Core:Web Components:WebComponent Class) has ability to broadcast data using `WebComponent.broadcast(name, detail = null, global = false)` method. You can use similar method on the `API` object to broadcast data to all listeners. Note that it broadcasts only global messages (accross all tabs and windows). And you can subscribe to the broadcasted messages using `API.listen(name, callback)` the same way you would do it on the WebComponent.
+
+```javascript
+import api from '/dist/system/api.js';
+
+api.listen("example:broadcast", eventData => {
+    console.log("GLOBAL LISTENER RECEIVED", eventData);
+});
+
+api.broadcast("example:broadcast", { data: 'Hello, World!' });
+```
+
 # Server Side Processing
 
 You can declare your event listeners the [usual way](:Zolinga Core:Events and Listeners). Do not forget to add the `remote` to `zolinga.json`'s listener declaration.

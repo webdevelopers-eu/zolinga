@@ -78,7 +78,7 @@ class Event {
     }
 
     get ok() {
-        return this.#status === Event.STATUS_OK;
+        return this.#status < 400;
     }
 
     get error() {
@@ -112,6 +112,24 @@ class Event {
     async dispatch() {
         // Assuming there is a global API object
         return await Event.api.dispatchEvent(this);
+    }
+
+    toJSON() {
+        return {
+            uuid: this.uuid,
+            type: this.type,
+            origin: this.origin,
+            status: this.status,
+            message: this.message,
+            response: this.response,
+            request: this.request,
+            ok: this.ok,
+            error: this.error,
+            unauthorized: this.unauthorized,
+            undetermined: this.undetermined,
+            forbidden: this.forbidden,
+            isTrusted: this.isTrusted()
+        };
     }
 }
 
