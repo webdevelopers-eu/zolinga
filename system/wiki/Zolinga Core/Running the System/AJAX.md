@@ -51,16 +51,16 @@ Refer to [WebComponent](:Zolinga Core:Web Components:WebComponent Class) for mor
 
 ## Global Broadasting
 
-The [WebComponent](:Zolinga Core:Web Components:WebComponent Class) has ability to broadcast data using `WebComponent.broadcast(name, detail = null, global = false)` method. You can use similar method on the `API` object to broadcast data to all listeners. Note that it broadcasts only global messages (accross all tabs and windows). And you can subscribe to the broadcasted messages using `API.listen(name, callback)` the same way you would do it on the WebComponent.
+The [WebComponent](:Zolinga Core:Web Components:WebComponent Class) has ability to broadcast data using `WebComponent.broadcast(name, detail = null, global = false)` method. You can use the same method on the `API` object to broadcast data to all listeners. And you can subscribe to the broadcasted messages using `API.listen(name, callback)` the same way you would do it on the WebComponent.
 
 ```javascript
 import api from '/dist/system/api.js';
 
 api.listen("example:broadcast", eventData => {
-    console.log("GLOBAL LISTENER RECEIVED", eventData);
+    console.log("LISTENER", eventData);
 });
 
-api.broadcast("example:broadcast", { data: 'Hello, World!' });
+api.broadcast("example:broadcast", { data: 'Hello, World!' }, true /* to all windows */);
 ```
 
 # Server Side Processing

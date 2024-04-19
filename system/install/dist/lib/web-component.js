@@ -18,9 +18,9 @@ import components from '/dist/system/web-components.js';
  */
 export default class WebComponent extends HTMLElement {
   /**
-     * The scope ID of the current window. This is used to filter out broadcast messages.
+     * The unique web component ID. This is used to filter out broadcast messages.
      */
-  static #scopeId = Math.random().toString(36).slice(2);
+  #componentId;
 
   /**
      * The list of attributes to observe for changes.
@@ -54,6 +54,8 @@ export default class WebComponent extends HTMLElement {
   constructor() {
     super();
 
+    this.#componentId = Math.random().toString(36).slice(2);
+
     // This promise is returned from this.ready() and resolves when the component is ready.
     const { promise, resolve } = Promise.withResolvers();
     this.#readyPromise = promise.then(() => this.dataset.ready = 'true');
@@ -63,19 +65,21 @@ export default class WebComponent extends HTMLElement {
       this.#installWaitEnabledPromise();
     }
     this.#broadcast = new BroadcastChannel('zolinga');
-    this.#broadcast.addEventListener('message', (ev) => {
-      if (ev.data.scope && ev.data.scope !== WebComponent.#scopeId) return;
+    this.#broadcast.addEventListener('message', this.#onMessage.bind(this)); // global messages
+    window.addEventListener('message', this.#onMessage.bind(this)); // local messages
 
-      const name = ev.data.name;
-      const detail = ev.data.detail;
-
-      this.#listeners.forEach((listener) => {
-        if (listener.name === name) {
-          listener.callback(detail);
-        }
-      });
-    });
+    // // Implement destructor using FinalizationRegistry
+    // if (typeof FinalizationRegistry !== 'undefined') {
+    //   const registry = new FinalizationRegistry(() => this.destructor());
+    //   registry.register(this);
+    // }
   }
+
+  // destructor() {
+  //   console.log('WebComponent.destructor(): ', this.#componentId);
+  //   this.#broadcast.close();
+  //   window.removeEventListener('message', this.#onMessage);
+  // }
 
   /**
    * Mark the component as ready.
@@ -163,11 +167,19 @@ export default class WebComponent extends HTMLElement {
      * @returns {WebComponent} this object for chaining
      */
   broadcast(name, detail = null, global = false) {
-    this.#broadcast.postMessage({
+    const payload = {
       name,
       "detail": typeof detail?.toJSON === 'function' ? detail.toJSON() : detail,
-      "scope": global ? null : WebComponent.#scopeId
-    });
+      "source": this.#componentId
+    };
+
+    const origin = window.location.origin;
+    if (global) {
+      this.#broadcast.postMessage(payload);
+    } else {
+      window.postMessage(payload, window.location.origin);
+    }
+
     return this;
   }
 
@@ -181,6 +193,21 @@ export default class WebComponent extends HTMLElement {
   listen(name, callback) {
     this.#listeners.add({ name, callback });
     return this;
+  }
+
+  #onMessage(ev) {
+    if (ev.origin !== window.location.origin || this.#componentId === ev.data.source) {
+      return;
+    }
+
+    const name = ev.data.name;
+    const detail = ev.data.detail;
+
+    this.#listeners.forEach((listener) => {
+      if (listener.name === name) {
+        listener.callback(detail);
+      }
+    });
   }
 
   /**
