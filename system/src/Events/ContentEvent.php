@@ -48,6 +48,13 @@ class ContentEvent extends Event implements StoppableInterface
      */
     public string $path;
 
+    /**
+     * The XPath object for the content.
+     *
+     * @var \DOMXPath $xpath
+     */
+    public readonly \DOMXPath $xpath;
+
     public readonly \DOMDocument $content;
 
     /**
@@ -70,6 +77,8 @@ class ContentEvent extends Event implements StoppableInterface
         $this->content->loadHTML('<!DOCTYPE html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET | LIBXML_NOWARNING | LIBXML_NOERROR);
 
         $this->path = rtrim($path ?: '', '/');
+
+        $this->xpath = new \DOMXPath($this->content);
     }
 
     
