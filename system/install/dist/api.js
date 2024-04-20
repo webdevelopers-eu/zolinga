@@ -136,6 +136,7 @@ class Api {
             "detail": typeof detail?.toJSON === 'function' ? detail.toJSON() : detail,
             "scope": null
         });
+        broadcast.close();
         return this;
     }
 
