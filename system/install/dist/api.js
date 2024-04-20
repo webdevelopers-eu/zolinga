@@ -14,23 +14,23 @@ import Event from './lib/event.js';
 */
 class Api {
     /**
-     * The API_GATE constant is the URL of the API gateway.
-       */
+    * The API_GATE constant is the URL of the API gateway.
+    */
     API_GATE = '/dist/system/gate/';
 
     /**
-       * The broadcast channel to send and receive messages.
-       */
+    * The broadcast channel to send and receive messages.
+    */
     #broadcast;
 
     /**
-       * The list of listeners for broadcast messages.
-       */
+    * The list of listeners for broadcast messages.
+    */
     #listeners = new Set();
 
     /**
-     * Event class used to instantiate new events.
-     */
+    * Event class used to instantiate new events.
+    */
     // Event = Event;
 
     /** 
@@ -42,15 +42,8 @@ class Api {
         this.Event.api = this;
 
         this.#broadcast = new BroadcastChannel('zolinga');
-        this.#broadcast.addEventListener('message', (ev) => {
-            const name = ev.data.name;
-            const detail = ev.data.detail;
-            this.#listeners.forEach((listener) => {
-                if (listener.name === name) {
-                    listener.callback(detail);
-                }
-            });
-        });
+        this.#broadcast.addEventListener('message', this.#onMessage.bind(this));
+        window.addEventListener('message', this.#onMessage.bind(this));
     }
 
     /**
@@ -120,23 +113,31 @@ class Api {
     }
 
     /**
-       * Send a broadcast message to all subscribers globally.
-       * Same mechanism as WebComponent.broadcast() but always global broadcast.
-       * 
+       * Send a broadcast message to all subscribers of the name.
+       * The broadcast message will not trigger the listeners in this object.
+       *
        * @param {String} name Event name that will be broadcasted.
        * @param {Object} detail Serializable object that will be broadcasted. See BroadcastChannel.postMessage() for more information.
+       * @param {boolean} global Send the name to all subscribers in all windows, not just in the current window.
        * @returns {Api} this object for chaining
        */
-    broadcast(name, detail = null) {
-        // this.#broadcast cannot receive its own messages
-        // we need to create new object.
-        const broadcast = new BroadcastChannel('zolinga'); 
-        broadcast.postMessage({
+    broadcast(name, detail = null, global = false) {
+        const payload = {
             name,
             "detail": typeof detail?.toJSON === 'function' ? detail.toJSON() : detail,
-            "scope": null
-        });
-        broadcast.close();
+            "source": null
+        };
+
+        const origin = window.location.origin;
+        if (global) {
+            // We want to receive it in this.#broadcast so we create new BroadcastChannel
+            const broadcast = new BroadcastChannel('zolinga');
+            broadcast.postMessage(payload);
+            broadcast.close();
+        } else {
+            window.postMessage(payload, window.location.origin);
+        }
+
         return this;
     }
 
@@ -150,6 +151,21 @@ class Api {
     listen(name, callback) {
         this.#listeners.add({ name, callback });
         return this;
+    }
+
+    #onMessage(ev) {
+        if (ev.origin !== window.location.origin) {
+            return;
+        }
+
+        const name = ev.data.name;
+        const detail = ev.data.detail;
+
+        this.#listeners.forEach((listener) => {
+            if (listener.name === name) {
+                listener.callback(detail);
+            }
+        });
     }
 };
 
