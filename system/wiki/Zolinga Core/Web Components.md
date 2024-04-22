@@ -42,6 +42,7 @@ export default class MyExample extends HTMLElement {
         this.attachShadow({mode: 'open'});
         this.shadowRoot.innerHTML = `<p>This is my example component</p>`;
         this.dataset.ready = 'true'; // Hide the default loading animation
+        this.dispatchEvent(new CustomEvent('web-component-ready'));
     }
 }
 ```
@@ -64,6 +65,7 @@ export default class MyExample extends HTMLElement {
         // this.shadowRoot.innerHTML = `<p>This is my example component</p>`;
         this.innerHTML = `<p>This is my example component</p>`;
         this.dataset.ready = 'true'; // Hide the default loading animation
+        this.dispatchEvent(new CustomEvent('web-component-ready'));
     }
 }
 ```
