@@ -58,7 +58,10 @@ export default class WebComponent extends HTMLElement {
 
     // This promise is returned from this.ready() and resolves when the component is ready.
     const { promise, resolve } = Promise.withResolvers();
-    this.#readyPromise = promise.then(() => this.dataset.ready = 'true');
+    this.#readyPromise = promise.then(() => {
+      this.dataset.ready = 'true';
+      this.dispatchEvent(new CustomEvent('web-component-ready'));
+    });
     this.#readyResolve = resolve;
 
     if (this.hasAttribute('disabled')) {
