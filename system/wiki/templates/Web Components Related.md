@@ -1,4 +1,4 @@
 - [List of Registered Web Components](:ref:wc)
 - [Zolinga  Web Components](:Zolinga Core:Web Components)
-- [WebComponent Class implementation](/dist/system/lib/web-component.js)
-- [WebComponents support script](/dist/system/web-components.js)
+- [WebComponent Class implementation](/dist/system/js/web-component.js)
+- [WebComponents support script](/dist/system/js/web-components.js)

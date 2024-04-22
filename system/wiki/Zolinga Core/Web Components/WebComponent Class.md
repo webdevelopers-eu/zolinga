@@ -2,13 +2,13 @@
 
 ## Overview
 
-The [WebComponent Class](/dist/system/lib/web-component.js) is the optional base class for your web components that you can extend instead of `HTMLElement`. This class provides a number of useful methods and properties that you can use in your components.
+The [WebComponent Class](/dist/system/js/web-component.js) is the optional base class for your web components that you can extend instead of `HTMLElement`. This class provides a number of useful methods and properties that you can use in your components.
 
 You will get following benefits by extending this class:
 - `this.ready(promise)` method to mark the component as ready after the initialization is done
     - waits for the `Promise` to resolve before marking the component as ready and firing the `web-component-ready` event.
     - if `Promise` is not provided the component is marked as ready immediately unless other calls to `this.ready()` are pending with `Promise`. E.g. you can make multiple calls to `this.ready()` with `Promise` and the component will be marked as ready only after all `Promise`s are resolved.
-- `this.loadContent()` method to load HTML and embed it in your component
+- `this.loadContent(url, options)` method to load HTML and embed it in your component
     - optionally executes embedded JavaScripts
     - autoload linked CSS files
     - postpones loading if the "disabled" attribute is set on the component
@@ -18,13 +18,19 @@ You will get following benefits by extending this class:
     - allows to broadcast either to all other components on the same page or to all components in all open windows/tabs of the same origin.
 - `this.listen()` method to listen to events from all components
     - allows to listen to events broadcasted using `this.broadcast()`
+- `this.rejectModal(data)` reject all Promises created using `this.watchModal()`
+- `this.resolveModal(data)` resolve all Promises created using `this.watchModal()`
+- `this.watchModal(element)` method to create a Promise that is settled when the watched component calls `this.resolveModal()` or `this.rejectModal()` 
+- `this.waitEnabled()` method to wait until the component is enabled (does not have the "disabled" attribute set)
+    - resolves immediately if the component is enabled
+    - resolves after the component is enabled if it is disabled
 
 ## Usage
 
 To use it import it and extend it in your component class:
 
 ```javascript
-import WebComponent from '/dist/system/lib/web-component.js';
+import WebComponent from '/dist/system/js/web-component.js';
 
 class MyComponent extends WebComponent {
     constructor() {
@@ -35,6 +41,50 @@ class MyComponent extends WebComponent {
 ```
 
 Tip: If you are reading this article using web interface then you can use DOM Inspector in your browser to see the content. The page is using web components to render the content.
+
+## Modals
+
+Sometime one component will need to spawn another component and wait for it to finish before continuing. This can be done using modals. The `watchModal()` method creates a Promise that is settled when the watched component calls `this.resolveModal()` or `this.rejectModal()`. The watched component can be any component on the page
+that uses the `WebComponent` class and supports calling `this.resolveModal()` and `this.rejectModal()`.
+
+One example is a login box that needs to be resolved before the main content is shown. The main content can be hidden until the login box is resolved.
+
+```javascript
+async function showLoginBox() {
+    const loginBox = document.createElement('login-box');
+    document.body.appendChild(loginBox);
+
+    try {
+        await loginBox.watchModal();
+        console.log('Login successful');
+        // Show the main content
+    } catch (error) {
+        console.error('Login failed:', error);
+    } finally {
+      loginBox.remove();
+    }
+}
+```
+
+The login box component can be implemented like this:
+
+```javascript
+class LoginBox extends WebComponent {
+    constructor() {
+        super();
+        ...
+    }
+
+    async login() {
+        try {
+            // Perform login
+            this.resolveModal(userData);
+        } catch (error) {
+            this.rejectModal(error);
+        }
+    }
+}
+```
 
 ## Methods
 

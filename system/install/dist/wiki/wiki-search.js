@@ -1,6 +1,6 @@
-import api from '/dist/system/api.js';
-import WebComponent from '/dist/system/lib/web-component.js';
-import zTemplate from '/dist/system/lib/z-template.js';
+import api from '/dist/system/js/api.js';
+import WebComponent from '/dist/system/js/web-component.js';
+import zTemplate from '/dist/system/js/z-template.js';
 
 class WikiSearch extends WebComponent {
     #input;

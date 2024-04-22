@@ -3,7 +3,7 @@
 Sending requests and receiving responses from the server is trivial. You can use the following code to send a request to the server:
 
 ```javascript
-import api from '/dist/system/api.js';
+import api from '/dist/system/js/api.js';
 
 const event = await api.dispatchEvent('example:test', { data: 'Hello, World!' });
 ```
@@ -16,7 +16,7 @@ Although it is recommended to strictly build your new application using ECMA6 mo
 
 ```javascript
 function dispatchEvent(name, data) {
-    return import('/dist/system/api.js')
+    return import('/dist/system/js/api.js')
         .then(exported => {
             return exported.default.dispatchEvent(name, data);
         });
@@ -34,7 +34,7 @@ After the server processes the request, it will dispatch a response event back t
 `WebComponent.listen("event-response:" + eventType, callback)` or `API.listen("event-response:" + eventType, callback)`. E.g.:
 
 ```javascript
-import api from '/dist/system/api.js';
+import api from '/dist/system/js/api.js';
 
 api.listen("event-response:example:test", eventData => {
     console.log("GLOBAL LISTENER RECEIVED", eventData.status, eventData.message, eventData.response);
@@ -54,7 +54,7 @@ Refer to [WebComponent](:Zolinga Core:Web Components:WebComponent Class) for mor
 The [WebComponent](:Zolinga Core:Web Components:WebComponent Class) has ability to broadcast data using `WebComponent.broadcast(name, detail = null, global = false)` method. You can use the same method on the `API` object to broadcast data to all listeners. And you can subscribe to the broadcasted messages using `API.listen(name, callback)` the same way you would do it on the WebComponent. 
 
 ```javascript
-import api from '/dist/system/api.js';
+import api from '/dist/system/js/api.js';
 
 api.listen("example:broadcast", eventData => {
     console.log("LISTENER", eventData);

@@ -1,4 +1,4 @@
-import components from '/dist/system/web-components.js';
+import components from '/dist/system/js/web-components.js';
 
 /**
  * A base class for web components that provides a few useful methods.
@@ -204,6 +204,80 @@ export default class WebComponent extends HTMLElement {
     return this;
   }
 
+  /**
+    * Wait until the "disabled" attribute is removed if it exists.
+    */
+  async waitEnabled() {
+    await this.#enabledPromise;
+  }
+
+  /**
+   * Sends event that this component was rejected. Other components listening to this modal component will get their 
+   * Promises rejected. E.g. this.watchModal(otherComponent).then(...).catch(...): Promise
+   * 
+   * @param {Object} data - The data to reject the Promise with
+   * @returns {void}
+   */
+  rejectModal(data) {
+    this.dispatchEvent(new CustomEvent('web-component-modal-settled', {detail: {data, settled: false}}));
+  }
+
+  /**
+   * Sends event that this component was resolved. Other components listening to this modal component will get their
+   * Promises resolved. E.g. this.watchModal(otherComponent).then(...).catch(...): Promise
+   * 
+   * @param {Object} data - The data to resolve the Promise with
+   * @returns {void}
+   */
+  resolveModal(data) {
+    this.dispatchEvent(new CustomEvent('web-component-modal-settled', {detail: {data, settled: true}}));
+  }
+
+  /**
+   * Waits for the modal component to resolve or reject.
+   * 
+   * Example: WebComponent.watchModal(document.querySelector('my-component')).then((data) => console.log(data));
+   *  
+   * @param {WebComponent|HTMLElement|null} component - The component to watch for resolve or reject. If not provided, this component is used.
+   * @returns {Promise} - A promise that resolves when the modal component resolves or rejects when target components calls this.resolveModal() or this.rejectModal()
+   */
+  static watchModal(component) {
+    return new Promise((resolve, reject) => {
+      (component || this).addEventListener('web-component-modal-settled', (ev) => {
+        if (ev.detail.settled) {
+          resolve(ev.detail.data);
+        } else {
+          reject(ev.detail.data);
+        }
+      });
+    });
+  }
+
+  /**
+   * Waits for the modal component to resolve or reject. This is a shorthand for WebComponent.watchModal(component).
+   * 
+   * Example: this.watchModal(document.querySelector('my-component')).then((data) => console.log(data));
+   * 
+   * Note: there is also a static method WebComponent.watchModal(component).
+   * 
+   * @param {WebComponent|HTMLElement} component - The component to watch for resolve or reject
+   * @returns {Promise} - A promise that resolves when the modal component resolves or rejects when target components calls this.resolveModal() or this.rejectModal()
+   */
+  watchModal(component) {
+    return WebComponent.watchModal(component);
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'disabled') {
+      if (newValue !== null) {
+        this.#installWaitEnabledPromise();
+      } else if (this.#enabledPromise) {
+        this.#enabledPromise.resolve();
+        this.#enabledPromise = null;
+      }
+    }
+  }
+
   #onMessage(ev) {
     if (ev.origin !== window.location.origin || this.#componentId === ev.data.source) {
       return;
@@ -217,24 +291,6 @@ export default class WebComponent extends HTMLElement {
         listener.callback(detail);
       }
     });
-  }
-
-  /**
-     * Wait until the "disabled" attribute is removed if it exists.
-     */
-  async waitEnabled() {
-    await this.#enabledPromise;
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'disabled') {
-      if (newValue !== null) {
-        this.#installWaitEnabledPromise();
-      } else if (this.#enabledPromise) {
-        this.#enabledPromise.resolve();
-        this.#enabledPromise = null;
-      }
-    }
   }
 
   #installWaitEnabledPromise() {

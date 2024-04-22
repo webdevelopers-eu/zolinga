@@ -6,7 +6,7 @@ self.addEventListener('install', event => {
         debugger;
       return cache.addAll([
         '/',
-        '/dist/system/web-components.js',
+        '/dist/system/js/web-components.js',
         // Add other static resources to cache
       ]);
     })
