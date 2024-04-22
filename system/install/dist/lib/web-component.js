@@ -124,16 +124,22 @@ export default class WebComponent extends HTMLElement {
      * @param {string} options.mode - 'open', 'closed': create Shadow Root in this mode and append it, 'seamless': append the content directly
      * @param {boolean} options.allowScripts - Whether to allow executing scripts in the loaded content
      * @param {number} options.timeout - Timeout in milliseconds for loading the content
+     * @param {function} options.filter - Filter function to modify the content before loading
      * @return {Promise} - Promise that resolves when the content is loaded and all scripts and styles are ready.
      *                      Promise will resolve to the Shadow Root or the component itself if mode is 'seamless'.
      */
-  async loadContent(url, options = { mode: 'open', allowScripts: false, timeout: 60000 }) {
+  async loadContent(url, options = { mode: 'open', allowScripts: false, timeout: 60000, filter: null }) {
     await this.waitEnabled();
     return fetch(url)
       .then((response) => response.text())
       .then((html) => this.#parseHtmlResolveLinks(html, url))
       .then((html) => {
         let root;
+
+        if (options.filter) {
+          html = options.filter(html);
+        }
+
         if (options.mode === 'seamless') {
           root = this;
           root.innerHTML = html;
