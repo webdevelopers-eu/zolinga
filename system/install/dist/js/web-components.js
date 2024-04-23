@@ -112,12 +112,15 @@ class WebComponentLoader {
 
                 &:not(:defined), &:not([data-error], [data-ready], [disabled]) {
                     cursor: wait;
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-image: var(--web-component-loader);
                     content-visibility: hidden;
                     contain-intrinsic-size: 32px 32px;
                     font-size: 0;
+
+                    &:not([no-load-anim]) {
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        background-image: var(--web-component-loader);    
+                    }
                 }
 
                 &[data-error] {

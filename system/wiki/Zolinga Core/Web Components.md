@@ -36,6 +36,7 @@ The following common attributes are supported by Zolinga web components:
 - `data-error`: Set to the error message when the web component fails to initialize. The system will display the error message instead of the component.
 - `disabled`: Set to true to disable the web component. For descendants of `WebComponent`, the web component won't load the content.
 - `hidden`: Set to true to hide the web component.
+- `no-load-anim`: Set to true to disable the loading animation for the web component.
 
 # Example
 
