@@ -16,7 +16,7 @@
  * 
  * Usage:
  * 
- *    import {default as components} '/data/system/web-components.js';
+ *    import {default as components} '/data/system/js/web-components.js';
  * 
  * Note: when you create Shadow documents you need to init the observer there too:
  * 

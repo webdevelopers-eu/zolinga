@@ -28,6 +28,15 @@ To create a component you need to declare it in section `webComponents` of the `
 - `module`
     > Contains the path to the JavaScript file that contains the component. The path is relative to your [dist directory](:Zolinga Core:Paths and Zolinga URI). It is located in your Zolinga module's `install/dist` directory and this directory will be symlinked to the public directory resulting in final public URL `http://example.com/dist/{zolinga module}/{javascript module}`.
 
+## Common Attributes
+
+The following common attributes are supported by Zolinga web components:
+
+- `data-ready`: Set to true when the web component is ready to be used. E.g. call `WebComponent.ready()` method or set `this.dataset.ready = true`.
+- `data-error`: Set to the error message when the web component fails to initialize. The system will display the error message instead of the component.
+- `disabled`: Set to true to disable the web component. For descendants of `WebComponent`, the web component won't load the content.
+- `hidden`: Set to true to hide the web component.
+
 # Example
 
 Considering the example declaration above the system expects that the file `{your module}/install/dist/my-components/my-example.js` is [ECMAScript module](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) that default-exports a class that extends `HTMLElement` class. The default export is the class that will be used to [define the custom element](https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/define).
@@ -50,7 +59,7 @@ export default class MyExample extends HTMLElement {
 This is all you need to do. Now you need to [include on the page](:Zolinga Core:Running the System:Page Request:Processing Page Content) support for Zolinga web components by adding the following line to your page:
 
 ```html
-<script type="module" src="/dist/system/web-components.js"></script>
+<script type="module" src="/dist/system/js/web-components.js"></script>
 ```
 
 Now if you place the element `<my-example></my-example>` on your page Zolinga will detect it and automatically load the your component script `/dist/{your module}/my-components/my-example.js` and register the component with the browser. As the result, the browser will render the custom element as defined in your component script. For more refer to the [MDN Web Components documentation](https://developer.mozilla.org/en-US/docs/Web/Web_Components).
@@ -85,7 +94,7 @@ Zolinga provides a base class `WebComponent` that you can extend to create your 
 When use `WebComponent` class you should call `this.ready()` method after you are done initializing your component. You can pass optional `Promise` as an argument to the `ready()` method. The `ready()` method will wait for the `Promise` to resolve before marking the component as ready.
 
 ```javascript
-import WebComponent from '/dist/system/lib/web-component.js';
+import WebComponent from '/dist/system/js/web-component.js';
 
 export default class MyExample extends WebComponent {
     constructor() {

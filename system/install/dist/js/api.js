@@ -1,4 +1,4 @@
-import Event from './lib/event.js';
+import Event from './event.js';
 
 /**
 * The Zolinga API javascript object.

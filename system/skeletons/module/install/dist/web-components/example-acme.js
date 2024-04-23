@@ -1,5 +1,5 @@
-import api from '/dist/system/api.js';
-import WebComponent from '/dist/system/lib/web-component.js';
+import api from '/dist/system/js/api.js';
+import WebComponent from '/dist/system/js/web-component.js';
 
 export default class WikiToc extends WebComponent {
 
