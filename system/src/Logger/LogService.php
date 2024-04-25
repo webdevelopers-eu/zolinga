@@ -245,6 +245,7 @@ class LogService implements ServiceInterface
 
         $line = [
             '['.date('c').']',
+            $severity->getEmoji(),
             '['.$severity->value.']',
             $_SERVER['REMOTE_ADDR'] ?? php_sapi_name(),
             $this->runtimeId . '/pid' . getmypid(),

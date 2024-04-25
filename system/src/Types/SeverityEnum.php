@@ -15,4 +15,14 @@ enum SeverityEnum: string
     case INFO = 'info';
     case WARNING = 'warning';
     case ERROR = 'error';
+
+    public function getEmoji(): string
+    {
+        return match (true) {
+            $this === self::INFO => '🔵',
+            $this === self::WARNING => '🟠',
+            $this === self::ERROR => '🔴',
+            // default => '⚫'
+        };
+    }
 }
