@@ -16,7 +16,7 @@ use JsonSerializable;
  * @property-read string $message human readable status message
  * @property-read string $statusName status code name like "UNDETERMINED" or "FORBIDDEN" or "OK"
  * @property-read string $statusNiceName human readable status name like "Undetermined" or "Forbidden" or "Not Found" or "OK"
- * @property-read boolean $ok is the status OK? Same value as returned by $event->isOK()
+ * @property-read boolean $ok is the status OK? Same value as returned by $event->isOk()
  */
 class Event implements JsonSerializable
 {
@@ -118,7 +118,7 @@ class Event implements JsonSerializable
                 return $this->status->getFriendlyName();
 
             case 'ok':
-                return $this->isOK();
+                return $this->isOk();
         
             default:
                 throw new \Exception("Property $name does not exist or is inaccessible on " . self::class);
@@ -159,15 +159,28 @@ class Event implements JsonSerializable
      */
     final public function setStatus(StatusEnum $status, string $message): StatusEnum
     {
-        // If event failed then allow overwriting the status only with another error or success status.
-        // If the status is OK do not overwrite it. 
+        // Priority of status codes is:
+        // 1. OK status has higest priority then error statuses
+        // 2. Lower status codes have higher priority than higher status codes
         //
-        // The rationale is that many Listeners may fail but one may succeed and that is enough. 
-        // E.g. if we request data 3 Listeners may not find them (404 status) but one may find them (200 status).
-        if ($this->status == self::STATUS_UNDETERMINED || !$this->isOK()) {
+        // This can be expressed simply by comparing the status values as OK < 400 <= ERROR
+        //
+        // Reasoning: Event can have multiple listeners as fail-overs. The event will
+        // be considered successful if at least one listener succeeds. If all listeners fail
+        // then the event will be considered failed.
+        //
+        // Example: 
+        // If we request resource from 3 different sources and 2 of them return 404
+        // and one returns 200 then the event is considered successful.
+        //
+        // If we check rights if one listener provider authorizes the request 
+        // then the request is authorized.
+        //
+        // To solve complex cases we may need to add third "important" parameter to the setStatus() method.
+        if ($this->isUndetermined() || $status->value < $this->status->value) {
             $this->status = $status;
             $this->message = $message;
-        }
+        } 
         return $this->status;
     }
 
@@ -186,9 +199,29 @@ class Event implements JsonSerializable
      *
      * @return boolean
      */
-    final public function isOK(): bool
+    final public function isOk(): bool
     {
-        return $this->status->value < 400;
+        return $this->status->isOk();
+    }
+
+    /**
+     * Does the Event has the status >= 400?
+     *
+     * @return boolean
+     */
+    final public function isError(): bool
+    {
+        return $this->status->isError();
+    }
+
+    /**
+     * Does the Event has the status UNDETERMINED?
+     *
+     * @return boolean
+     */
+    final public function isUndetermined(): bool
+    {
+        return $this->status->isUndetermined();
     }
 
     public function __toString(): string
