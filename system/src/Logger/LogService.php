@@ -70,20 +70,25 @@ class LogService implements ServiceInterface
      * @return void
      */
     public function __invoke(SeverityEnum $severity, string $category, string|Throwable $message, array $context = null): void {
-        $this->write($severity, $category, $message, $context);
+        $this->log($severity, $category, $message, $context);
     }
 
     /**
      * This method is an alias for $api->log(SeverityEnum::INFO, $category, $message, $context) because intelephense for VS Code does not support magic method __invoke();
      * and also stubornly refuses to recognize the magic method __invoke() as a valid method. As an alternative you can use $api->log->log(...) instead of $api->log(...)
      * 
-     * @param SeverityEnum $severity. You can use constants $api->log::SEVERITY_INFO, $api->log::SEVERITY_WARNING, $api->log::SEVERITY_ERROR or \Zolinga\System\Types\SeverityEnum enumerations.
+     * @param bool|SeverityEnum $severity. You can use constants $api->log::SEVERITY_INFO, $api->log::SEVERITY_WARNING, $api->log::SEVERITY_ERROR or \Zolinga\System\Types\SeverityEnum enumerations or bool where false is ERROR and true is INFO.
      * @param string $category The category of the message, starts with module name - dot-separated, e.g. "ecs.installation"
      * @param string|Throwable $message Any message to log.
      * @param ?array<mixed> $context Any JSON-serializable structure to log with the message.
      * @return void
      */
-    public function log(SeverityEnum $severity, string $category, string|Throwable $message, array $context = null): void {
+    public function log(SeverityEnum|bool $severity, string $category, string|Throwable $message, array $context = null): void {
+        if ($severity === true) {
+            $severity = SeverityEnum::INFO;
+        } elseif ($severity === false) {
+            $severity = SeverityEnum::ERROR;
+        }
         $this->write($severity, $category, $message, $context);
     }
 
@@ -228,7 +233,9 @@ class LogService implements ServiceInterface
             JSON_UNESCAPED_SLASHES | 
             JSON_UNESCAPED_UNICODE | 
             JSON_INVALID_UTF8_IGNORE | 
-            JSON_INVALID_UTF8_SUBSTITUTE;
+            JSON_INVALID_UTF8_SUBSTITUTE |
+            JSON_PARTIAL_OUTPUT_ON_ERROR
+            ;
 
         if ($message instanceof Throwable) {
             $context = $context ?? [];
