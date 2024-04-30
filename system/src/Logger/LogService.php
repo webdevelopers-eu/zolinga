@@ -7,6 +7,7 @@ namespace Zolinga\System\Logger;
 use Zolinga\System\Events\ServiceInterface;
 use Zolinga\System\Types\SeverityEnum;
 use Throwable;
+use const Zolinga\System\IS_INTERACTIVE;
 
 /**
  * Logging service.
@@ -48,6 +49,26 @@ class LogService implements ServiceInterface
     private string $buffer = '';
     private readonly string $runtimeId;
 
+    /**
+     * Count of messages logged with severity ERROR.
+     *
+     * @var integer
+     */
+    public int $errorCount = 0;
+
+    /**
+     * Count of messages logged with severity WARNING.
+     *
+     * @var integer
+     */
+    public int $warningCount = 0;
+
+    /**
+     * Count of messages logged with severity INFO.
+     *
+     * @var integer
+     */
+    public int $infoCount = 0;
 
     public function __construct() {
         // Short string to uniquely identify the runtime logs from this run.
@@ -229,6 +250,8 @@ class LogService implements ServiceInterface
     {
         global $api;
 
+        $this->{$severity->value . 'Count'}++;
+
         $jsonFlags = 
             JSON_UNESCAPED_SLASHES | 
             JSON_UNESCAPED_UNICODE | 
@@ -269,6 +292,10 @@ class LogService implements ServiceInterface
             file_put_contents($this->path, implode(' ', $line) . PHP_EOL, FILE_APPEND | LOCK_EX);
         } else {
             $this->buffer .= implode(' ', $line) . PHP_EOL;
+        }
+
+        if (IS_INTERACTIVE) {
+            file_put_contents('php://stderr', $severity->getEmoji() . ' ' . $category . ': ' . $message . PHP_EOL);
         }
     }
 }

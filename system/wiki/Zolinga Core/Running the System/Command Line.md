@@ -28,6 +28,24 @@ zolinga \
 
 Run `bin/zolinga --help` to see the available options.
 
+Non-JSON values (e.g. `--test.param=123`) will be converted to int, float, bool, null or string as follows:
+
+- `null` - if the value is `null`
+- `true` - if the value is `true` or `yes`
+- `false` - if the value is `false` or `no`
+- `int` - if the value is an integer
+- `float` - if the value is a float
+- `string` - everything else.
+
+Examples:
+- `--test.param=yes` will be converted into `{ "test": { "param": true } }`
+- `--test.param=true` will be converted into `{ "test": { "param": true } }`
+- `--test.param=123` will be converted into `{ "test": { "param": 123 } }`
+- `--test.param=123.45` will be converted into `{ "test": { "param": 123.45 } }`
+- `--test.param=null` will be converted into `{ "test": { "param": null } }`
+- `--test.param=string` will be converted into `{ "test": { "param": "string" } }`
+
+
 # Declaring Event Listeners
 
 The event listeners are same as any other listeners except they need to listen for events from `cli` origin. Example of `zolinga.json` file listener declaration:

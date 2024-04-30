@@ -55,4 +55,16 @@ foreach ($requests as $data) {
     );
 }
 
+try {
 echo json_encode($responses);
+} catch (\Exception $e) {
+    echo json_encode([
+        "uuid" => "error:" . uniqid(),
+        "type" => "error",
+        "origin" => "internal",
+        "status" => 500,
+        "statusName" => "Internal Server Error",
+        "statusNiceName" => "Error",
+        "message" => $e->getMessage()
+    ]);
+}
