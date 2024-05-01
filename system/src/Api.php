@@ -115,6 +115,7 @@ class Api
             $listener->$method($event);
         } catch (\Throwable $e) {
             $err = $e->getMessage();
+            $this->log->error('system', $err);
             //trigger_error($err . ' [' . basename($e->getFile()) . ':' . $e->getLine() . ']', E_USER_WARNING);
             $event->setStatus(StatusEnum::ERROR, $err);
         }

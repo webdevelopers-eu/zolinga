@@ -50,6 +50,28 @@ class CliArgument
             $pointer = &$pointer[$key];
         }
 
+        switch ($value) {
+            case 'yes':                
+            case 'true':
+                $value = true;
+                break;
+            case 'no':
+            case 'false':
+                $value = false;
+                break;
+            case 'null':
+                $value = null;
+                break;
+            default:
+                if (is_numeric($value) && strpos($value, '.') !== false) {
+                    $value = (float) $value;
+                } elseif (is_numeric($value)) {
+                    $value = (int) $value;
+                } else {
+                    $value = (string) $value;
+                }
+        }
+
         $pointer = $value;
 
         return [ 'parameter', $data ];
