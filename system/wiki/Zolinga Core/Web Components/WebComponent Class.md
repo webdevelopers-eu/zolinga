@@ -106,6 +106,8 @@ The loadContent function loads the content of an HTML file into the component. I
     - `"seamless"`: Append the content directly.
   - `allowScripts` (boolean): Indicates whether to allow executing scripts in the loaded content.
   - `timeout` (number): Timeout in milliseconds for loading the content.
+  - `filter` (function): A function that filters the content before appending it. The function receives the content as a parameter and should return the filtered content.
+  - `inheritStyles` (boolean): Indicates whether to inherit the styles from the parent document. Default is false. Valid only for "open" and "closed" modes as "seamless" mode always inherits styles.
 
 #### Return Value
 

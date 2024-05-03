@@ -128,10 +128,11 @@ export default class WebComponent extends HTMLElement {
      * @param {boolean} options.allowScripts - Whether to allow executing scripts in the loaded content
      * @param {number} options.timeout - Timeout in milliseconds for loading the content
      * @param {function} options.filter - Filter function to modify the content before loading
+     * @param {boolean} options.inheritStyles - Whether to inherit the styles from the parent document, only for "closed" and "open" document modes. "seamless" mode always inherits styles.
      * @return {Promise} - Promise that resolves when the content is loaded and all scripts and styles are ready.
      *                      Promise will resolve to the Shadow Root or the component itself if mode is 'seamless'.
      */
-  async loadContent(url, options = { mode: 'open', allowScripts: false, timeout: 60000, filter: null }) {
+  async loadContent(url, options = { mode: 'open', allowScripts: false, timeout: 60000, filter: null, inheritStyles: false }) {
     await this.waitEnabled();
     return fetch(url)
       .then((response) => response.text())
@@ -150,6 +151,10 @@ export default class WebComponent extends HTMLElement {
           root = this.attachShadow({ mode: options.mode });
           root.innerHTML = html;
           components.observe(root);
+
+          if (options.inheritStyles) {
+            this.#inheritStyles(root);
+          }
         }
 
         // Wait for styles and scripts to load
@@ -164,6 +169,20 @@ export default class WebComponent extends HTMLElement {
       .catch((error) => {
         this.dataset.error = error;
       });
+  }
+
+  #inheritStyles(root) {
+    const doc = this.getRootNode();
+
+    doc.adoptedStyleSheets.values().forEach((styleSheet) => {
+      root.adoptedStyleSheets.push(styleSheet);
+    });
+
+    Array.from(doc.styleSheets).forEach((styleSheet) => {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(styleSheet.cssText);
+      root.adoptedStyleSheets.push(sheet);
+    });    
   }
 
   /**
@@ -219,7 +238,7 @@ export default class WebComponent extends HTMLElement {
    * @returns {void}
    */
   rejectModal(data) {
-    this.dispatchEvent(new CustomEvent('web-component-modal-settled', {detail: {data, settled: false}}));
+    this.dispatchEvent(new CustomEvent('web-component-modal-settled', { detail: { data, settled: false } }));
   }
 
   /**
@@ -230,7 +249,7 @@ export default class WebComponent extends HTMLElement {
    * @returns {void}
    */
   resolveModal(data) {
-    this.dispatchEvent(new CustomEvent('web-component-modal-settled', {detail: {data, settled: true}}));
+    this.dispatchEvent(new CustomEvent('web-component-modal-settled', { detail: { data, settled: true } }));
   }
 
   /**
