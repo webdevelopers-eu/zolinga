@@ -171,16 +171,16 @@ export default class WebComponent extends HTMLElement {
       });
   }
 
-  #inheritStyles(root) {
+  async #inheritStyles(root) {
     const doc = this.getRootNode();
 
-    doc.adoptedStyleSheets.values().forEach((styleSheet) => {
+    Array.from(doc.adoptedStyleSheets.values()).forEach((styleSheet) => {
       root.adoptedStyleSheets.push(styleSheet);
     });
 
     Array.from(doc.styleSheets).forEach((styleSheet) => {
       const sheet = new CSSStyleSheet();
-      sheet.replaceSync(styleSheet.cssText);
+      sheet.replace(styleSheet.cssText);
       root.adoptedStyleSheets.push(sheet);
     });
   }
