@@ -182,7 +182,7 @@ export default class WebComponent extends HTMLElement {
       const sheet = new CSSStyleSheet();
       sheet.replaceSync(styleSheet.cssText);
       root.adoptedStyleSheets.push(sheet);
-    });    
+    });
   }
 
   /**
@@ -262,11 +262,14 @@ export default class WebComponent extends HTMLElement {
    */
   static watchModal(component) {
     return new Promise((resolve, reject) => {
-      (component || this).addEventListener('web-component-modal-settled', (ev) => {
-        if (ev.detail.settled) {
-          resolve(ev.detail.data);
-        } else {
-          reject(ev.detail.data);
+      const target = component || this;
+      target.addEventListener('web-component-modal-settled', (ev) => {
+        if (ev.srcElement === target) {
+          if (ev.detail.settled) {
+            resolve(ev.detail.data);
+          } else {
+            reject(ev.detail.data);
+          }
         }
       });
     });
