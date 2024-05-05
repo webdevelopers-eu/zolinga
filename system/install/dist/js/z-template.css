@@ -1,0 +1,67 @@
+:host, :root {
+    --z-anim-speed: 0.2s;
+}
+
+.z-no-anim {
+    --z-anim-speed: 0s;
+}
+
+.z-template-hidden,
+.dna-template-hidden,
+[template] {
+    display: none !important;
+}
+
+/* Nonessential */
+/* Using :where() because of 0 specificity */
+*:where([z-content-rev], .z-fade-in, .dna-template-visible),
+*:where([template-clone], [z-removed]) {
+    animation-timing-function: ease-in;
+    animation-duration: var(--z-anim-speed, 0.32s);
+    animation-fill-mode: forwards;
+    transform-origin: center center;
+}
+
+*:where([z-content-rev], .z-fade-in, .dna-template-visible) {
+    animation-name: z-fade-in;
+}
+
+*:where([template-clone]), .z-slide-in {
+    animation-name: z-slide-in;
+}
+
+*:where([z-removed]), .z-slide-out {
+    animation-name: z-slide-out;
+}
+
+@keyframes z-fade-in {
+    0% {
+	opacity: 0;
+    }
+    100% {
+	opacity: 1;
+    }
+}
+
+@keyframes z-slide-in {
+    0% {
+	opacity: 0;
+        transform: translateY(1em);
+    }
+    100% {
+	opacity: 1;
+        transform: translateY(0px);
+    }
+}
+
+@keyframes z-slide-out {
+    0% {
+	opacity: 1;
+        transform: translateX(0%);
+    }
+    100% {
+	opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
