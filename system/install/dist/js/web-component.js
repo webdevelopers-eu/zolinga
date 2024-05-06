@@ -172,16 +172,18 @@ export default class WebComponent extends HTMLElement {
   }
 
   async #inheritStyles(root) {
-    const doc = this.getRootNode();
+    // const doc = this.getRootNode();
+    const doc = document; // always inherit only from main document
 
     Array.from(doc.adoptedStyleSheets.values()).forEach((styleSheet) => {
       root.adoptedStyleSheets.push(styleSheet);
     });
 
     Array.from(doc.styleSheets).forEach((styleSheet) => {
-      const sheet = new CSSStyleSheet();
-      sheet.replace(styleSheet.cssText);
-      root.adoptedStyleSheets.push(sheet);
+      root.appendChild(styleSheet.ownerNode.cloneNode(true));
+      // const sheet = new CSSStyleSheet();
+      // sheet.replace(styleSheet.cssText);
+      // root.adoptedStyleSheets.push(sheet);
     });
   }
 
