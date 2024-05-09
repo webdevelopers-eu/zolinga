@@ -70,7 +70,7 @@ class WikiFile implements JsonSerializable
                 return $content; // problems with {{templates}} . $this->getSourceFooter('text/markdown');
             case 'html': // html format
                 $parser = new MarkDownParser();
-                return $parser->toHtml($this->content);
+                return $parser->toHTML($this->content);
             case 'plainText':
                 return html_entity_decode(strip_tags($this->html)); // . $this->getSourceFooter('text/plain');
             case 'meta':

@@ -48,7 +48,7 @@ class WikiEventArticle extends WikiGeneratedArticle
             $this->addContentFileTip();
         }
 
-        $this->contentFiles[] = new WikiText($this->generateContentHtml(), WikiText::MIME_HTML);
+        $this->contentFiles[] = new WikiText($this->generateContentHTML(), WikiText::MIME_HTML);
         $this->sortContentFiles();
     }
 
@@ -56,7 +56,7 @@ class WikiEventArticle extends WikiGeneratedArticle
     {
     }
 
-    private function generateContentHtml(): string
+    private function generateContentHTML(): string
     {
         global $api;
 
@@ -75,7 +75,7 @@ class WikiEventArticle extends WikiGeneratedArticle
 
         if ($emits) { // If emit is defined we prefere it over heuristic digging of parameters from listeners 
             foreach ($emits as $emitInfo) {
-                $eventClassListHtml[] = WikiClassFile::typeToNameHtml(new ReflectionClass($emitInfo['class']));
+                $eventClassListHtml[] = WikiClassFile::typeToNameHTML(new ReflectionClass($emitInfo['class']));
                 $originList = [...$originList, ...$emitInfo['origin']];
             }
         } else {
@@ -88,7 +88,7 @@ class WikiEventArticle extends WikiGeneratedArticle
                     $firstParam = $refMethod->getParameters()[0] ?? null;
                     if ($firstParam) {
                         $type = $firstParam->getType();
-                        $eventClassListHtml[] = WikiClassFile::typeToNameHtml($type);
+                        $eventClassListHtml[] = WikiClassFile::typeToNameHTML($type);
                     }
                 } catch (\Exception $e) {
                     trigger_error($e->getMessage(), E_USER_WARNING);
@@ -114,7 +114,7 @@ class WikiEventArticle extends WikiGeneratedArticle
         $descriptionList = [];
         foreach ($originList as $origin) {
             foreach ($api->manifest->findByEvent(new Event($this->event, $origin), 'emit') as $info) {
-                $html = MarkDownParser::linkifyHtml($info['description'], shortClasses: true);
+                $html = MarkDownParser::linkifyHTML($info['description'], shortClasses: true);
                 $descriptionList[] = "<li><span class='origin pill {$origin->value}'>{$origin->value}</span> " . $html . "</li>";
             }
         }
@@ -182,7 +182,7 @@ class WikiEventArticle extends WikiGeneratedArticle
                 $ret .= "<div class='event'>Listens for <a href=\":ref:event:{$listener['event']}\">{$listener['event']}</a> event</div>";
             }
 
-            $ret .= "<div class='description'>" . MarkDownParser::linkifyHtml($listener['description'] ?: '', shortClasses: true) . "</div>";
+            $ret .= "<div class='description'>" . MarkDownParser::linkifyHTML($listener['description'] ?: '', shortClasses: true) . "</div>";
             if ($listener['right']) {
                 $ret .= "<div class='right'><a href=':ref:class:Zolinga:System:Events:AuthorizeEvent'>Authorization</a> required: <code>{$listener['right']}</code></div>";
             }
@@ -211,7 +211,7 @@ class WikiEventArticle extends WikiGeneratedArticle
 
             $ref = new ReflectionMethod($className, $method);
             foreach ($ref->getParameters() as $param) {
-                $ret .= WikiClassFile::typeToNameHtml($param->getType());
+                $ret .= WikiClassFile::typeToNameHTML($param->getType());
             }
 
             $ret .= "</span><span class='brackets'>)</span>";
