@@ -1,8 +1,5 @@
-#!/usr/bin/env php
+#!/usr/bin/env -S php -dxdebug.mode=debug,develop,trace -dxdebug.start_with_request=yes
 <?php
-
-declare(strict_types=1);
-
 /**
  * This is a CLI script for the Zolinga system.
  * 
@@ -37,6 +34,8 @@ declare(strict_types=1);
  * @date 2024-02-06
  */
 
+declare(strict_types=1);
+
 namespace Zolinga\System\Gates;
 
 // Check that this is a running as a CLI script otherwise exit.
@@ -45,11 +44,36 @@ if (php_sapi_name() !== 'cli') {
     exit(1);
 }
 
+// Re-run with debug options?
+$xdebugOpts = array_filter(
+    $argv,
+    fn ($opt) => str_starts_with($opt, '--xdebug')
+);
+if (count($xdebugOpts)) {
+    $xdebugMode = array_reduce(
+        $xdebugOpts,
+        fn ($mode, $opt) => preg_match('/^--xdebug-mode=(\w+)/', $opt, $matches) ? $matches[1] : $mode,
+        'debug,develop,trace'
+    );
+    // Only profile mode needs restarting PHP
+    if (preg_match('/profile/', $xdebugMode) && !preg_match('/profile/', ini_get('xdebug.mode'))) {
+        putenv('INTERACTIVE=1'); // Debugging is always interactive, right?
+        passthru(
+            escapeshellcmd(PHP_BINARY) .
+                ' -dxdebug.mode=' . escapeshellarg($xdebugMode) .
+                ' -dxdebug.start_with_request=yes' .
+                ' ' . implode(' ', $argv),
+            $exitCode
+        );
+        exit($exitCode);
+    }
+}
+
 require(__DIR__ . '/../system/loader.php');
 
 /** @phpstan-ignore-next-line */
 set_error_handler(function ($errNo, $errStr, $errFile, $errLine) {
-    $severity = match($errNo) {
+    $severity = match ($errNo) {
         E_WARNING, E_USER_WARNING, E_CORE_WARNING, E_COMPILE_WARNING, E_USER_DEPRECATED, E_DEPRECATED => '🟧 WARNING',
         E_NOTICE, E_USER_NOTICE => '🟦 NOTICE',
         E_STRICT => '🟨 STRICT',

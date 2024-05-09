@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 declare(strict_types=1);
@@ -10,7 +9,7 @@ use const Zolinga\System\ROOT_DIR;
 use const Zolinga\System\START_TIME;
 
 /**
- * This is a CLI script for the Zolinga system. It is colled from bin/zolinga 
+ * This is a CLI script for the Zolinga system. It is called from bin/zolinga 
  * 
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2021-08-20
