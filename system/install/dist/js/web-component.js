@@ -137,7 +137,7 @@ export default class WebComponent extends HTMLElement {
     return fetch(url)
       .then((response) => response.text())
       .then((html) => this.#parseHtmlResolveLinks(html, url))
-      .then((html) => {
+      .then(async (html) => {
         let root;
 
         if (options.filter) {
@@ -153,6 +153,7 @@ export default class WebComponent extends HTMLElement {
           components.observe(root);
 
           if (options.inheritStyles) {
+            await this.#waitForStyles(document.documentElement, options.timeout);
             this.#inheritStyles(root);
           }
         }
@@ -394,11 +395,10 @@ export default class WebComponent extends HTMLElement {
      */
   async #waitForStyles(root, timeout = 30000) {
     const promises = [];
-    root.querySelectorAll('link').forEach((node) => {
-      if (node.rel == 'stylesheet' && node.href) {
+    root.querySelectorAll('link[rel~="stylesheet"][href]:not([disabled])')
+      .forEach((node) => {
         promises.push(this.#waitForLoad(node, timeout));
-      }
-    });
+      });
     return Promise.all(promises);
   }
 
@@ -410,16 +410,30 @@ export default class WebComponent extends HTMLElement {
      * @throws {Error} - If the element fails to load within the specified timeout.
      */
   async #waitForLoad(element, timeout = 30000) {
-    return new Promise((resolve, reject) => {
+    const { promise, resolve, reject } = Promise.withResolvers();
+
+    if (element instanceof HTMLImageElement && element.complete) { // HTMLImageElement.complete is true when the image is loaded
+      resolve();
+    } else if (element instanceof HTMLLinkElement && element.sheet) { // HTMLLinkElement.sheet is null until the stylesheet is loaded
+      resolve();
+    } else {
       const timer = setTimeout(() => {
         const error = new Error(`Resource ${element.href ?? element.src} load timeout after ${timeout}ms`);
         console.warn(error);
         reject(error);
       }, 10000);
-      element.onload = () => {
-        clearTimeout(timer); resolve();
-      };
-      element.onerror = reject;
-    });
+
+      element.addEventListener('load', resolve, { once: true });
+      element.addEventListener('error', reject, { once: true });
+
+      promise.finally(() => {
+        console.log('WebComponent.#waitForLoad(): ', element.href ?? element.src);
+        clearTimeout(timer);
+        element.removeEventListener('load', resolve);
+        element.removeEventListener('error', reject);
+      });
+    }
+
+    return promise;
   }
 }
