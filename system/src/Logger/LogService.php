@@ -278,6 +278,7 @@ class LogService implements ServiceInterface
             '['.$severity->value.']',
             $_SERVER['REMOTE_ADDR'] ?? php_sapi_name(),
             $this->runtimeId . '/pid' . getmypid(),
+            sprintf("%.1F", memory_get_usage(true) / 1024 / 1024) . 'M',
             '['.$category.']',
             $severity->getEmoji(),
             json_encode($message, $jsonFlags),
