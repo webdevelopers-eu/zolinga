@@ -47,6 +47,8 @@ class Cli
         "eval" => false,
         // debugging
         "xdebug" => false,
+        // Debug mode
+        "xdebug-mode" => "debug,develop,trace", // ,profile",
         // spun php server
         "server" => false,
         // Supress default output
@@ -153,15 +155,20 @@ class Cli
 
         // php -dxdebug.mode=debug,develop,profile,trace -dxdebug.start_with_request=yes  
         // Enable xdebug
-        ini_set('xdebug.mode', 'debug,develop,profile,trace');
+        ini_set('xdebug.mode', $this->options['xdebug-mode']); // 'debug,develop,profile,trace'
         ini_set('xdebug.start_upon_error', 'yes');
         ini_set('xdebug.client_host', $host);
         ini_set('xdebug.client_port', $port);
 
+        // Set xdebug.output_dir to writeable directory
+        if (ini_get('xdebug.output_dir') == "") {
+            ini_set('xdebug.output_dir', sys_get_temp_dir());
+        }
+
         //xdebug_start_trace();
         if (function_exists('xdebug_connect_to_client')) {
             \xdebug_connect_to_client();
-            $this->printError("🐞 Xdebug is enabled.");
+            $this->printError("🐞 Xdebug is enabled. Output dir: " . ini_get('xdebug.output_dir') . ", mode: " . ini_get('xdebug.mode'));
         } else {
             $this->printError("🐞 ERROR: Xdebug is not available.");
         }
@@ -181,7 +188,7 @@ class Cli
         // Add xdebug options
         if ($this->options['xdebug']) {
             list($dbHost, $dbgPort) = $this->parseHostPort($this->options['xdebug'], "127.0.0.1", 9003);
-            $phpParams[] = "-dxdebug.mode=debug,develop,profile,trace";
+            $phpParams[] = "-dxdebug.mode=" . escapeshellarg($this->options['xdebug-mode']);
             $phpParams[] = "-dxdebug.start_with_request=yes";
             $phpParams[] = "-dxdebug.client_host=$dbHost";
             $phpParams[] = "-dxdebug.client_port=$dbgPort";
@@ -336,6 +343,12 @@ class Cli
                     
                         Enable xdebug by calling xdebug_connect_to_client().
                         Default: 127.0.0.1:9003
+
+                --xdebug-mode=MODES
+                    
+                        Set xdebug.mode value. Only valid if --xdebug is set.
+                        Example: --xdebug-mode=profile
+                        Default: debug,develop,trace
 
                 --server[=[HOST:]PORT]
 
