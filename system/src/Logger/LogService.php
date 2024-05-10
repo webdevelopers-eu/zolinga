@@ -72,7 +72,7 @@ class LogService implements ServiceInterface
 
     public function __construct() {
         // Short string to uniquely identify the runtime logs from this run.
-        $this->runtimeId = substr(md5(uniqid()), 0, 8);
+        $this->runtimeId = substr(base_convert(strval(rand(1000000000, 9999999999)), 10, 36), 0, 4);
     }
 
     /**
@@ -275,11 +275,10 @@ class LogService implements ServiceInterface
 
         $line = [
             '['.date('c').']',
-            '['.$severity->value.']',
             $_SERVER['REMOTE_ADDR'] ?? php_sapi_name(),
-            $this->runtimeId . '/pid' . getmypid(),
-            sprintf("%.1F", memory_get_usage(true) / 1024 / 1024) . 'M',
-            '['.$category.']',
+            '['.$category.':'.$severity->value.']',
+            $this->runtimeId . '/' . getmypid(),
+            sprintf("%.1F", memory_get_usage() / 1024 / 1024) . 'M',
             $severity->getEmoji(),
             json_encode($message, $jsonFlags),
         ];
