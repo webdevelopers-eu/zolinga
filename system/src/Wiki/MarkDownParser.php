@@ -86,7 +86,7 @@ class MarkDownParser extends \Parsedown
         }
     }
 
-    public function toHtml(string $text): string
+    public function toHTML(string $text): string
     {
         return $this->text($text);
     }
@@ -134,7 +134,7 @@ class MarkDownParser extends \Parsedown
             ) {
                 $text = $ret['element']['element']['text'];
                 $html = highlight_string("<" . "?php\n" . $text, true) ?: $text;
-                $html = self::linkifyHtml($html);
+                $html = self::linkifyHTML($html);
                 $html = "<div class='php-code-block'>$html</div>";
                 $ret['element'] = ['rawHtml' => $html];
             }
@@ -171,7 +171,7 @@ class MarkDownParser extends \Parsedown
         return self::linkify($text, fn ($text, $uri) => "[$text]($uri)", $baseNamespace, $shortClasses);
     }
 
-    static function linkifyHtml(string $text, ?string $baseNamespace = null, bool $shortClasses = false): string
+    static function linkifyHTML(string $text, ?string $baseNamespace = null, bool $shortClasses = false): string
     {
         return self::linkify($text, fn ($text, $uri, $type) => "<a class='{$type}' href=\"" . htmlspecialchars($uri) . "\">" . htmlspecialchars($text) . "</a>", $baseNamespace, $shortClasses);
     }

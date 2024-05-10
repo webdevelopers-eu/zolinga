@@ -38,13 +38,13 @@ class WikiClassFile extends WikiFile
             case "content":
                 return "**Generated Article**";
             case "html":
-                return $this->generateHtml();
+                return $this->generateHTML();
             default:
                 return parent::__get($name);
         }
     }
 
-    private function generateHtml(): string
+    private function generateHTML(): string
     {
         global $api;
 
@@ -70,23 +70,23 @@ class WikiClassFile extends WikiFile
         if ($extends || $implements || $traits) {
             $html .= "<ul class='inheritance'>";
             if ($extends) {
-                $html .= "<li><span class='extends'>extends</span> <span class='name'>" . $this->typeToNameHtml($extends) . "</span></li>\n";
+                $html .= "<li><span class='extends'>extends</span> <span class='name'>" . $this->typeToNameHTML($extends) . "</span></li>\n";
             }
             if ($implements) {
-                $implementsHTML = array_map(fn ($name) => $this->typeToNameHtml(new ReflectionClass($name)), $implements);
+                $implementsHTML = array_map(fn ($name) => $this->typeToNameHTML(new ReflectionClass($name)), $implements);
                 $html .= "<li><span class='implements'>implements</span> <span class='name'>" . implode(", ", $implementsHTML) . "</span></li>\n";
             }
             if ($traits) {
-                $traitsHTML = array_map(fn ($name) => $this->typeToNameHtml(new ReflectionClass($name)), $traits);
+                $traitsHTML = array_map(fn ($name) => $this->typeToNameHTML(new ReflectionClass($name)), $traits);
                 $html .= "<li><span class='uses'>uses</span> <span class='name'>" . implode(", ", $traitsHTML) . "</span></li>\n";
             }
             $html .= "</ul>";
         }
 
-        $html .= $this->formatCommentHtml($ref);
-        $html .= $this->generateConstantsHtml($ref);
-        $html .= $this->generatePropertiesHtml($ref);
-        $html .= $this->generateMethodsHtml($ref);
+        $html .= $this->formatCommentHTML($ref);
+        $html .= $this->generateConstantsHTML($ref);
+        $html .= $this->generatePropertiesHTML($ref);
+        $html .= $this->generateMethodsHTML($ref);
 
         $html .= "</main>";
         return $html;
@@ -98,7 +98,7 @@ class WikiClassFile extends WikiFile
      * @param ReflectionClass<object> $ref
      * @return string
      */
-    private function generateMethodsHtml(ReflectionClass $ref): string
+    private function generateMethodsHTML(ReflectionClass $ref): string
     {
         if (count($ref->getMethods()) === 0) return "";
 
@@ -120,11 +120,11 @@ class WikiClassFile extends WikiFile
             $methodHtml .= $this->getDeclaringClassLink($ref, $method);
 
             $methodHtml .= "<span class='name'>{$method->name}</span>";
-            $methodHtml .= $this->generateMethodParamsHtml($method);
+            $methodHtml .= $this->generateMethodParamsHTML($method);
             if ($method->hasReturnType()) {
-                $methodHtml .= " <span class='return'><span>:</span> <span>" . self::typeToNameHtml($method->getReturnType()) . "</span></span>";
+                $methodHtml .= " <span class='return'><span>:</span> <span>" . self::typeToNameHTML($method->getReturnType()) . "</span></span>";
             }
-            $methodHtml .= $this->formatCommentHtml($method);
+            $methodHtml .= $this->formatCommentHTML($method);
             $methodHtml .= "</li>";
 
             if (!isset($classMethods[$declaringClass->name])) $classMethods[$declaringClass->name] = [];
@@ -156,7 +156,7 @@ class WikiClassFile extends WikiFile
         return " <a href='{$uri}' class='pill inherited' title='Declared on {$originClass->name}'>↳</a>";
     }
 
-    private function generateMethodParamsHtml(ReflectionMethod $method): string
+    private function generateMethodParamsHTML(ReflectionMethod $method): string
     {
         if (count($method->getParameters()) === 0) return "()";
 
@@ -165,7 +165,7 @@ class WikiClassFile extends WikiFile
         foreach ($method->getParameters() as $param) {
             $paramHtml = "";
             if ($param->hasType()) {
-                $paramHtml = self::typeToNameHtml($param->getType()) . " ";
+                $paramHtml = self::typeToNameHTML($param->getType()) . " ";
             }
             if ($param->isPassedByReference()) $paramHtml .= "<span class='reference'>&</span>";
             $paramHtml .= "<span class='name'>\${$param->name}</span>";
@@ -187,7 +187,7 @@ class WikiClassFile extends WikiFile
      * @param ReflectionClass<object> $ref
      * @return string
      */
-    private function generateConstantsHtml(ReflectionClass $ref): string
+    private function generateConstantsHTML(ReflectionClass $ref): string
     {
         if (count($ref->getConstants()) === 0) return "";
 
@@ -210,7 +210,7 @@ class WikiClassFile extends WikiFile
      * @param ReflectionClass<object> $ref
      * @return string
      */
-    private function generatePropertiesHtml(ReflectionClass $ref): string
+    private function generatePropertiesHTML(ReflectionClass $ref): string
     {
         if (count($ref->getProperties()) === 0) return "";
 
@@ -231,7 +231,7 @@ class WikiClassFile extends WikiFile
             $itemHtml .= $this->getDeclaringClassLink($ref, $prop);
 
             if ($prop->hasType()) {
-                $itemHtml .= self::typeToNameHtml($prop->getType()) . " ";
+                $itemHtml .= self::typeToNameHTML($prop->getType()) . " ";
             }
 
             $itemHtml .= "<span class='name'>\${$prop->name}</span>";
@@ -241,7 +241,7 @@ class WikiClassFile extends WikiFile
                 $itemHtml .= " <span class='default'><span>=</span> <span>" . htmlspecialchars($var) . "</span></span>";
             }
 
-            $itemHtml .= $this->formatCommentHtml($prop);
+            $itemHtml .= $this->formatCommentHTML($prop);
             $itemHtml .= "</li>";
 
             if (!isset($itemsList[$declaringClass->name])) $itemsList[$declaringClass->name] = [];
@@ -262,7 +262,7 @@ class WikiClassFile extends WikiFile
      * @param ReflectionClass<object>|ReflectionMethod|ReflectionProperty $ref
      * @return string
      */
-    private function formatCommentHtml(ReflectionClass|ReflectionMethod|ReflectionProperty $ref): string
+    private function formatCommentHTML(ReflectionClass|ReflectionMethod|ReflectionProperty $ref): string
     {
         $comment = $ref->getDocComment();
         if (!$comment) return "";
@@ -273,7 +273,7 @@ class WikiClassFile extends WikiFile
         $html = "<div class='comment-block'><pre class='comment'>" . htmlspecialchars($comment) . "</pre></div>";
 
         $baseNamespace = str_replace('/', '\\', dirname(str_replace('\\', '/', $this->path)));
-        $html = MarkDownParser::linkifyHtml($html, $baseNamespace);
+        $html = MarkDownParser::linkifyHTML($html, $baseNamespace);
 
         return $html;
     }
@@ -284,7 +284,7 @@ class WikiClassFile extends WikiFile
      * @param ReflectionClass<object>|ReflectionType $ref
      * @return string
      */
-    static public function typeToNameHtml(ReflectionClass|ReflectionType $ref): string
+    static public function typeToNameHTML(ReflectionClass|ReflectionType $ref): string
     {
         $separator = '|';
         $list = [];

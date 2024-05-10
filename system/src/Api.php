@@ -84,8 +84,8 @@ class Api
      */
     public function dispatchEvent(Event $event): Event
     {
+        $timer = microtime(true);
         $subscriptions = $this->manifest->findByEvent($event, 'listen');
-
 
         foreach ($subscriptions as $subscription) {
             if ($event instanceof StoppableInterface && $event->isPropagationStopped()) break;
@@ -103,6 +103,7 @@ class Api
             $this->processEvent($event, $this->getSubscriberByClass($subscription['class']), $subscription['method']);
         }
 
+        $event->totalTime += microtime(true) - $timer;
         return $event;
     }
 

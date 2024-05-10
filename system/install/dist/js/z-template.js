@@ -741,7 +741,7 @@ class Tokenizer extends Array {
                       this.#cmdText(zProto, command);
                       break;
                   case "html":
-                      this.#cmdHtml(zProto, command);
+                      this.#cmdHTML(zProto, command);
                       break;
                   case "value":
                       this.#cmdValue(zProto, command);
@@ -869,7 +869,7 @@ class Tokenizer extends Array {
           }
       }
   
-      #cmdHtml(zProto, command) {
+      #cmdHTML(zProto, command) {
           zProto.innerHTML = command.value;
       }
   

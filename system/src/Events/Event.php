@@ -45,6 +45,13 @@ class Event implements JsonSerializable
     public readonly OriginEnum $origin;
 
     /**
+     * Time to process this event.
+     * 
+     * @var float
+     */
+    public float $totalTime = 0;
+
+    /**
      * Status of the event.
      * 
      * Note it is an enum and not a string so to access the value use $event->status->value.
@@ -245,6 +252,7 @@ class Event implements JsonSerializable
             "origin" => $this->origin->value,
             "status" => $this->status->value,
             "message" => $this->message,
+            "totalTime" => round($this->totalTime, 3),
         ];
     }
 }

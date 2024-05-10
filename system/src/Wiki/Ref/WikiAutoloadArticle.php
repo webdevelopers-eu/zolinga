@@ -18,7 +18,7 @@ class WikiAutoloadArticle extends WikiArticle
         parent::__construct($uri);
         $this->title = "Autoloading";
 
-        $this->contentFiles[] = new WikiText($this->generateContentHtml(), WikiText::MIME_HTML);
+        $this->contentFiles[] = new WikiText($this->generateContentHTML(), WikiText::MIME_HTML);
     }
 
     protected function initChildren(): void
@@ -32,7 +32,7 @@ class WikiAutoloadArticle extends WikiArticle
         // }
     }
 
-    private function generateContentHtml(): string
+    private function generateContentHTML(): string
     {
         global $api;
         $autoloads = "<table>";
@@ -53,7 +53,7 @@ class WikiAutoloadArticle extends WikiArticle
         EOT;
     }
 
-    // private function generateContentHtml(): string
+    // private function generateContentHTML(): string
     // {
     //     $list = [];
     //     foreach ($this->discoverClasses() as $class) {
