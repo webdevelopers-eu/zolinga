@@ -181,10 +181,13 @@ export default class WebComponent extends HTMLElement {
     });
 
     Array.from(doc.styleSheets).forEach((styleSheet) => {
-      root.appendChild(styleSheet.ownerNode.cloneNode(true));
-      // const sheet = new CSSStyleSheet();
-      // sheet.replace(styleSheet.cssText);
-      // root.adoptedStyleSheets.push(sheet);
+      if (styleSheet.ownerNode) {
+        root.appendChild(styleSheet.ownerNode.cloneNode(true));
+      } else {
+        const sheet = new CSSStyleSheet();
+        sheet.replace(styleSheet.cssText);
+        root.adoptedStyleSheets.push(sheet);
+      }
     });
   }
 
