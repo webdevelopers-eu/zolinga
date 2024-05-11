@@ -47,7 +47,7 @@ class Cli
         // debugging
         "xdebug" => false,
         // Debug mode
-        "xdebug-mode" => "debug,develop,trace", // ,profile",
+        "xdebug-mode" => "debug,develop", // ,profile",
         // spun php server
         "server" => false,
         // Supress default output
@@ -347,7 +347,7 @@ class Cli
                     
                         Set xdebug.mode value. Only valid if --xdebug is set.
                         Example: --xdebug-mode=profile
-                        Default: debug,develop,trace
+                        Default: debug,develop
 
                 --server[=[HOST:]PORT]
 

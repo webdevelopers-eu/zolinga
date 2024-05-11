@@ -1,4 +1,4 @@
-#!/usr/bin/env -S php -dxdebug.mode=debug,develop,trace -dxdebug.start_with_request=yes
+#!/usr/bin/env -S php -dxdebug.mode=debug,develop -dxdebug.start_with_request=yes
 <?php
 /**
  * This is a CLI script for the Zolinga system.
