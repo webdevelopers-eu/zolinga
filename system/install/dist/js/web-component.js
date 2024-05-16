@@ -430,7 +430,7 @@ export default class WebComponent extends HTMLElement {
       element.addEventListener('error', reject, { once: true });
 
       promise.finally(() => {
-        console.log('WebComponent.#waitForLoad(): ', element.href ?? element.src);
+        // console.log('WebComponent.#waitForLoad(): ', element.href ?? element.src);
         clearTimeout(timer);
         element.removeEventListener('load', resolve);
         element.removeEventListener('error', reject);

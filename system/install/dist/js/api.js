@@ -69,7 +69,8 @@ class Api {
 
         try {
             // AJAX request using fetch
-            const response = await fetch(this.API_GATE, {
+            const op = (data.op || event.type.split(':').pop() || '');
+            const response = await fetch(`${this.API_GATE}?op=${op}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -86,11 +87,11 @@ class Api {
                 throw new Error('AJAX API: Network response was not ok', { "cause": response });
             }
 
-            const data = await response.json();
-            if (!data || !data.length) {
+            const responseDataAll = await response.json();
+            if (!responseDataAll || !responseDataAll.length) {
                 throw new Error('AJAX API: No data received from server', { "cause": response });
             }
-            const responseData = data[0];
+            const responseData = responseDataAll[0];
             if (!responseData) {
                 throw new Error('AJAX API: No Event response received from server', { "cause": response });
             }
@@ -100,8 +101,9 @@ class Api {
 
             event.setStatus(responseData.status, responseData.message);
             event.response = responseData.response;
+            event.request = data;
 
-            console.log('AJAX API Response:', responseData);
+            console.log('AJAX API Event %s (%s) with Response:', event.type, op, event);
             this.broadcast('event-response:' + event.type, event);
 
             return event;
