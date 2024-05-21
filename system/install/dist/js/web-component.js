@@ -172,6 +172,7 @@ export default class WebComponent extends HTMLElement {
       });
   }
 
+  // Inherit all styles except those with noinherit attribute
   async #inheritStyles(root) {
     // const doc = this.getRootNode();
     const doc = document; // always inherit only from main document
@@ -182,7 +183,9 @@ export default class WebComponent extends HTMLElement {
 
     Array.from(doc.styleSheets).forEach((styleSheet) => {
       if (styleSheet.ownerNode) {
-        root.appendChild(styleSheet.ownerNode.cloneNode(true));
+        if (!styleSheet.ownerNode.hasAttribute('noinherit')) {
+          root.appendChild(styleSheet.ownerNode.cloneNode(true));
+        }
       } else {
         const sheet = new CSSStyleSheet();
         sheet.replace(styleSheet.cssText);
@@ -266,7 +269,7 @@ export default class WebComponent extends HTMLElement {
    * @param {WebComponent|HTMLElement|null} component - The component to watch for resolve or reject. If not provided, this component is used.
    * @returns {Promise} - A promise that resolves when the modal component resolves or rejects when target components calls this.resolveModal() or this.rejectModal()
    */
-  static watchModal(component) {
+  static async watchModal(component) {
     return new Promise((resolve, reject) => {
       const target = component || this;
       target.addEventListener('web-component-modal-settled', (ev) => {
@@ -291,8 +294,31 @@ export default class WebComponent extends HTMLElement {
    * @param {WebComponent|HTMLElement} component - The component to watch for resolve or reject
    * @returns {Promise} - A promise that resolves when the modal component resolves or rejects when target components calls this.resolveModal() or this.rejectModal()
    */
-  watchModal(component) {
+  async watchModal(component) {
     return WebComponent.watchModal(component);
+  }
+
+  /**
+   * Wait for web component to load.
+   * 
+   * Web-component is loaded when it has the 'data-ready' attribute and 
+   * it dispatches the 'web-component-ready' event.
+   * 
+   * @param {HTMLElement} component 
+   * @returns {Promise} - A promise that resolves when the component is ready.
+   */
+  static async waitForComponent(component) {
+    return new Promise((resolve, reject) => {
+      if (component.dataset.ready === 'true') {
+        resolve(component);
+      } else {
+        component.addEventListener('web-component-ready', () => resolve(component), { once: true });
+      }
+    });
+  }
+
+  async waitForComponent(component) {
+    return WebComponent.waitForComponent(component);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
