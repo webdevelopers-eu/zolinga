@@ -24,6 +24,14 @@ use const Zolinga\System\ROOT_DIR;
  */
 class ManifestService extends ArrayObject implements ServiceInterface
 {
+
+    /**
+     * SHA1 hash of all zolinga.json file hashes.
+     *
+     * @var string
+     */
+    public readonly string $superHash;
+    
     /**
      * Alphabetically sorted list of all discovered manifest file paths.
      * 
@@ -142,6 +150,8 @@ class ManifestService extends ArrayObject implements ServiceInterface
             $this->refresh();
             $this->save();
         }
+
+        $this->superHash = sha1(json_encode($this->currentSignatures));
     }
 
     /**
@@ -314,7 +324,10 @@ class ManifestService extends ArrayObject implements ServiceInterface
 
         // Reset the supermanifest
         $data["signatures"] = $this->currentSignatures;
+        ksort($data["signatures"]);
+
         $data["manifests"] = array_map($this->canonicalize(...), $this->manifestList);
+        sort($data["manifests"]);
 
         // Find all ROOT_DIR/modules/*/zolinga.json files
         // Glob returns an array of paths that are sorted.
