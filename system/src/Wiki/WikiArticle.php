@@ -131,6 +131,7 @@ class WikiArticle implements JsonSerializable
 
         $file = new WikiFile($file);
         $this->contentFiles[] = $file;
+        $this->sortContentFiles();
         return $file;
     }
 

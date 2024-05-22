@@ -1,3 +1,5 @@
+Priority: 0.5
+
 # WebComponent Class
 
 ## Overview

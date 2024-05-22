@@ -133,6 +133,7 @@ export default class WebComponent extends HTMLElement {
      *                      Promise will resolve to the Shadow Root or the component itself if mode is 'seamless'.
      */
   async loadContent(url, options = { mode: 'open', allowScripts: false, timeout: 60000, filter: null, inheritStyles: false }) {
+    url = this.rewriteURL(url, 'content');
     await this.waitEnabled();
     return fetch(url)
       .then((response) => response.text())
@@ -170,6 +171,20 @@ export default class WebComponent extends HTMLElement {
       .catch((error) => {
         this.dataset.error = error;
       });
+  }
+
+  /**
+   * This is meant to be extended by subclasses to rewrite URLs before loading them.
+   * 
+   * @param String url 
+   * @param String type - for now supported only 'content' for content HTML URLs
+   * @return String
+   */
+  rewriteURL(url, type) {
+    // Add ?rev=XY to the URL to prevent caching
+    const o = new URL(url, window.location);
+    o.searchParams.set('rev', document.documentElement.dataset.revision);
+    return o.toString();
   }
 
   // Inherit all styles except those with noinherit attribute
