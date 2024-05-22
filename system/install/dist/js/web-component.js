@@ -181,9 +181,17 @@ export default class WebComponent extends HTMLElement {
    * @return String
    */
   rewriteURL(url, type) {
+    return this.addUrlRevParam(url);
+  }
+
+  addUrlRevParam(url) {
     // Add ?rev=XY to the URL to prevent caching
+    const rev = document.documentElement.dataset.revision;
+    if (!rev) return url;
+
+    // Way to invalidate cache - append revision number to the URL
     const o = new URL(url, window.location);
-    o.searchParams.set('rev', document.documentElement.dataset.revision);
+    o.searchParams.set('rev', rev);
     return o.toString();
   }
 
@@ -394,7 +402,9 @@ export default class WebComponent extends HTMLElement {
       const attributes = ['src', 'href'];
       attributes.forEach((attr) => {
         if (node.hasAttribute(attr)) {
-          node.setAttribute(attr, node[attr]); // node.src or node.href are already resolved by HTMLDocument.
+          let url = new URL(node.getAttribute(attr), baseUrl);
+          url = this.addUrlRevParam(url.toString());
+          node.setAttribute(attr, url); // node.src or node.href are already resolved by HTMLDocument.
         }
       });
     });
