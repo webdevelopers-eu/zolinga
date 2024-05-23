@@ -95,7 +95,7 @@ class Api
                 $authEvent = new AuthorizeEvent('system:authorize', AuthorizeEvent::ORIGIN_INTERNAL, [$subscription['right']]);
                 $authEvent->dispatch();
                 if (!$authEvent->isAuthorized($subscription['right'])) {
-                    $event->setStatus(StatusEnum::UNAUTHORIZED, _("You are not authorized to perform this action."));
+                    $event->setStatus(StatusEnum::UNAUTHORIZED, _("You are not authorized to perform this action.") . ' (' . $event->type . ')');
                     continue;
                 }
             }
