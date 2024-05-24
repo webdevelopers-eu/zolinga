@@ -78,11 +78,11 @@ class Event {
     }
 
     get ok() {
-        return this.#status < 400;
+        return !this.undetermined &&  this.#status < 400;
     }
 
     get error() {
-        return this.#status === Event.STATUS_ERROR;
+        return !this.undetermined && this.#status >= 400;
     }
 
     get undetermined() {

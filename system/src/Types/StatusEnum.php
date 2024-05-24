@@ -82,12 +82,12 @@ enum StatusEnum: int
 
     public function isError(): bool
     {
-        return $this->value >= 400;
+        return !$this->isUndetermined() && $this->value >= 400;
     }
 
     public function isOk(): bool
     {
-        return $this->value && $this->value < 400;
+        return !$this->isUndetermined() && $this->value && $this->value < 400;
     }
 
     public function isUndetermined(): bool
