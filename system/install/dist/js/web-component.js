@@ -139,20 +139,16 @@ export default class WebComponent extends HTMLElement {
       .then((response) => response.text())
       .then((html) => this.#parseHtmlResolveLinks(html, url))
       .then(async (html) => {
-        let root;
-
         if (options.filter) {
           html = options.filter(html);
         }
 
-        if (options.mode === 'seamless') {
-          root = this;
-          root.innerHTML = html;
-        } else {
-          root = this.attachShadow({ mode: options.mode });
-          root.innerHTML = html;
-          components.observe(root);
+        const root = options.mode === 'seamless' ? this : this.attachShadow({ mode: options.mode }); 
+        root.innerHTML = html;
 
+        // Shadow DOM
+        if (options.mode !== 'seamless') {
+          components.observe(root);
           if (options.inheritStyles) {
             await this.#waitForStyles(document.documentElement, options.timeout);
             this.#inheritStyles(root);
