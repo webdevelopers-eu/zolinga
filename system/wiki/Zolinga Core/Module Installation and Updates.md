@@ -19,10 +19,19 @@ As a result the system runs effectively in two modes:
 
 This may seem a bit confusing at first, but it is a very powerful mechanism that allows you to control the installation and update process of your module in a very fine-grained way.
 
-The rule of thumb is this:
+## Rules
 
-- The `install/install` folder should always contain all scripts necessary to install the module from scratch. You can modify, add or remove scripts from this folder at any time. They will be executed only once during the installation phase.
-- The `install/update` folder should contain all scripts necessary to update the module from one version to another. You should not modify the scripts in this folder as already executed scripts will never be executed again. Only new scripts will be executed. So in "update" folder you just keep adding new scripts to keep existing systems up to date.
+- The `install/install` folder should always contain all scripts necessary to install the module from scratch. 
+  - You can freely modify old, add new or remove existing scripts from this folder at any time. 
+  - They will be executed only once during the installation phase. So modification of these scripts will only affect new installations and not existing systems.
+- The `install/update` folder should contain all scripts necessary to update the module from one version to another. 
+  - You should not modify the scripts in this folder as already executed scripts will never be executed again and older scripts are essential to upgrading older systems.
+  - Only scripts with new names will be executed on existing systems. So in "update" folder you just keep adding new scripts to keep existing systems up to date. Fixing older scripts usually means adding new scripts that fix the problems caused by the older upgrade/installation scripts.
+
+## Development Workflow
+
+- you start with the `install/install` folder and add all scripts necessary to install the module from scratch. You tweak it until it works or until anybody else uses your module.
+- then with every change you add **new** scripts to the `install/update` folder to add the incremental change and in the same time you *alter* the old installation scripts or you may add new scripts in the `install/install` folder to reflect the changes in the initial installation process as well.
 
 ## Naming Conventions
 
