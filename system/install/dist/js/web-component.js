@@ -475,7 +475,7 @@ export default class WebComponent extends HTMLElement {
         const error = new Error(`Resource ${element.href ?? element.src} load timeout after ${timeout}ms`);
         console.warn(error);
         reject(error);
-      }, 10000);
+      }, timeout);
 
       element.addEventListener('load', resolve, { once: true });
       element.addEventListener('error', reject, { once: true });
