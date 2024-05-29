@@ -143,7 +143,7 @@ export default class WebComponent extends HTMLElement {
           html = options.filter(html);
         }
 
-        const root = options.mode === 'seamless' ? this : this.attachShadow({ mode: options.mode }); 
+        const root = options.mode === 'seamless' ? this : this.attachShadow({ mode: options.mode });
         root.innerHTML = html;
 
         // Shadow DOM
