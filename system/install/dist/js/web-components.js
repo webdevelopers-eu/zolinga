@@ -95,58 +95,63 @@ class WebComponentLoader {
     #initStylesheet() {
         const customElements = this.#mapping.map(m => m.tag);
         this.stylesheet = new CSSStyleSheet();
+        const selector = customElements.join(',');
+
+        // IMPORTANT: Using nested CSS crashes all Safari browsers up to OSX 14.5 - we need to repeat the selector...
         this.stylesheet.replaceSync(`
-            *:where(${customElements.join(',')}):where(:not([data-ready], [data-error])) { /* least specific */
+            *:where(${selector}):where(:not([data-ready], [data-error])) { /* least specific */
                 display: inline-block;
             }
-            *:is(${customElements.join(',')}) {
+
+            *:is(${selector}) {
                 --web-component-loader: url("data:image/svg+xml;random=0,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMidYMid meet' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='0' fill='none' stroke='%23888888' stroke-width='.5' opacity='0' %3E%3Canimate restart='always' attributeName='opacity' dur='5s' from='0' to='1' fill='freeze' begin='.5s' /%3E%3Canimate restart='always' attributeName='r' calcMode='spline' dur='2' keySplines='0 .2 .5 1' keyTimes='0;1' repeatCount='indefinite' values='1;80'/%3E%3Canimate restart='always' attributeName='stroke-width' calcMode='spline' dur='2' keySplines='0 .2 .5 1' keyTimes='0;1' repeatCount='indefinite' values='0;25'/%3E%3Canimate restart='always' attributeName='stroke-opacity' calcMode='spline' dur='2' keySplines='0 .2 .5 1' keyTimes='0;1' repeatCount='indefinite' values='1;0'/%3E%3C/circle%3E%3C/svg%3E%0A");
+            }
 
-                &:not([data-ready]) [slot] {
-                    display: none !important;
-                }
+            *:is(${selector}):not([data-ready]) [slot] {
+                display: none !important;
+            }
 
-                &[hidden] {
-                    display: none !important;
-                }
+            *:is(${selector})[hidden] {
+                display: none !important;
+            }
 
-                &:not(:defined), &:not([data-error], [data-ready], [disabled]) {
-                    cursor: wait;
-                    content-visibility: hidden;
-                    contain-intrinsic-size: 32px 32px;
-                    font-size: 0;
+            *:is(${selector}):not(:defined), *:is(${selector}):not([data-error], [data-ready], [disabled]) {
+                cursor: wait;
+                content-visibility: hidden;
+                contain-intrinsic-size: 32px 32px;
+                font-size: 0;
 
-                    &:not([no-load-anim]) {
-                        background-position: center;
-                        background-repeat: no-repeat;
-                        background-image: var(--web-component-loader);    
-                    }
-                }
-
-                &[data-error] {
-                    cursor: not-allowed;
-                }
-
-                &[data-error]::before {
-                    content: "⚠️";
-                    font-size: max(1rem, min(2rem, 80%));
-                    display: inline-block;
-                    position: absolute;
-                    z-index: 10000;
-                }
-
-                &[data-error]:hover::after {
-                    position: fixed;
-                    max-width: calc(100% - 2em);
-                    top: 1em;
-                    left: 1em;
-                    font-size: 1rem;
-                    background-color: color-mix(in oklab, rgb(var(--color-bg, 243, 243, 243)), red);
-                    color: rgb(var(--color-fg, 0, 0, 0));
-                    content: "WebComponent Error: " attr(data-error);
-                    padding: 0.5em;
+                &:not([no-load-anim]) {
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    background-image: var(--web-component-loader);    
                 }
             }
+
+            *:is(${selector})[data-error] {
+                cursor: not-allowed;
+            }
+
+            *:is(${selector})[data-error]::before {
+                content: "⚠️";
+                font-size: max(1rem, min(2rem, 80%));
+                display: inline-block;
+                position: absolute;
+                z-index: 10000;
+            }
+
+            *:is(${selector})[data-error]:hover::after {
+                position: fixed;
+                max-width: calc(100% - 2em);
+                top: 1em;
+                left: 1em;
+                font-size: 1rem;
+                background-color: color-mix(in oklab, rgb(var(--color-bg, 243, 243, 243)), red);
+                color: rgb(var(--color-fg, 0, 0, 0));
+                content: "WebComponent Error: " attr(data-error);
+                padding: 0.5em;
+            }
+            
         `.replace(/random=\d+/, `random=${Math.random().toString().slice(2)}`));
         document.adoptedStyleSheets.push(this.stylesheet);
     }
