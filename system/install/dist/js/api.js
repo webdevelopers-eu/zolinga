@@ -69,8 +69,8 @@ class Api {
 
         try {
             // AJAX request using fetch
-            const op = ((data && data.op) || event.type.split(':').pop() || '');
-            const response = await fetch(`${this.API_GATE}?op=${op}`, {
+            const op = ((data && data.op) || null);
+            const response = await fetch(`${this.API_GATE}?${event.type}${op && '*' + op || ''}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
