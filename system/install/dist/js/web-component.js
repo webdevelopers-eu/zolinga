@@ -462,9 +462,11 @@ export default class WebComponent extends HTMLElement {
   async #waitForLoad(element, timeout = 30000) {
     const { promise, resolve, reject } = Promise.withResolvers();
 
-    if (element instanceof HTMLImageElement && element.complete) { // HTMLImageElement.complete is true when the image is loaded
+    if (element instanceof HTMLImageElement && (element.complete || element.loading == 'lazy')) { 
+      // HTMLImageElement.complete is true when the image is loaded
       resolve();
-    } else if (element instanceof HTMLLinkElement && element.sheet) { // HTMLLinkElement.sheet is null until the stylesheet is loaded
+    } else if (element instanceof HTMLLinkElement && element.sheet) { 
+      // HTMLLinkElement.sheet is null until the stylesheet is loaded
       resolve();
     } else {
       const timer = setTimeout(() => {
