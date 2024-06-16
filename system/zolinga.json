@@ -17,6 +17,15 @@
       ]
     },
     {
+      "description": "Modify the config settings for current program run.",
+      "event": "config",
+      "class": "\\Zolinga\\System\\Config\\ConfigService",
+      "method": "onConfig",
+      "origin": [
+        "cli"
+      ]
+    },
+    {
       "description": "The system logger facility $api->log.",
       "service": "log",
       "class": "\\Zolinga\\System\\Logger\\LogService",

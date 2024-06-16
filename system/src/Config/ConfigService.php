@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 namespace Zolinga\System\Config;
+
+use Zolinga\System\Events\RequestEvent;
 use Zolinga\System\Events\ServiceInterface;
 use const Zolinga\System\ROOT_DIR;
 
@@ -20,9 +22,34 @@ use const Zolinga\System\ROOT_DIR;
  */
 class ConfigService extends ConfigArrayObject implements ServiceInterface
 {
+    private array $dynamicConfig = []; 
+
     public function __construct()
     {
         parent::__construct();
+        $this->loadData($this->mergeConfigs());
+    }
+
+    public function onConfig(RequestEvent $event): void
+    {
+        $this->merge($event->request);
+        $event->setStatus($event::STATUS_OK, 'Configuration merged.');
+    }
+
+    /**
+     * Merge in dynamic configuration. Note that this is not persistent and is valid only for the current request.
+     * 
+     * You can add dynamic config from command line using the event `config`: 
+     * 
+     * `bin/zolinga config '{"db": {"host": "localhost"}}'`
+     * `bin/zolinga config --db.host=localhost`
+     *
+     * @param array $config
+     * @return void
+     */
+    public function merge(array $config): void
+    {
+        $this->dynamicConfig = array_replace_recursive($this->dynamicConfig, $config);
         $this->loadData($this->mergeConfigs());
     }
 
@@ -50,6 +77,9 @@ class ConfigService extends ConfigArrayObject implements ServiceInterface
                 $config = array_replace_recursive($config, $configObject->getArrayCopy());
             }
         }
+
+        $config = array_replace_recursive($config, $this->dynamicConfig);
+
         return $config;
     }
 }
