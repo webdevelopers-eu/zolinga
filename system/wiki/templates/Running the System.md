@@ -1,6 +1,7 @@
-- [Events and Listeners](:Zolinga Core:Events and Listeners)
-- [Processing Page Content](:Zolinga Core:Running the System:Page Request:Processing Page Content)
-- [Processing POST and GET](:Zolinga Core:Running the System:Page Request:Processing POST and GET)
-- [AJAX](:Zolinga Core:Running the System:AJAX)
-- [Command Line](:Zolinga Core:Running the System:Command Line)
-- [Custom Scripts](:Zolinga Core:Running the System:Custom Scripts)
+- [Events and Listeners](:Zolinga Core:Events and Listeners) - Learn how to create and use events and listeners.
+- [Processing Page Content](:Zolinga Core:Running the System:Page Request:Processing Page Content) - Process page content.
+- [Processing POST and GET](:Zolinga Core:Running the System:Page Request:Processing POST and GET) - Process POST and GET requests.
+- [AJAX](:Zolinga Core:Running the System:AJAX) - Make AJAX requests to Zolinga using standard Javascript library.
+- [Command Line](:Zolinga Core:Running the System:Command Line) - Run Zolinga from the command line.
+    - [Config Event](:ref:event:config) - Change configuration values from CLI just for the current request. 
+- [Custom Scripts](:Zolinga Core:Running the System:Custom Scripts) - Create a custom URL gateway for your scripts.
