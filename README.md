@@ -214,6 +214,7 @@ E.g.
 - [Zolinga DB](https://github.com/webdevelopers-eu/zolinga-db) - simple MySQL API, id `zolinga-db`
 - [Zolinga RMS](https://github.com/webdevelopers-eu/zolinga-rms) - simple Rights Management, id `zolinga-rms`
 - [Zolinga Commons](https://github.com/webdevelopers-eu/zolinga-commons) - contains common widgets and other goodies, id `zolinga-commons`
+- [Zolinga Intl](https://github.com/webdevelopers-eu/zolinga-intl) - language translation support, id `zolinga-intl`
 
 
 When you install a module, it will be automatically added to the `modules` directory and its documentation will be merged into inbuilt Zolinga WIKI Documentation right in your Zolinga installation.
