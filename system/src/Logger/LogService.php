@@ -295,7 +295,7 @@ class LogService implements ServiceInterface
         }
 
         if (IS_INTERACTIVE) {
-            file_put_contents('php://stderr', $severity->getEmoji() . ' ' . $category . ': ' . $message . PHP_EOL);
+            file_put_contents('php://stderr', date('H:i:s '). $severity->getEmoji() . ' ' . $category . ': ' . $message . PHP_EOL);
         }
     }
 }
