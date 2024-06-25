@@ -31,7 +31,7 @@ class ManifestService extends ArrayObject implements ServiceInterface
      * @var string
      */
     public readonly string $superHash;
-    
+
     /**
      * Alphabetically sorted list of all discovered manifest file paths.
      * 
@@ -338,10 +338,15 @@ class ManifestService extends ArrayObject implements ServiceInterface
 
             foreach (self::STORAGE_MAP as $keys) {
                 foreach ($keys as $key) {
-                    if ($key === 'autoload') {
-                        $data[$key] = [...$data[$key], ...$this->canonicalizeAutoloads(dirname($file), $merge[$key] ?? null)];
-                    } else {
-                        $data[$key] = [...$data[$key], ...$this->convertToAtoms($key, $merge[$key] ?? [], $moduleName)];
+                    switch ($key) {
+                        case 'config':
+                            $data[$key] = array_replace_recursive($data[$key], $merge[$key] ?? []);
+                            break;
+                        case 'autoload':
+                            $data[$key] = [...$data[$key], ...$this->canonicalizeAutoloads(dirname($file), $merge[$key] ?? null)];
+                            break;
+                        default:
+                            $data[$key] = [...$data[$key], ...$this->convertToAtoms($key, $merge[$key] ?? [], $moduleName)];
                     }
                 }
             }
