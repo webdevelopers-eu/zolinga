@@ -1,7 +1,21 @@
 #!/bin/bash
+# Syntax: list-modules [--format=git|default]
 
+
+FORMAT="%-24s %s";
 DIR=$(realpath "`dirname $0`/../modules");
 CWD=`pwd`;
+
+for X in "$@"; do
+    case "$X" in
+        --format=git ) FORMAT='git clone %2$s %1$s'; shift;;
+        --format=default ) FORMAT='%-24s %s'; shift;;
+        * )
+            echo "Unknown parameter: $X";
+            echo "Usage: $0 [--format=git|default]";
+            exit 1;;
+    esac
+done
 
 if [ ! -d "$DIR" ]; then
     echo "Directory $DIR does not exist";
@@ -11,6 +25,7 @@ fi
 for X in `ls -1 "$DIR"`; do 
     cd "$DIR/$X";
     URL=`git remote get-url --push origin`; 
-    echo "$X $URL"; 
+    awk -v X="$X" -v URL="$URL" -v FORMAT="$FORMAT" 'BEGIN { printf FORMAT, X, URL; }';
+    echo;
 done
 cd "$CWD";
