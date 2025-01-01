@@ -1,0 +1,16 @@
+#!/bin/bash
+
+DIR=$(realpath "`dirname $0`/../modules");
+CWD=`pwd`;
+
+if [ ! -d "$DIR" ]; then
+    echo "Directory $DIR does not exist";
+    exit 1;
+fi
+
+for X in `ls -1 "$DIR"`; do 
+    cd "$DIR/$X";
+    URL=`git remote get-url --push origin`; 
+    echo "$X $URL"; 
+done
+cd "$CWD";
