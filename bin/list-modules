@@ -8,7 +8,7 @@ CWD=`pwd`;
 
 for X in "$@"; do
     case "$X" in
-        --format=git ) FORMAT='git clone %2$s %1$s'; shift;;
+        --format=git ) FORMAT='git clone %2$s %1$s;'; shift;;
         --format=default ) FORMAT='%-24s %s'; shift;;
         * )
             echo "Unknown parameter: $X";
