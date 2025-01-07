@@ -194,7 +194,10 @@ class Cli
         }
 
         list($host, $port) = $this->parseHostPort($this->options['server'], "0.0.0.0", 8888);
-        $cmd = "php " . implode(" ", $phpParams) . " -S $host:$port -t " . escapeshellarg(ROOT_DIR . "/public/");
+        $phpParams[] = "-S $host:$port";
+        $phpParams[] = "-t " . escapeshellarg(ROOT_DIR . "/public/");
+
+        $cmd = PHP_BINARY . " " . implode(" ", $phpParams);
 
         $httpHost = preg_match("/^(0\.0\.0\.0|127\.0\.0\.1|localhost)$/", "$host") ? "localhost" : $host;
         $wiki = "http://$httpHost:$port" . $api->config['wiki']['urlPrefix'];
@@ -209,7 +212,10 @@ class Cli
             $cmd
 
             EOT);
+
+        // Make sure when user exits this script, the server is stopped
         passthru($cmd);
+        echo "WAITING\n";
     }
 
     /**

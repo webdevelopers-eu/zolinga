@@ -1,17 +1,17 @@
 #!/bin/sh
 # This script is used to run the CLI application
 # It will automatically detect the available PHP versions and use the first one found
-# If you want to use a specific PHP version, you can set the PHP_EXEC environment variable
+# If you want to use a specific PHP version, you can set the PHP_EXECUTABLE environment variable
 # 
-# Example: PHP_EXEC=php8.0 ./bin/zolinga ...
+# Example: PHP_EXECUTABLE=php8.0 ./bin/zolinga ...
 
-PHP_EXEC_SEARCH="php8.4 php8.3 php8.2 php8 php"
+PHP_EXECUTABLE_SEARCH="php8.4 php8.3 php8.2 php8 php"
 
 # Check for available PHP versions in order
-if [ -z "$PHP_EXEC" ]; then
-    for TRY_EXEC in $PHP_EXEC_SEARCH; do
+if [ -z "$PHP_EXECUTABLE" ]; then
+    for TRY_EXEC in $PHP_EXECUTABLE_SEARCH; do
         if command -v "$TRY_EXEC" >/dev/null 2>&1; then
-            PHP_EXEC="$TRY_EXEC"
+            PHP_EXECUTABLE="$TRY_EXEC"
             break
         fi
     done
@@ -24,5 +24,5 @@ if [ ! -f "$PHP_CLI_BOOTSTRAP" ]; then
     exit 1
 fi
 
-"$PHP_EXEC" -dxdebug.mode=debug,develop -dxdebug.start_with_request=yes "$PHP_CLI_BOOTSTRAP" "$@"
+"$PHP_EXECUTABLE" -dxdebug.mode=debug,develop -dxdebug.start_with_request=yes "$PHP_CLI_BOOTSTRAP" "$@"
 
