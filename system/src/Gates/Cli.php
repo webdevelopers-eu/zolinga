@@ -215,7 +215,6 @@ class Cli
 
         // Make sure when user exits this script, the server is stopped
         passthru($cmd);
-        echo "WAITING\n";
     }
 
     /**
@@ -313,6 +312,8 @@ class Cli
      */
     private function printHelp(): void
     {
+        global $api;
+
         echo <<<EOT
             Zolinga CLI
 
@@ -406,6 +407,12 @@ class Cli
             EOT;
 
         echo "\n\n";
+
+        echo str_repeat("-", intval(getenv('COLUMNS')) ?: 80) . "\n";
+        echo "For more information run bin/zolinga --server=0.0.0.0:8888 and visit Zolinga WIKI at\n\n";
+        echo "    🌎 http://127.0.0.1:8888" . $api->config['wiki']['urlPrefix'] . "/:ref:event\n\n";
+        echo "All 'cli' (command line interface) events are listed in the 'Zolinga Explorer/Events' article.\n";
+        echo str_repeat("-", intval(getenv('COLUMNS')) ?: 80) . "\n";
     }
 
     /**
