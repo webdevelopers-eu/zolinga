@@ -59,7 +59,7 @@ class Bootstrap
      * @param int $groupId optional group id, otherwise current group id will be used
      * @return string in format {USER}:{GROUP}
      */
-    private function getOsUser(int $userId=null, int $groupId=null): string {
+    private function getOsUser(?int $userId=null, ?int $groupId=null): string {
         $u=posix_getpwuid($userId === null ? posix_geteuid() : $userId);
         $g=posix_getgrgid($groupId === null ? posix_getegid() : $groupId);
         return $u['name'].':'.$g['name'];
