@@ -90,7 +90,7 @@ class LogService implements ServiceInterface
      * @param ?array<mixed> $context Any JSON-serializable structure to log with the message.
      * @return void
      */
-    public function __invoke(SeverityEnum $severity, string $category, string|Throwable $message, array $context = null): void {
+    public function __invoke(SeverityEnum $severity, string $category, string|Throwable $message, ?array $context = null): void {
         $this->log($severity, $category, $message, $context);
     }
 
@@ -104,7 +104,7 @@ class LogService implements ServiceInterface
      * @param ?array<mixed> $context Any JSON-serializable structure to log with the message.
      * @return void
      */
-    public function log(SeverityEnum|bool $severity, string $category, string|Throwable $message, array $context = null): void {
+    public function log(SeverityEnum|bool $severity, string $category, string|Throwable $message, ?array $context = null): void {
         if ($severity === true) {
             $severity = SeverityEnum::INFO;
         } elseif ($severity === false) {
@@ -161,7 +161,7 @@ class LogService implements ServiceInterface
      * @param ?array<mixed> $context Any JSON-serializable structure to log with the message.
      * @return void
      */
-    public function info(string $category, string|Throwable $message, array $context = null): void {
+    public function info(string $category, string|Throwable $message, ?array $context = null): void {
         $this->write(SeverityEnum::INFO, $category, $message, $context);
     }
 

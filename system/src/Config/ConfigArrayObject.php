@@ -23,7 +23,7 @@ class ConfigArrayObject extends ArrayObject
     const FLAGS_NONE = 0;
     const FLAGS_REMOVE_COMMENTS = 1;
 
-    public function __construct(string $filePath = null, int $flags = self::FLAGS_NONE)
+    public function __construct(?string $filePath = null, int $flags = self::FLAGS_NONE)
     {
         parent::__construct([]);
 
