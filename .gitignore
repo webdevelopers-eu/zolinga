@@ -15,6 +15,8 @@ locale/
 /public/dist/*
 !/public/dist/README.txt
 
+/public/robots.txt
+
 /modules/*
 !/modules/README.txt
 !/modules/*.example

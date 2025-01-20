@@ -3,8 +3,9 @@
     RewriteBase /
 
     # Exclude specific file types and directories from the rewrite
-    RewriteCond %{REQUEST_URI} !\.(jpg|jpeg|png|gif|css|js|ico|svg|woff|woff2|ttf)$
-    RewriteCond %{REQUEST_URI} !^/(images/|media/|css/|js/)
+    #RewriteCond %{REQUEST_URI} !\.(3g2|3gp|7z|aac|ai|aiff|apk|appcache|asf|avi|backup|bak|bash|bat|bin|bz2|cab|cgi|cmd|conf|crx|css|csv|dat|db|db3|dll|dmg|doc|docx|dtd|dump|ear|eot|eps|exe|flac|flv|gif|gz|htc|ico|ics|ini|iso|jar|jpeg|jpg|js|json|log|lz|lz4|lzma|lzo|lzop|m4a|m4v|manifest|mov|mp3|mp4|mpeg|mpg|msi|msp|odp|ods|odt|oex|ogg|ogv|old|pdf|pl|png|ppt|pptx|ps|psd|py|rar|rb|safariextz|sh|sql|sqlite|sqlite3|sqlitedb|svg|svgz|swf|sys|tar|tar.gz|tgz|tmp|torrent|ttf|txt|vcf|vtt|war|wav|web|webapp|webm|webmanifest|webp|wma|wmv|woff|woff2|xls|xlsx|xml|xpi|xz|yaml|yml|zip|zst)$
+    #RewriteCond %{REQUEST_URI} !/(images|media|css|js)/
+    RewriteCond %{REQUEST_URI} !\.[a-z0-9]{1,4}$
 
     # Exclude existing files and directories from the rewrite
     RewriteCond %{REQUEST_FILENAME} !-f

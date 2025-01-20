@@ -117,7 +117,7 @@ class Api
         } catch (\Throwable $e) {
             $err = $e->getMessage() . ' [' . basename($e->getFile()) . ':' . $e->getLine() . ']';
             $this->log->error('system', $err);
-            //trigger_error($err . ' [' . basename($e->getFile()) . ':' . $e->getLine() . ']', E_USER_WARNING);
+            trigger_error($err . ' [' . basename($e->getFile()) . ':' . $e->getLine() . ']', E_USER_WARNING);
             $event->setStatus(StatusEnum::ERROR, $err);
         }
     }
