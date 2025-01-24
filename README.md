@@ -87,7 +87,10 @@ dock:$ git clone https://github.com/webdevelopers-eu/zolinga.git /tmp/zolinga
 dock:$ /tmp/zolinga/bin/zolinga --server
 ```
 
-Then visit [http://localhost:8888](http://localhost:8888) in your browser.
+* Then visit [http://localhost:8888](http://localhost:8888) in your browser.
+* WIKI Documentation: [http://localhost:8888/wiki](http://localhost:8888/wiki) (password: "WIKI")
+
+
 
 ### Apache
 
