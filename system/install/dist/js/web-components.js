@@ -172,11 +172,13 @@ class WebComponentLoader {
             }
             return;
         }
-        // Use xpath selector to find any elements where local-name() contains a hyphen 
-        const elements = node.ownerDocument.evaluate(
-            `(.|.//*)[contains(" ${this.#mapping.map(m => m.tag).join(" ")} ", concat(" ", local-name(), " "))][local-name() != "translate-me"]`,
-            node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null
-        );
+
+        // Use xpath selector to find any elements where local-name() contains a hyphen
+        const customElements = this.#mapping.map(m => m.tag).filter(tag => tag !== 'translate-me');
+        const queryList = customElements.map(tag => `local-name() = '${tag}'`);
+        const query = `(.|.//*)[${queryList.join(" or ")}]`;
+
+        const elements = node.ownerDocument.evaluate(query, node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         for (let i = 0; i < elements.snapshotLength; i++) {
             this.#checkElement(elements.snapshotItem(i));
         }
