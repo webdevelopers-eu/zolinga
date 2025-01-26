@@ -189,9 +189,11 @@ To list all available modules run the following command:
 
 # Documentation
 
-Zolinga is a highly extensible system with various modules, some of which may be proprietary along with their documentation. This means there's no single, comprehensive online documentation available. However, unlike other systems, Zolinga itself boasts extensive self-documenting features and an inbuilt WIKI. This WIKI displays all necessary documentation for your specific installation, including all modules.
+Zolinga is a highly extensible system with a modular architecture. Some of its modules, along with their documentation, may be proprietary. As a result, there is no single, comprehensive online documentation available for the entire system. However, Zolinga stands out with its robust self-documenting capabilities and an integrated WIKI. This built-in WIKI dynamically displays all the necessary documentation tailored to your specific installation, including details for every installed module.
 
-The advantage is clear: each module carries its own documentation, which automatically merges with the all-system WIKI upon installation. Your work, modules, and progress remain visible only to you and others with your software installed. You'll never see documentation for features you haven't installed, ensuring you always have the right documentation version matching your installation.
+The key advantage is that each module comes with its own documentation, which is automatically integrated into the system-wide WIKI upon installation. This ensures that your work, modules, and progress are visible only to you and others who have the same software setup. You’ll never encounter documentation for features or modules you haven’t installed, guaranteeing that the documentation you see always matches the exact version of your installation.
+
+For a sneak peek into the online documentation for the core and base modules, you can visit [Zolinga.ORG Documentation](https://www.zolinga.org/wiki). However, always refer to your local documentation, as it may include additional modules, including any custom ones you’ve developed or installed.
 
 It was challenging to implement, but the results speak for themselves—it works great!
 
