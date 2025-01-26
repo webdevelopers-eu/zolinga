@@ -304,7 +304,7 @@ class WikiArticle implements JsonSerializable
             'id' => $this->uri, // For z-template to identify elements
             'uri' => $this->uri,
             'title' => $this->title,
-            'contentFiles' => $this->contentFiles,
+            // 'contentFiles' => $this->contentFiles,
             'priority' => $this->priority,
             'children' => $this->__get('children') // lazy initialization
         ];
