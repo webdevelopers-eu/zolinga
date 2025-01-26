@@ -284,9 +284,11 @@
   },
   "config": {
     "wiki": {
+      "# enabled": "Enable or disable WIKI.",
+      "enabled": true,
       "# urlPrefix": "WIKI URL prefix. If not set then wiki is disabled completely.",
       "urlPrefix": "/wiki",
-      "# password": "WIKI password. If not set then wiki is disabled completely.",
+      "# password": "WIKI password. If empty - no password is required (use with caution).",
       "password": "ZOLINGA",
       "# maxAttempts": "Maximum number of login attempts. When exceeded the user must wait.",
       "maxAttempts": 5,

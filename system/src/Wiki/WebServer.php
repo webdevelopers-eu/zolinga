@@ -31,7 +31,7 @@ class WebServer implements ListenerInterface
     {
         global $api;
 
-        if (empty($api->config['wiki']['urlPrefix']) || empty($api->config['wiki']['password'])) {
+        if (empty($api->config['wiki']['urlPrefix']) || $api->config['wiki']['password'] === false) {
             $this->prefix = false;
         } else {
             $this->prefix = rtrim($api->config['wiki']['urlPrefix'], '/') ?: false;

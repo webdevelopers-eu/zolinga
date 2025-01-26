@@ -1,5 +1,18 @@
 {
     "# help": "This is the global configuration file that is used to override {module}/zolinga.json's config sections.",
     "# requirements": "This file is optional.",
-    "# comments": "The '#' character in the key is used to denote a comment."
+    "# comments": "The '#' character in the key is used to denote a comment.",
+
+    "wiki": {
+        "# enabled": "Enable or disable wiki. If not set then wiki is disabled completely.",
+        "enabled": true,
+        "# urlPrefix": "WIKI URL prefix. If not set then wiki is disabled completely.",
+        "urlPrefix": "/wiki",
+        "# password": "WIKI password. If empty - no password is required (use with caution).",
+        "password": "···",
+        "# allowedIps": "List of IP addresses that can see wiki or '*' for all. You can use '*' and '?' as wildcards. E.g. 192.168.* or 192.168.1.?",
+        "allowedIps": [
+            "*"
+        ]
+    }
 }

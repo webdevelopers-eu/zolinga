@@ -16,9 +16,14 @@ use Zolinga\System\Events\ListenerInterface;
 class WikiAuth implements ListenerInterface
 {
     private const LOG_FILE = "private://system/wiki-login.log.json";
+    private int $maxAttempts = 5;
+    private int $maxAttemptsTimeframe = 300;
 
     public function __construct()
     {
+        global $api;
+        $this->maxAttempts = intval($api->config['wiki']['maxAttempts']) ?? 5;
+        $this->maxAttemptsTimeframe = intval($api->config['wiki']['maxAttemptsTimeframe']) ?? 300;
     }
 
     /**
@@ -33,6 +38,10 @@ class WikiAuth implements ListenerInterface
     {
         global $api;
 
+        if (!$api->config['wiki']['enabled']) {
+            return false;
+        }
+
         // allowedIps
         $ips = $api->config['wiki']['allowedIps'] ?? ["127.0.0.1"];
 
@@ -43,7 +52,7 @@ class WikiAuth implements ListenerInterface
             return (bool) preg_match($regExp, $_SERVER['REMOTE_ADDR']);
         }, false);
 
-        return $match && !empty($api->config['wiki']['password']) && !empty($api->config['wiki']['urlPrefix']);
+        return $match && !empty($api->config['wiki']['urlPrefix']);
     }
 
     /**
@@ -74,45 +83,66 @@ class WikiAuth implements ListenerInterface
         if (!$this->isEnabled()) {
             $_SESSION['systemWiki']['authorized'] = false;
             $event->setStatus($event::STATUS_NOT_FOUND, "WIKI is not enabled");
-            return;
-        }
-
-        if (!empty($event->request['password'])) {
-            // Simple brute force prevention
-            $maxAttempts = $api->config['wiki']['maxAttempts'] ?? 5;
-            $timeframe = $api->config['wiki']['maxAttemptsTimeframe'] ?? 300;
-            $log = json_decode(file_get_contents(self::LOG_FILE) ?: '[]', true);
-            $attempts = 0;
-            $save = false;
-            foreach ($log as $k => $record) {
-                if ($record['time'] < time() - $timeframe) {
-                    unset($log[$k]);
-                    $save = true;
-                    continue;
-                }
-                if ($record['ip'] == $_SERVER['REMOTE_ADDR']) {
-                    $attempts++;
-                }
+        } elseif (!empty($event->request['password'])) {
+            if ($this->throttle($_SERVER['REMOTE_ADDR'])) { 
+                $event->setStatus($event::STATUS_FORBIDDEN, "Too many attempts. Wait " . ($this->maxAttemptsTimeframe / 60) . " minutes.");
+            } elseif ($this->loginWithPassword($event->request['password'])) {
+                $event->setStatus($event::STATUS_OK, "Authorized");
+            } else {
+                $event->setStatus($event::STATUS_UNAUTHORIZED, "Invalid password");
+                $this->recordLoginAttempt($_SERVER['REMOTE_ADDR']);
             }
-            if ($attempts > $maxAttempts) {
-                $event->setStatus($event::STATUS_FORBIDDEN, "Too many attempts. Wait " . ($timeframe / 60) . " minutes.");
-            } else { // Login attempt
-                $_SESSION['systemWiki']['authorized'] = $api->config['wiki']['password'] === $event->request['password'];
-            }
-
-            if ($save) {
-                file_put_contents(self::LOG_FILE, json_encode($log, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-            }
-        }
-
-        if (!empty($_SESSION['systemWiki']['authorized'])) {
+        } elseif ($this->isAuthorized()) {
             $event->setStatus($event::STATUS_OK, "Authorized");
-            $log = array_filter($log ?? [], fn ($record) => $record['ip'] != $_SERVER['REMOTE_ADDR']);
         } else {
             $event->setStatus($event::STATUS_UNAUTHORIZED, "Unauthorized");
-            $log[] = ['time' => time(), 'ip' => $_SERVER['REMOTE_ADDR']];
+            $this->recordLoginAttempt($_SERVER['REMOTE_ADDR']);
         }
-        file_put_contents(self::LOG_FILE, json_encode($log));
+    }
+
+    private function readAttempts(): array {
+        return json_decode(file_get_contents(self::LOG_FILE) ?: '[]', true) ?? [];
+    }
+
+    private function recordLoginAttempt(string $ip) {
+        $log = $this->readAttempts();
+        $log[] = ['time' => time(), 'ip' => $ip];
+        file_put_contents(self::LOG_FILE, json_encode($log, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    private function throttle(string $ip) {
+        // Simple brute force prevention
+        $log = $this->readAttempts();
+        $attempts = 0;
+        $save = false;
+
+        // Throttling and brute force prevention
+        foreach ($log as $k => $record) {
+            // Remove old records
+            if ($record['time'] < time() - $this->maxAttemptsTimeframe) {
+                unset($log[$k]);
+                $save = true;
+                continue;
+            }
+            // Count attempts for this IP
+            if ($record['ip'] == $_SERVER['REMOTE_ADDR']) {
+                $attempts++;
+            }
+        }
+
+        if ($save) {
+            file_put_contents(self::LOG_FILE, json_encode($log, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        }
+
+        return $attempts > $this->maxAttempts;
+    }
+
+    private function loginWithPassword(string $password): bool
+    {
+        global $api;
+
+        $_SESSION['systemWiki']['authorized'] = $api->config['wiki']['password'] === '' || $api->config['wiki']['password'] === $password;
+        return $_SESSION['systemWiki']['authorized'];
     }
 
     /**
@@ -123,7 +153,6 @@ class WikiAuth implements ListenerInterface
     public function isAuthorized(): bool
     {
         global $api;
-
-        return $this->isEnabled() && ($_SESSION['systemWiki']['authorized'] ?? false);
+        return $this->isEnabled() && (($_SESSION['systemWiki']['authorized'] ?? false) || $api->config['wiki']['password'] === '');
     }
 }
