@@ -20,7 +20,7 @@
 
 ## But... why?
 
-I'm fully committed to a single project, and these components—framework, cron, translation module, database access, a database-less CMS, and simple Rights Management—are the vital building blocks needed for it. After two months of intense effort and drawing from twenty years of experience, I felt it was fitting to give back to the open-source community before delving into the closed-source aspect of the project.
+I'm fully committed to a single project, and these components—framework, cron, translation module, database access, a database-less CMS, and simple Rights Management—are the vital building blocks needed for it. After two months of intense effort and drawing from 25 years of experience, I felt it was fitting to give back to the open-source community before delving into the closed-source aspect of the project.
 
 You might wonder why not opt for an existing solution? Well, the project I'm working on is anticipated to run for the next 10 years. 90% of the code has no parallel in existing modules. For that reason, it needs to be both minimalistic and immutable. Minimalistic because fewer features equate to less maintenance headaches and fewer upgrade issues. Immutable because it significantly reduces the cost of maintaining modules. 
 
