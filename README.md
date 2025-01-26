@@ -165,6 +165,8 @@ use Zolinga\System\Events\Event;
 
 This is all there is to it. Except for a few optional syntax sugars to make the module manifest easier to write and read, you don't need to know anything more than what is in this example. You're practically the Zolinga expert now!
 
+For more information refer to inbuilt WIKI documentation in your Zolinga installation. The WIKI is available at the URL `/wiki/` upon initial installation - see the section [Installation](#installation) for more details.
+
 ## Installing Modules
 
 To install new module run the following command:
