@@ -15,7 +15,7 @@ class WikiToc extends WebComponent {
         const root = await this.loadContent(new URL('wiki-toc.html', import.meta.url), { mode: 'seamless' });
         const event = await api.dispatchEvent('wiki:toc');
 
-        this.recursiveTemplate = this.querySelector('#toc-recursive-template');
+        this.recursiveTemplate = this.querySelector('#toc-recursive-template').cloneNode(true);
         this.#render(event.response.toc);
         this.listen('wiki:article:loaded', (detail) => this.#onArticleLoaded(detail.uri));
 
