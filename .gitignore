@@ -2,6 +2,8 @@
 locale/
 *.??-??.*
 
+# Resouces just on local machine
+/local
 
 /vendor/*
 !/vendor/README.txt
