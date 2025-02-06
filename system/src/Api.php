@@ -192,7 +192,15 @@ class Api
     private function getSubscriberByClass(string $class): ListenerInterface
     {
         if (!class_exists($class)) {
-            throw new \Exception("Class $class not found. Make sure the zolinga.json's 'autoload' section is correct.");
+            $parts = explode('\\', trim($class, '\\'));
+            $vendor = array_shift($parts);
+            $module = array_shift($parts);
+            $dirName = strtolower("$vendor-$module");
+            $path = "./modules/$dirName/src/" . implode('/', $parts) . '.php';
+            $tip = "Assuming the module is in ./modules/$dirName and the class is located at $path: ";
+            $tip .= "Ensure that zolinga.json contains an autoload section like this: `\"autoload\": {\"$vendor\\\\$module\\\\\": \"src/\"}`. ";
+            $tip .= "Then verify that the expected file exists at \"$path\" (it " . (file_exists(ROOT_DIR . '/' . $path) ? 'does' : 'does not') . " exist currently).";
+            throw new \Exception("Class $class not found. Make sure the zolinga.json's 'autoload' section is correct. TIP: $tip");
         }
 
         $interfaces = class_implements($class);

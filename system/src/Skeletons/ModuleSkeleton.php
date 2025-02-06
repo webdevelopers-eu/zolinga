@@ -27,7 +27,10 @@ class ModuleSkeleton implements ListenerInterface
      */
     public function onModule(RequestResponseEvent $event): void
     {
-        $moduleName = ($event->request['name'] ?? null) ?: trim(readline("Enter module name: ") ?: "");
+        $moduleName = ($event->request['name'] ?? null);
+        while (!is_string($moduleName) || strlen($moduleName) < 2) {
+            $moduleName = preg_replace("/[^a-z0-9_.-]/ig", "-", basename(readline("Enter module name (at least 3 chars long): ")));
+        }
         $moduleName = basename($moduleName);
         $dst = ROOT_DIR . "/modules/$moduleName/";
 
