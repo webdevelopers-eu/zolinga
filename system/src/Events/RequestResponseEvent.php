@@ -47,4 +47,24 @@ class RequestResponseEvent extends RequestEvent {
             'response' => $this->response
         ];
     }
+
+    /**
+     * Create a new instance from an array of data.
+     *
+     * @param array $data The data to create the event from. See RequestResponseEvent::jsonSerialize() for the structure.
+     * @return static
+     */
+    public static function fromArray(array $data): static {
+        $event = new static(
+            $data['type'],
+            OriginEnum::tryFrom($data['origin']),
+            new ArrayObject($data['request']),
+            new ArrayObject($data['response'])
+        );
+        $event->uuid = $data['uuid'];
+        if ($data['status']) {
+            $event->setStatus($data['status'], $data['message']);
+        }
+        return $event;
+    }
 }

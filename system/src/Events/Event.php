@@ -248,11 +248,30 @@ class Event implements JsonSerializable
     public function jsonSerialize(): mixed
     {
         return [
+            "uuid" => $this->uuid,
             "type" => $this->type,
             "origin" => $this->origin->value,
             "status" => $this->status->value,
             "message" => $this->message,
             "totalTime" => round($this->totalTime, 3),
         ];
+    }
+
+        /**
+     * Create a new instance from an array of data.
+     *
+     * @param array $data The data to create the event from. See RequestResponseEvent::jsonSerialize() for the structure.
+     * @return static
+     */
+    public static function fromArray(array $data): static {
+        $event = new static(
+            $data['type'],
+            OriginEnum::tryFrom($data['origin'])
+        );
+        $event->uuid = $data['uuid'];
+        if ($data['status']) {
+            $event->setStatus($data['status'], $data['message']);
+        }
+        return $event;
     }
 }
