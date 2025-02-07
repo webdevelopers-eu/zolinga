@@ -233,6 +233,8 @@ class Bootstrap
             return (bool) preg_match($regExp, $_SERVER['REMOTE_ADDR'] ?? php_sapi_name());
         }, false);
 
+        define('ZOLINGA_DEBUG', $match);
+
         if ($match) {
             error_reporting(E_ALL);
         } else {
