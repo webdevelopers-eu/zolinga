@@ -222,6 +222,6 @@ E.g.
 - [Zolinga RMS](https://github.com/webdevelopers-eu/zolinga-rms) - simple Rights Management, id `zolinga-rms`
 - [Zolinga Commons](https://github.com/webdevelopers-eu/zolinga-commons) - contains common widgets and other goodies, id `zolinga-commons`
 - [Zolinga Intl](https://github.com/webdevelopers-eu/zolinga-intl) - language translation support, id `zolinga-intl`
-
+- [Zolinga AI](https://github.com/webdevelopers-eu/zolinga-ai) - AI support, id `zolinga-ai`
 
 When you install a module, it will be automatically added to the `modules` directory and its documentation will be merged into inbuilt Zolinga WIKI Documentation right in your Zolinga installation.
