@@ -63,6 +63,13 @@
     "Example\\Acme\\": "src/"
   },
 
+  "#-dependencies": "--------------------------------------------------------------------",
+  "# dependencies": "Optional. Dependencies that your module requires.",
+  "dependencies": [
+    "zolinga-commons",
+    "zolinga-db"
+  ],
+
   "#-config": "-----------------------------------------------------------------------",
   "# config": "Optional. Configuration options for your module.",
   "config": {
