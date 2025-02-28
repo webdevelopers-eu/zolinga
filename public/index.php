@@ -67,7 +67,8 @@ require(dirname(__DIR__) . '/system/loader.php');
             trigger_error("Headers already sent in $file on line $line . If you want to produce content on your own call \$event->preventDefault() on the $contentEvent", E_USER_WARNING);
         } else {
             header('Content-Type: text/html; charset=utf-8');
-        }   
+        }
+        http_response_code($contentEvent->status->value);
         echo $contentEvent->getContentHTML();
     }
 
