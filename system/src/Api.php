@@ -20,6 +20,7 @@ use Zolinga\System\Config\Atom\{ListenAtom, EmitAtom, WebComponentAtom, AtomInte
  */
 class Api
 {
+
     /**
      * @var array<string, Object> list of lazily instantiated services accesible through $api->myService
      */
@@ -51,6 +52,16 @@ class Api
     public function __set(string $name, Object $value): void
     {
         throw new \Exception("Cannot set property $name on Api object.");
+    }
+
+    /**
+     * Is the system in debug mode?
+     * 
+     * @return bool
+     */
+    public function isDebugging(): bool
+    {
+        return \ZOLINGA_DEBUG;
     }
 
     /**
