@@ -81,11 +81,7 @@ class WikiToc extends WebComponent {
         this.querySelectorAll('a.active').forEach(a => a.classList.remove('active'));
         activeLink.classList.add('active');
         activeLink.scrollIntoView({ behavior: 'smooth', block: "center" });
-        
-        // Remove all parent .close classes
-        (function* (el) { const c = el.closest('menu.close'); if (c) yield; })(activeLink)
-            .forEach(el => el.classList.remove('close'));
-        
+                
         this.#updateNavigation(activeLink);
     }
     
