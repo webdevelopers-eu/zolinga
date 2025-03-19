@@ -34,7 +34,21 @@ As you can see, the event type is constructed from the [system:request:](:ref:ev
 }
 ```
 
-This listener definition hooks your custom listener to any `?hello=...` request. The listener class may look like this:
+You can use the sugar syntax `request` instead of the full `type` event name in which case the `origin` is set to `remote` implicitly.
+
+```json
+{
+    "listen": [
+        {
+            "request": "hello",
+            "class": "\\Example\\HelloRequestListener",
+            "method": "onRequest"
+        }
+    ]
+}
+``` 
+
+This listener definition hooks your custom listener to any `?hello[...]=...` request. The listener class may look like this:
 
 ```php
 namespace Example;
@@ -46,12 +60,13 @@ class HelloRequestListener implements ListenerInterface
     public function onRequest(RequestEvent $event)
     {
         echo "Hello, the request is: " . json_encode($event->request) . "\n";
+        echo "The value of 'myProp' is: " . $event->request['myProp'] . "\n";
         $event->setStatus($event::STATUS_OK, "Request processed.");
     }
 }
 ```
 
-Now any POST or GET request with `?hello=...` parameter will be processed by this listener.
+Now any POST or GET request with `?hello[myProp]=123` parameter will be processed by this listener.
 
 # Related
 {{Running the System}}

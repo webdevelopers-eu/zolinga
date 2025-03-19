@@ -28,14 +28,14 @@ xx.title {
 /* all scrollbars are thin */
 * {
     scrollbar-color: 
-        color-mix(in oklab, rgb(var(--color-fg)) 50%, rgb(var(--color-primary)) 50%) 
-        color-mix(in oklab, rgb(var(--color-bg)) 95%, rgb(var(--color-fg)) 5%);
+    color-mix(in oklab, rgb(var(--color-fg)) 50%, rgb(var(--color-primary)) 50%) 
+    color-mix(in oklab, rgb(var(--color-bg)) 95%, rgb(var(--color-fg)) 5%);
     scrollbar-width: thin;
 }
 
 :root {
     color-scheme: light dark;
-
+    
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     font-size: 16px;
     line-height: 1.6;
@@ -43,7 +43,7 @@ xx.title {
     --shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     --radius: 5px;
     --border: 1px solid color-mix(in oklab, rgb(var(--color-bg)) 80%, rgb(var(--color-fg)) 20%);
-
+    
     --link-color-rgb: color-mix(in oklab, rgb(var(--color-primary)), #7777FF);
 }
 
@@ -78,15 +78,15 @@ body {
     height: 1.2cap;
     min-height: 8px;
     vertical-align: middle;
-
+    
     & .logo-bg {
         fill: rgb(var(--color-primary));
     }
-
+    
     & .logo-fg {
         fill: rgb(var(--color-bg));
     }
-
+    
     &::before {
         content: var(--logo-url);
         position: absolute;
@@ -120,12 +120,12 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1em;
-
+    
     & .logo {
         height: min(2.4em, 10vw);
         flex: 0 0 2.4em;
     }
-
+    
     & .name {
         vertical-align: middle;
         margin: 0em 0.5em;
@@ -144,32 +144,32 @@ body {
     grid-template-rows: min-content fit-content(100px) 1fr min-content;
     grid-auto-rows: minmax(100px, auto);
     grid-template-areas:
-        "title  content"
-        "search content"
-        "toc    content"
-        "footer footer";
-
+    "title  content"
+    "search content"
+    "toc    content"
+    "footer footer";
+    
     @media screen and (max-width: 800px) {
         grid-template-columns: 1fr fit-content(100px);
         grid-template-areas:
-            "title   menu"
-            "search  search"
-            "content content"
-            "footer  footer";
+        "title   menu"
+        "search  search"
+        "content content"
+        "footer  footer";
     }
-
+    
     @media print {
         grid-template-columns: 1fr;
         grid-template-areas:
-            "title"
-            "content"
-            "footer";
+        "title"
+        "content"
+        "footer";
     }
-
+    
     &>.title {
         grid-area: title;
     }
-
+    
     &>.search {
         grid-area: search;
         display: flex;
@@ -177,11 +177,11 @@ body {
         align-items: left;
         align-self: center;
         position: relative;
-
+        
         & label {
             display: flex;
             padding: 0.2em 0.5em;
-
+            
             &::before {
                 content: '🔍';
                 margin-right: 0.5em;
@@ -191,14 +191,14 @@ body {
                 transition: all 2s;
             }
         }
-
+        
         &:has(input.searching) label::before {
             filter: none;
             opacity: 1;
             /* animation magnifying glass circling */
             animation: circle 1s linear infinite;
         }
-
+        
         & input {
             width: 100%;
             text-overflow: ellipsis;
@@ -206,17 +206,17 @@ body {
             padding: 0px;
             background: none;
             margin: 0px;
-
+            
             &:focus {
                 outline: none;
             }
         }
-
+        
         &:has(input:placeholder-shown) .search-results {
             display: none;
         }
-
-
+        
+        
         & .search-results {
             display: none;
             margin: 0px;
@@ -237,11 +237,11 @@ body {
             max-height: 50vh;
             overflow-y: auto;
             overflow-x: hidden;
-
+            
             & li {
                 cursor: pointer;
             }
-
+            
             & .search-snippet {
                 text-overflow: ellipsis;
                 line-clamp: 3;
@@ -251,31 +251,31 @@ body {
                 -webkit-box-orient: vertical;
                 display: -webkit-box;
                 overflow: hidden;
-
+                
                 & b {
                     background-color: rgba(var(--color-primary), 0.2);
                 }
             }
         }
-
+        
         &:has(:focus-within, :active, :focus) .search-results {
             display: block;
         }
     }
-
+    
     &>.content {
         grid-area: content;
         display: flex;
         flex-direction: column;
         overflow: auto;
-
+        
         & wiki-article {
             flex: 1 1 auto;
             display: flex;
             flex-direction: column;
         }
     }
-
+    
     &>.footer {
         grid-area: footer;
         text-align: center;
@@ -286,25 +286,25 @@ body {
         margin: 0em 2em 0em 2em;
         flex-wrap: wrap;
     }
-
+    
     &>.menu {
         grid-area: menu;
-
+        
         &>button {
             font-size: 2em;
             padding: 0em 0.32em;
         }
-
+        
         @media screen and (min-width: 800px) {
             display: none;
         }
     }
-
+    
     &>.toc {
         grid-area: toc;
         overflow-y: auto;
         overflow-x: hidden;
-
+        
         &+.curtain {
             transition: opacity 0.5s;
             position: fixed;
@@ -318,7 +318,7 @@ body {
             pointer-events: none;
             backdrop-filter: blur(2px);
         }
-
+        
         @media screen and (max-width: 800px) {
             margin: 0px;
             border-radius: 0px;
@@ -329,11 +329,11 @@ body {
             overflow-y: auto;
             width: 80vw;
             transition: left 0.2s;
-
+            
             &.visible {
                 left: 0;
                 z-index: 10;
-
+                
                 &+.curtain {
                     pointer-events: all;
                     opacity: 1;
@@ -356,7 +356,7 @@ body {
     top: 0px;
     z-index: 1;
     background-color: rgb(var(--color-bg));
-
+    
     & .text-icon {
         font-size: 1.3em;
     }
@@ -374,6 +374,10 @@ body {
     visibility: visible;
 }
 
+html menu.toc {
+    margin: 0px 0.5em;
+}
+
 menu.toc,
 menu.toc menu {
     position: relative;
@@ -385,26 +389,28 @@ menu.toc menu {
     padding: 0em 0em 0em 1em;
     margin: 0em;
     list-style: none;
-
+    
     & .current {
         font-weight: bold;
     }
-
+    
     & menu:not(.open):not(:has(a.active)) {
         display: none;
     }
-
+    
     & menu.close {
         display: none;
     }
-
+    
     &>li {
         display: flex;
         flex-direction: column;
         flex-wrap: nowrap;
         align-items: stretch;
-        justify-content: center;
-
+        justify-content: start;
+        position: relative;
+        margin-left: 0em;
+        
         &>a {
             padding: 0.2em 0em;
             display: flex;
@@ -415,22 +421,29 @@ menu.toc menu {
             transition: color 0.5s;
             line-height: 1.2em;
         }
-
-        & a::before {
+        
+        &::before {
             flex: 0 0 1em;
             content: '▪';
             font-weight: normal;
             text-align: center;
-            display: inline-block;
+            display: block;
+            position: absolute;
+            top: 0em;
+            left: -1.5em;
+            padding: 0em 0.5em;
             color: color-mix(in oklab, rgb(var(--color-primary)) 40%, rgb(var(--color-bg)) 60%);
             margin-right: 0.35em;
         }
-
-        &:has(> menu)>a::before {
-            content: '⊞';
+        
+        &:has(>menu) {
+            cursor: context-menu;
+            &::before {
+                content: '⊞';
+            }
         }
-
-        &:has(> menu.open)>a::before {
+        
+        &:has(> menu.open)::before {
             content: '⊟';
         }
     }
@@ -442,52 +455,52 @@ wiki-login {
     align-items: center;
     justify-content: center;
     flex: 1 1 100%;
-
+    
     & svg {
         width: min(20vh, 15em);
         opacity: 20%;
         aspect-ratio: 1 / 1;
-
+        
         & .logo-bg {
             fill: rgb(var(--color-fg));
         }
-
+        
         & .logo-fg {
             fill: rgb(var(--color-bg));
         }
     }
-
+    
     &:not([data-show="form"]) .wiki-login {
         display: none;
     }
-
+    
     &[data-show="form"] .wiki-login-loading {
         display: none;
     }
-
+    
     & .wiki-login-loading::before {
         content: '🔑';
         font-size: 5em;
         filter: grayscale(100%) opacity(30%);
     }
-
+    
     & .wiki-login {
         display: flex;
         gap: 1em;
         flex-direction: column;
         align-items: center;
         text-align: center;
-
+        
         & small {
             max-width: 320px;
             text-align: center;
             opacity: 0.5;
         }
-
+        
         & input {
             text-align: center;
             letter-spacing: 0.5em;
-
+            
             &::placeholder {
                 font-style: normal;
                 letter-spacing: 0.1em;
@@ -501,11 +514,11 @@ wiki-login {
     .noprint {
         display: none !important;
     }
-
+    
     body {
         background-color: transparent;
     }
-
+    
     .box {
         box-shadow: none;
         border: none;
@@ -516,7 +529,7 @@ wiki-login {
     from {
         transform: rotate(0deg) translateX(0.2em) rotate(0deg);
     }
-
+    
     to {
         transform: rotate(360deg) translateX(0.2em) rotate(-360deg);
     }
