@@ -173,7 +173,7 @@ var {
 }
 
 
-.php-code-block {
+.php-code-block:not(:has(> pre)) {
     background-color: color-mix(in oklab, rgb(var(--color-bg)) 85%, rgb(var(--color-primary)) 15%);
     padding: 1em;
     border-radius: var(--radius);
