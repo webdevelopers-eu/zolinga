@@ -283,6 +283,8 @@
     "Parsedown": "vendor/parsedown/Parsedown.php"
   },
   "config": {
+    "# baseURL": "Base URL of the application. This is used for generating links and redirects.",
+    "baseURL": "http://localhost:8080",
     "wiki": {
       "# enabled": "Enable or disable WIKI.",
       "enabled": true,
