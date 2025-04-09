@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Zolinga\System\Config;
 
 use Zolinga\System\Events\RequestEvent;
+use Zolinga\System\Events\RequestResponseEvent;
 use Zolinga\System\Events\ServiceInterface;
 use const Zolinga\System\ROOT_DIR;
 
@@ -33,6 +34,9 @@ class ConfigService extends ConfigArrayObject implements ServiceInterface
     public function onConfig(RequestEvent $event): void
     {
         $this->merge($event->request);
+        if ($event instanceof RequestResponseEvent) {
+            $event->response['config'] = $this;
+        }
         $event->setStatus($event::STATUS_OK, 'Configuration merged.');
     }
 
