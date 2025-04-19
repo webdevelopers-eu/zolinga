@@ -64,7 +64,7 @@ enum StatusEnum: int
     public function getEmoji(): string
     {
         return match (true) {
-            $this === self::UNDETERMINED => '⭕',
+            $this === self::UNDETERMINED => '⚫',
             $this->value < 200 => '🔵',
             $this->value < 300 => '🟢',
             $this->value < 400 => '🟠',
