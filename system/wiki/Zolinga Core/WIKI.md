@@ -53,6 +53,8 @@ The header section is separated from the content by an empty line.
 
 The base parser is great [Parsedown](https://github.com/erusev/parsedown/wiki/) with few tweaks.
 
+Syntax should be [standard Markdown](https://www.markdownguide.org/basic-syntax/).
+
 The custom tweaks are:
 
 - **\{{YOUR NAME}}** - will be replaced with the content of the template file from the `{module}/wiki/templates/YOUR NAME.md` file.
