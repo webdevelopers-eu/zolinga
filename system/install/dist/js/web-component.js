@@ -183,10 +183,13 @@ export default class WebComponent extends HTMLElement {
   addUrlRevParam(url) {
     // Add ?rev=XY to the URL to prevent caching
     const rev = document.documentElement.dataset.revision;
-    if (!rev) return url;
+    if (!rev || url.match(/^javascript:|\?rev=/)) return url;
 
     // Way to invalidate cache - append revision number to the URL
-    const o = new URL(url, window.location);
+    const o = new URL(url, window.location);    
+
+    if (o.host !== window.location.host) return url;
+
     o.searchParams.set('rev', rev);
     return o.toString();
   }
