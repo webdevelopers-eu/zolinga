@@ -70,7 +70,7 @@ class Api {
         try {
             // AJAX request using fetch
             const op = ((data && data.op) || null);
-            const info = `${event.type}${op && '/' + op || ''}${data.id && ':' + data.id || ''}`;
+            const info = `${event.type}${op && '/' + op || ''}${data && data.id && ':' + data.id || ''}`;
             const response = await fetch(`${this.API_GATE}?${info}`, {
                 method: 'POST',
                 headers: {
