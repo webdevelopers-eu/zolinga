@@ -37,6 +37,7 @@ locale/
 /composer.json
 /composer.lock
 /.vscode/*
-!/.vscode/copilot-instructions.md
+/.github/*
+!/.github/copilot-instructions.md
 /*.code-workspace
 /*.cache
