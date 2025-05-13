@@ -225,7 +225,7 @@ class Cli
      * @param string $defaultPort
      * @return array{0: string, 1: int} [host, port]
      */
-    private function parseHostPort(string|bool $string, string $defaultHost, string|int $defaultPort): array
+    private function parseHostPort(int|string|bool $string, string $defaultHost, string|int $defaultPort): array
     {
         $host = $defaultHost;
         $port = $defaultPort;
@@ -233,15 +233,17 @@ class Cli
 
         if (is_bool($string)) { // cli parameter without value is parsed as true
             return [$host, (int) $port];
+        } elseif (is_numeric($string)) {
+            return [$host, (int) $string];
         } elseif (count($parts) == 1 && is_numeric($parts[0])) {
-            $port = $parts[0];
+            return [$host, (int) $parts[0]];
         } elseif (count($parts) == 2) {
-            $host = $parts[0];
-            $port = $parts[1];
-        } else {
-            throw new \Exception("Invalid host:port format. Expected: '[HOST[:PORT]]', got: " . json_encode($string));
+            $host = $parts[0] ?: $host;
+            $port = $parts[1] ?: $port;
+            return [$host, (int) $port];
         }
-        return [$host, (int) $port];
+
+        throw new \Exception("Invalid host:port format. Expected: '[HOST[:PORT]]', got: " . json_encode($string));
     }
 
     /**
