@@ -10,3 +10,4 @@
 # Testing And Running the Code
 
 * You can run the system by running `bin/zolinga` command. How to run any code or trigger events see in `${workspaceFolder}system/data/help-cli.txt`
+    * Using `bin/zolinga` command you can run any event, run arbitrary PHP script or inline PHP code and also start inbuilt PHP web server to run the frontend.
