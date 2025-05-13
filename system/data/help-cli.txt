@@ -1,0 +1,89 @@
+Zolinga CLI
+
+Usage: zolinga [options] [event [params]] [event [params]] ...
+
+options
+
+    --help, -h  Show this help message
+
+    --json, -j
+    
+        Print pure JSON format with responses joined in one array of responses.
+
+
+    --single, -s, --single=SELECTOR 
+    
+        Print only the first response in JSON format - implies --json
+        If SELECTOR is provided (JSON dot-notation), it will print only the selected part 
+        of the response.If the printed response is not a scalar, it will be printed in JSON format
+        otherwise decoded to a string.
+
+        If no SELECTOR is provided the whole response part of the first response is printed.
+
+    --execute=/path/script.php, -x=/path/script.php
+
+        Run a script.
+
+    --eval="echo 'Hello world';", -e="echo 'Hello world';"
+
+        Eval a PHP.
+
+    --xdebug[=[HOST:]PORT]
+        
+            Enable xdebug by calling xdebug_connect_to_client().
+            Default: 127.0.0.1:9003
+
+    --xdebug-mode=MODES
+        
+            Set xdebug.mode value. Only valid if --xdebug is set.
+            Example: --xdebug-mode=profile
+            Default: debug,develop
+
+    --server[=[HOST:]PORT]
+
+            Run a PHP built-in web server on the specified port. 
+            If no port is provided, 8888 is used.
+            Note: Only for development and debugging purposes!
+            Default: 0.0.0.0:8888
+
+    --quiet, -q
+
+        Do not print any output by default. Use this option in case that listeners
+        produce output and you don't want to mix it up with default response
+        output.
+
+        Note: Only standard response output is suppressed. Errors and other messages
+        are still printed to stderr and whatever other modules print to stdout.
+
+event
+
+    The event type in the format of an URI. Example: example.org:api:myEvent
+    See Zolinga WIKI's "Zolinga Explorer/Events" article for the list of supported event types.
+
+params
+
+    Parameters to the event. The parameters can be in JSON format or in Javascript dot notation.
+
+    - JSON formatted parameter to the event starts with '{' e.g. '{"system":{"db":{"password":"123"}}'
+
+    - Parameter in Javascript dot notation to the event starts with '--' e.g. --system.db.password=123
+
+Example:
+
+    zolinga example.org:api:myEvent --system.db.password=123 --system.db.user=me
+
+    is equivalent to
+
+    zolinga example.org:api:myEvent '{"system":{"db":{"password":"123","user":"me"}}'
+
+    You can chain more events with their parameters.
+
+    zolinga \
+        example.org:api:myEvent '{"system":{"db":{"password":"123","user":"me"}}' \
+        example.org:api:anotherEvent --test.param=123 \
+        example.org:api:yetAnotherEvent;
+
+    Print only response['db']['host'] value from the first event response:
+
+    zolinga --single=response.db.host example.org:db:info
+
