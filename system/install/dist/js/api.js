@@ -89,6 +89,11 @@ class Api {
             }
 
             const responseDataAll = await response.json();
+            if (responseDataAll instanceof Object && responseDataAll.type === 'error') {
+                throw new Error('AJAX API: Server error: ' + (responseDataAll.message || '-'), { "cause": responseDataAll });
+            }
+
+
             if (!responseDataAll || !responseDataAll.length) {
                 throw new Error('AJAX API: No data received from server', { "cause": response });
             }
