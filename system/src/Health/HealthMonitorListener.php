@@ -28,7 +28,7 @@ class HealthMonitorListener implements ListenerInterface
     {
         global $api;
 
-        $minSpace = ini_parse_quantity($api->config['health']['minSpace'] ?? '500') * 1024 * 1024; // Convert to bytes
+        $minSpace = ini_parse_quantity($api->config['health']['minSpace'] ?? '500'); // Convert to bytes
         $error = false;
 
         // Get path to check (data directories - can be mounted)

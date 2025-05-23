@@ -306,8 +306,8 @@
     "# baseURL": "Base URL of the application. This is used for generating links and redirects.",
     "baseURL": "http://localhost:8080",
     "health": {
-      "# minSpace": "Minimum free disk space required. In MB.",
-      "minSpace": "5000"
+      "# minSpace": "Minimum free disk space required. Format: {number}{unit}, Units: G, M, K, B",
+      "minSpace": "5G"
     },
     "wiki": {
       "# enabled": "Enable or disable WIKI.",
