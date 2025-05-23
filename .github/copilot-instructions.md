@@ -8,8 +8,9 @@
     * All joined `zolinga.json` files are stored in `${workspaceFolder}/data/system/system.cache.json` file.
 * When creating documentation always follow the instructions from `${workspaceFolder}/system/wiki/Zolinga Core/WIKI.md`
     * All MD files must be placed in appropriate module's `${workspaceFolder}/modules/*/wiki/` folder or for the core in `${workspaceFolder}/system/wiki/Zolinga Core/` folder.
-* Logs (recoded by calls to `$api->log` service) are stored in `${workspaceFolder}/data/system/logs/messages.log` 
+* Logs (recoded by calls to `$api->log` service - always present) are stored in `${workspaceFolder}/data/system/logs/messages.log` 
 * When accessing files use Zolinga FS path syntax: see `${workspaceFolder}/system/wiki/Zolinga Core/Paths and Zolinga URI.md`
+* Merged configurations inside module's zolinga.json and config/global.json, config/local.json files are exposed as `$api->config[key1][key2]...` see: `${workspaceFolder}/system/wiki/templates/Config Event.md`
 
 # Testing And Running the Code
 
@@ -22,12 +23,7 @@
 You are an expert PHP developer. 
 
 * Generate PHP 8.4-compatible code
-* Use property accessors for all public properties. For each property if needed:
-    1. Declare a private backing field for storage.
-    2. Declare a public property with get and set blocks.
-    3. In get block, apply any read-time logic using the backing field.
-    4. In set block, apply any write-time logic using the backing field.
+* Instead of method accessors use properties with get and set blocks if required, you may use also assymetric visibility.
 * Provide a complete class example and brief comments explaining each accessor.
-* Private properties are not prefixed with an underscore.
 * Use `camelCase` for all variables and method names.
 * Use `PascalCase` for all class names.

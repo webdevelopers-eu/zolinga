@@ -128,7 +128,7 @@ class Event implements JsonSerializable
                 return $this->isOk();
         
             default:
-                throw new \Exception("Property $name does not exist or is inaccessible on " . self::class);
+                throw new \Exception("Property " . self::class . "::$$name does not exist or is inaccessible.");
         }
     }
 
@@ -164,7 +164,7 @@ class Event implements JsonSerializable
      * @param string $message
      * @return StatusEnum current status. May not be the same as $status in case there is already a error status set.
      */
-    final public function setStatus(StatusEnum $status, string $message): StatusEnum
+    public function setStatus(StatusEnum $status, string $message): StatusEnum
     {
         // Priority of status codes is:
         // 1. OK status has higest priority then error statuses

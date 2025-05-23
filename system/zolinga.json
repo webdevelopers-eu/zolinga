@@ -8,6 +8,26 @@
   "attributes": {},
   "listen": [
     {
+      "description": "System health check command (CLI).",
+      "event": "healthcheck",
+      "class": "\\Zolinga\\System\\Health\\HealthCheckCli",
+      "method": "onHealthcheck",
+      "origin": [
+        "cli"
+      ],
+      "priority": 0.9
+    },
+    {
+      "description": "System health monitor for internal health checks.",
+      "event": "healthcheck",
+      "class": "\\Zolinga\\System\\Health\\HealthMonitorListener",
+      "method": "onHealthcheck",
+      "origin": [
+        "internal"
+      ],
+      "priority": 0.8
+    },
+    {
       "description": "Install the module using GIT.",
       "event": "install",
       "class": "\\Zolinga\\System\\Installer\\InstallModuleCli",
@@ -285,6 +305,10 @@
   "config": {
     "# baseURL": "Base URL of the application. This is used for generating links and redirects.",
     "baseURL": "http://localhost:8080",
+    "health": {
+      "# minSpace": "Minimum free disk space required. In MB.",
+      "minSpace": "5000"
+    },
     "wiki": {
       "# enabled": "Enable or disable WIKI.",
       "enabled": true,
