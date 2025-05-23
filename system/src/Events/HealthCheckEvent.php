@@ -6,6 +6,7 @@ namespace Zolinga\System\Events;
 
 use Zolinga\System\Types\StatusEnum;
 use Zolinga\System\Types\OriginEnum;
+use Zolinga\System\Types\SeverityEnum;
 
 /**
  * Event for healthcheck operations.
@@ -69,6 +70,8 @@ class HealthCheckEvent extends RequestEvent implements StoppableInterface
      */
     public function report(string $component, StatusEnum $status, string $description): self
     {
+        global $api;
+
         $this->reports[] = [
             'component' => $component,
             'status' => $status,
@@ -80,12 +83,16 @@ class HealthCheckEvent extends RequestEvent implements StoppableInterface
         if ($status->isError() && !$this->status->isError()) {
             $this->setStatus($status, "Health check detected issues");
         }
+
+        $api->log->log($status->isError() ? SeverityEnum::ERROR : SeverityEnum::INFO, "system", "Health check for $component: $description");
         
         return $this;
     }
 
     public function setStatus(StatusEnum $status, string $message): StatusEnum
     {
+        global $api;
+
         // If the status is already set to an error, do not override it
         if ($status->isOk()) { // OK is default we set only errors
             return $this->status;
