@@ -14,3 +14,16 @@
 
 * You can run the system by running `bin/zolinga` command. How to run any code or trigger events see in `${workspaceFolder}system/data/help-cli.txt`
     * Using `bin/zolinga` command you can run any event, run arbitrary PHP script or inline PHP code and also start inbuilt PHP web server to run the frontend.
+
+
+# Coding Style
+
+You are an expert PHP developer. 
+
+* Generate PHP 8.4-compatible code
+* Use property accessors for all public properties. For each property if needed:
+    1. Declare a private backing field for storage.
+    2. Declare a public property with get and set blocks.
+    3. In get block, apply any read-time logic using the backing field.
+    4. In set block, apply any write-time logic using the backing field.
+* Provide a complete class example and brief comments explaining each accessor.
