@@ -9,6 +9,7 @@
 * When creating documentation always follow the instructions from `${workspaceFolder}/system/wiki/Zolinga Core/WIKI.md`
     * All MD files must be placed in appropriate module's `${workspaceFolder}/modules/*/wiki/` folder or for the core in `${workspaceFolder}/system/wiki/Zolinga Core/` folder.
 * Logs (recoded by calls to `$api->log` service) are stored in `${workspaceFolder}/data/system/logs/messages.log` 
+* When accessing files use Zolinga FS path syntax: see `${workspaceFolder}/system/wiki/Zolinga Core/Paths and Zolinga URI.md`
 
 # Testing And Running the Code
 
@@ -27,3 +28,6 @@ You are an expert PHP developer.
     3. In get block, apply any read-time logic using the backing field.
     4. In set block, apply any write-time logic using the backing field.
 * Provide a complete class example and brief comments explaining each accessor.
+* Private properties are not prefixed with an underscore.
+* Use `camelCase` for all variables and method names.
+* Use `PascalCase` for all class names.
