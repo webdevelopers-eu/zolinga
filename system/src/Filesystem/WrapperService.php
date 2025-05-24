@@ -14,6 +14,7 @@ use const Zolinga\System\ROOT_DIR;
  * - public://{module-name}/ - module public data directory, e.g. ROOT_DIR . '/public/data/{module-name}/'
  * - private://{module-name}/ - module private data directory, e.g. ROOT_DIR . '/data/{module-name}/'
  * - dist://{module-name}/ - module dist data directory, e.g. ROOT_DIR . '/public/dist/{module-name}/'
+ * - config://{module-name}/{config-file} - ROOT_DIR . '/config/{module-name}/{config-file}'
  * 
  * Accessible as the $api->fs service.
  *
@@ -22,7 +23,7 @@ use const Zolinga\System\ROOT_DIR;
  */
 class WrapperService implements ServiceInterface
 {
-    const SCHEMES = ['module', 'public', 'private', 'dist', 'wiki'];
+    const SCHEMES = ['module', 'public', 'private', 'dist', 'wiki', 'config'];
 
     /**
      * Module locations indexed by module name.
@@ -76,6 +77,7 @@ class WrapperService implements ServiceInterface
      * $api->fs->toPath('public://my-module/file.txt');  // Returns '/var/www/html/public/data/my-module/file.txt'
      * $api->fs->toPath('private://my-module/file.txt'); // Returns '/var/www/html/data/my-module/file.txt'
      * $api->fs->toPath('dist://my-module/file.txt');  // Returns '/var/www/html/modules/my-module/install/dist/file.txt'
+     * $api->fs->toPath('config://my-module/settings.json'); // Returns '/var/www/html/config/my-module/settings.json'
      *
      * @param string $uri The scheme to convert into file system path.
      * @return string|false The corresponding file path and false if the scheme is not recognized.
@@ -96,6 +98,7 @@ class WrapperService implements ServiceInterface
             'public' => ROOT_DIR . '/public/data/' . $urlHost . $urlPath,
             'private' => ROOT_DIR . '/data/' . $urlHost . $urlPath,
             'dist' => ROOT_DIR . '/public/dist/' . $urlHost . $urlPath,
+            'config' => ROOT_DIR . '/config/' . $urlHost . $urlPath,
             default => false
         };
     }
@@ -109,6 +112,7 @@ class WrapperService implements ServiceInterface
      * $api->fs->toZolingaUri('/var/www/html/public/data/my-module/file.txt');  // Returns 'public://my-module/file.txt'
      * $api->fs->toZolingaUri('/var/www/html/data/my-module/file.txt'); // Returns 'private://my-module/file.txt'
      * $api->fs->toZolingaUri('/var/www/html/modules/my-module/install/dist/file.txt');  // Returns 'dist://my-module/file.txt'
+     * $api->fs->toZolingaUri('/var/www/html/config/my-module/settings.json'); // Returns 'config://my-module/settings.json'
      *
      * @param string $path The file path to convert into Zolinga URI
      * @return string|false The converted scheme or false if no matching scheme is found.
@@ -123,6 +127,7 @@ class WrapperService implements ServiceInterface
             str_starts_with($path, ROOT_DIR . '/public/data/') => substr_replace($path, 'public://', 0, strlen(ROOT_DIR . '/public/data/')),
             str_starts_with($path, ROOT_DIR . '/data/') => substr_replace($path, 'private://', 0, strlen(ROOT_DIR . '/data/')),
             str_starts_with($path, ROOT_DIR . '/public/dist/') => substr_replace($path, 'dist://', 0, strlen(ROOT_DIR . '/public/dist/')),
+            str_starts_with($path, ROOT_DIR . '/config/') => substr_replace($path, 'config://', 0, strlen(ROOT_DIR . '/config/')),
             default => $this->path2ModuleUri($path)
         };
 
