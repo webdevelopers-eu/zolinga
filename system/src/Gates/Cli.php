@@ -110,7 +110,9 @@ class Cli
         if ($this->options['execute']) {
             $script = $this->options['execute'];
             if (!is_string($script) || !file_exists($script)) {
-                throw new \Exception("Script $script does not exist.");
+                $msg = "Script $script does not exist. Current working directory: " . getcwd();
+                $this->printError($msg);
+                throw new \Exception($msg);
             }
             (function ($script) {
                 global $api;
