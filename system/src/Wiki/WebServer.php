@@ -61,8 +61,8 @@ class WebServer implements ListenerInterface
 
         $base = $event->content->getElementsByTagName('base')->item(0);
         if ($base instanceof \DOMElement) {
-            $urlBase = str_replace('${urlPrefix}', $this->prefix, $base->getAttribute('href'));
-            $base->setAttribute('href', $urlBase);
+            $baseURL = str_replace('${urlPrefix}', $this->prefix, $base->getAttribute('href'));
+            $base->setAttribute('href', $baseURL);
         }
         
         $event->setStatus(ContentEvent::STATUS_OK, 'Wiki page loaded');
