@@ -49,6 +49,10 @@ The first article.
 
 The header section is separated from the content by an empty line.
 
+# Links
+
+All the .md files from all modules are merged into a single wiki. The links to the articles are relative to the wiki root, so you can link to any article using the path like `:Zolinga Core:WIKI:Syntax`. This will display to the `wiki/Zolinga Core/WIKI/Syntax.md` file. The "parent" page `:Zolinga Core:WIKI` will be mapped to the `wiki/Zolinga Core/WIKI.md` file.
+
 # Syntax
 
 The base parser is great [Parsedown](https://github.com/erusev/parsedown/wiki/) with few tweaks.
