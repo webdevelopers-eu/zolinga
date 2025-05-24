@@ -13,12 +13,18 @@
 * When accessing files use Zolinga FS path syntax: see `${workspaceFolder}/system/wiki/Zolinga Core/Paths and Zolinga URI.md`
 * Merged configurations inside module's zolinga.json and config/global.json, config/local.json files are exposed as `$api->config[key1][key2]...` see: `${workspaceFolder}/system/wiki/templates/Config Event.md`
 
+# Translations
+
+* Translatable PHP strings are used through PHP's gettext method `dgettext(<module-name>, <string>)`. `<module-name>` is the module folder name.
+* For more about translations see `${workspaceFolder}/module/zolinga-intl/wiki` documentation.
+* Do not create gettext files or /locale folders, just use dgettext() or dngettext()
 
 # Testing And Running the Code
 
 * You can run the system by running `bin/zolinga` command. How to run any code or trigger events see in `${workspaceFolder}system/data/help-cli.txt`
-    * Using `bin/zolinga` command you can run any event, run arbitrary PHP script or inline PHP code and also start inbuilt PHP web server to run the frontend.
-
+    * Using `bin/zolinga` command you can run any CLI sourced event - `bin/zolinga EVENT1 <params>`
+    * You can run even test scripts directly from the command line like this: `bin/zolinga --execute=".../my-script.php"` or `bin/zolinga --eval="echo 'Hello World';"`. 
+    * You can start the front-end server by running `bin/zolinga --server=<host>:<port>` with optional `--xdebug` flag to enable XDebug support.
 
 # Coding Style
 
