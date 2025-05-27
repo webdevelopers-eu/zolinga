@@ -6,6 +6,7 @@ namespace Zolinga\System\Health;
 
 use Zolinga\System\Events\HealthCheckEvent;
 use Zolinga\System\Events\ListenerInterface;
+use Zolinga\System\Types\SeverityEnum;
 use Zolinga\System\Types\StatusEnum;
 
 /**
@@ -17,7 +18,7 @@ use Zolinga\System\Types\StatusEnum;
  * @author GitHub Copilot <copilot@github.com>
  * @since 2025-05-23
  */
-class HealthMonitorListener implements ListenerInterface
+class HealthCheckListener implements ListenerInterface
 {    
     /**
      * Handle the internal healthcheck event
@@ -40,11 +41,11 @@ class HealthMonitorListener implements ListenerInterface
         // Check if the path exists
         foreach ($pathToCheck as $path) {
             if (!is_dir($path)) {
-                $event->report('Disk Space', StatusEnum::ERROR, "Data directory not found: $path");
+                $event->report('Disk Space', SeverityEnum::ERROR, "Data directory not found: $path");
                 return;
             }
             if (!is_writable($path)) {
-                $event->report('Disk Space', StatusEnum::ERROR, "Data directory not writable: $path");
+                $event->report('Disk Space', SeverityEnum::ERROR, "Data directory not writable: $path");
                 return;
             }
 
@@ -61,13 +62,13 @@ class HealthMonitorListener implements ListenerInterface
                     round($minSpace / 1024 / 1024)
                 );
                 // Report error if free space is below the minimum
-                $event->report('Disk Space', StatusEnum::ERROR, "Low disk space: $info");
+                $event->report('Disk Space', SeverityEnum::ERROR, "Low disk space: $info");
                 $error = true;
             }
         }
 
         if (!$error) {
-            $event->report('Disk Space', StatusEnum::OK, "Sufficient disk space >" . round($minSpace / 1024 / 1024) . "MB");
+            $event->report('Disk Space', SeverityEnum::INFO, "Sufficient disk space >" . round($minSpace / 1024 / 1024) . "MB");
         }
     }
 }

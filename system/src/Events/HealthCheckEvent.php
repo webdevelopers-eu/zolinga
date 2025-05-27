@@ -64,27 +64,29 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
      * Report a health check result for a component
      * 
      * @param string $component Name of the component being checked
-     * @param StatusEnum $status Status of the component
+     * @param SeverityEnum $severity Status of the component
      * @param string $description Description of the health status or issue
      * @return self Returns $this for method chaining
      */
-    public function report(string $component, StatusEnum $status, string $description): self
+    public function report(string $component, SeverityEnum $severity, string $description): self
     {
         global $api;
 
+        $isError = $severity !== SeverityEnum::INFO;
+
         $this->reports[] = [
             'component' => $component,
-            'status' => $status,
-            'description' => $description,
+            'severity' => $severity,
+            'description' => $severity->getEmoji() . ' ' . $description,
             'timestamp' => time()
         ];
         
         // If any component reports an error, update the event status
-        if ($status->isError() && !$this->status->isError()) {
-            $this->setStatus($status, "Health check detected issues");
+        if ($isError) {
+            $this->setStatus(StatusEnum::ERROR, "Health check detected issues");
         }
 
-        $api->log->log($status->isError() ? SeverityEnum::ERROR : SeverityEnum::INFO, "system", "Health check for $component: $description");
+        $api->log->log($severity, "system", "Health check for $component: $description");
         
         return $this;
     }
@@ -115,7 +117,7 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
         // Generate a summary of the health check reports
         $errors = [];        
         foreach ($this->reports as $report) {
-            if ($report['status']->isError()) {
+            if ($report['severity'] !== SeverityEnum::INFO) {
                 $errors[$report['component']] = $report['component'];
             }
         }

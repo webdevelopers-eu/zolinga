@@ -20,7 +20,7 @@
     {
       "description": "System health monitor for internal health checks.",
       "event": "healthcheck",
-      "class": "\\Zolinga\\System\\Health\\HealthMonitorListener",
+      "class": "\\Zolinga\\System\\Health\\HealthCheckListener",
       "method": "onHealthcheck",
       "origin": [
         "internal"
@@ -198,6 +198,14 @@
     }
   ],
   "emit": [
+    {
+      "event": "healthcheck",
+      "description": "Event that is fired by the health check command (`bin/zolinga healthcheck`). Listeners are supposed to return the health status of the system.",
+      "class": "\\Zolinga\\System\\Events\\HealthCheckEvent",
+      "origin": [
+        "internal"
+      ]
+    },
     {
       "event": "system:authorize",
       "description": "\\Zolinga\\System\\Events\\AuthorizeEvent is dispatched when an Event is going to be processed by the Listener having the 'right' option set in zolinga.json. Authorization Providers are supposed to call $event->autorize() if the user has the $event->right permission.",

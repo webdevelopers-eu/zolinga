@@ -50,6 +50,7 @@ class HealthCheckCli implements ListenerInterface
         
         // Add the health reports to the event response
         $event->response = [
+            'data' => $healthcheckEvent->response,
             'reports' => $healthcheckEvent->reports,
             'summary' => $healthcheckEvent->getSummary(),
             'notification' => [
