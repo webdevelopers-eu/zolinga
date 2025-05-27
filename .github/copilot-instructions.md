@@ -31,7 +31,9 @@
 You are an expert PHP developer. 
 
 * Generate PHP 8.4-compatible code
-* Instead of method accessors use properties with get and set blocks if required, you may use also assymetric visibility.
-* Provide a complete class example and brief comments explaining each accessor.
+* Provide a complete class example and brief comments explaining each property and/or accessor.
 * Use `camelCase` for all variables and method names.
-* Use `PascalCase` for all class names.
+* Use `PascalCase` for all class names. 
+* Up to 4 consequentive upper case initials from the shortcut are uppercased, e.g. `XMLHttpRequest` or `HTTPClient` or `getURL()`.
+* Use `kebab-case` (also known as `lisp-case`) for all file names, e.g. `my-class.php`, `my-module.json`, `my-event.md`. 
+    * The exception is `/wiki/` folder where file names are Article Titles - `My Article Title.md`.

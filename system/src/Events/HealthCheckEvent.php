@@ -19,7 +19,7 @@ use Zolinga\System\Types\SeverityEnum;
  * @property-read array $reports Collection of health check reports from various components
  * @property-read ?string $notifyEmail Email address to send notifications to if issues are found
  */
-class HealthCheckEvent extends RequestEvent implements StoppableInterface
+class HealthCheckEvent extends RequestResponseEvent implements StoppableInterface
 {
     use StoppableTrait;
 
