@@ -72,7 +72,7 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
     {
         global $api;
 
-        $isError = $severity !== SeverityEnum::INFO;
+        $isError = !in_array($severity, [SeverityEnum::INFO, SeverityEnum::WARNING]);
 
         $this->reports[] = [
             'component' => $component,
@@ -117,7 +117,7 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
         // Generate a summary of the health check reports
         $errors = [];        
         foreach ($this->reports as $report) {
-            if ($report['severity'] !== SeverityEnum::INFO) {
+            if (!in_array($report['severity'], [SeverityEnum::INFO, SeverityEnum::WARNING])) {
                 $errors[$report['component']] = $report['component'];
             }
         }
