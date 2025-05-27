@@ -70,6 +70,7 @@ class HealthCheckCli implements ListenerInterface
             $api->log->error("system", "Health check failed with status: $status");
         } else {
             $api->log->info("system", "Health check completed successfully with status: $status");
+            $api->pingjoe->ping("ipd:healthcheck", "+8 hours");
         }
     }
     
