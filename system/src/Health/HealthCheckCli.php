@@ -84,10 +84,12 @@ class HealthCheckCli implements ListenerInterface
     {
         global $api;
         
-        $subject = "Health Check Alert - " . $event->status->getFriendlyName();
-        $body = $event->getSummary();
-        $body .= "\n\nThis is an automated message from Zolinga Health Monitor.";
-        
+        $subject = "Health Check Alert - " . implode(', ', $event->getFailedComponents());
+        $body = "This is an automated message from Zolinga Health Monitor.\n\n";
+        $body .= implode("\n", $event->getReportsAsTexts());
+        $body .= "\n\nDetails:\n";
+        $body .= json_encode($event->response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
         // Using PHP's mail function as a fallback
         if (mail($email, $subject, $body)) {
             $api->log->info("system", "Health check notification sent to $email");

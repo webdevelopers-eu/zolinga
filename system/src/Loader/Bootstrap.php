@@ -117,6 +117,8 @@ class Bootstrap
 
     public function initSession(): void
     {
+        global $api;
+
         // Make sure SESSION cookie is secure, uses HTTPOnly and SameSite=Strict
         session_set_cookie_params([
             'secure' => IS_HTTPS, // set to true when HTTPS is available
@@ -125,10 +127,14 @@ class Bootstrap
         ]);
 
         if (session_status() === PHP_SESSION_NONE) {
-            session_start() or throw new \Exception('Cannot start session.');
+            if (!session_start()) {
+                $api->log->error('system', 'Failed to start session.');
+                throw new \Exception('Cannot start session.');
+            }
         }
 
         if (isset($_REQUEST['destroy'])) {
+            $api->log->info('system', 'Session destroyed by request.');
             session_destroy();
             session_start();
         }

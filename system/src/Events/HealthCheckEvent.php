@@ -124,4 +124,26 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
         
         return "Failed components: " . implode(', ', $errors) . ".";
     }
+
+    public function getFailedComponents(): array
+    {
+        $failed = [];
+        foreach ($this->reports as $report) {
+            if (!in_array($report['severity'], [SeverityEnum::INFO, SeverityEnum::WARNING])) {
+                $failed[] = $report['component'];
+            }
+        }
+        return $failed;
+    }
+
+    public function getReportsAsTexts(): array
+    {
+        $return = [];
+        
+        foreach($this->reports as $report) {
+            $return[] = $report['severity']->getEmoji() . ' ' . $report['component'] . ': ' . $report['description'];
+        }
+
+        return $return;
+    }
 }
