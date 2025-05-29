@@ -111,7 +111,7 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
     public function getSummary(): string
     {
         if ($this->status->isOk()) {
-            return "All components are healthy.";
+            return "☺️ All components are healthy.";
         }
         
         // Generate a summary of the health check reports
@@ -122,7 +122,7 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
             }
         }
         
-        return "Failed components: " . implode(', ', $errors) . ".";
+        return "❗Failed components: " . implode(', ', $errors) . ".";
     }
 
     public function getFailedComponents(): array
