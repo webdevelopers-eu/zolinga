@@ -75,9 +75,10 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
         $isError = !in_array($severity, [SeverityEnum::INFO, SeverityEnum::WARNING]);
 
         $this->reports[] = [
+            'emoji' => $severity->getEmoji(),
             'component' => $component,
             'severity' => $severity,
-            'description' => $severity->getEmoji() . ' ' . $description,
+            'description' => $description,
             'timestamp' => time()
         ];
         
