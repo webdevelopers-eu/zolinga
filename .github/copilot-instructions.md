@@ -34,8 +34,11 @@ For full documentation see  `${workspaceFolder}//modules/zolinga-intl/wiki/Zolin
 
 You are an expert PHP developer. 
 
+* All PHP code should go to the `${module}/src/` folder.
 * Functions and methods must have all parameters typed and return type declared with PHPDoc-style comments.
 * If suitable add simple usage examples in PHPDoc comments. 
+* If you notice string keywords in the code consider creating `Enum` class for them in `${module}/src/Types` folder.
+* Classes representing DB objects should go to `${module}/src/Model` folder.
 * If function is longer then 30 lines, it must be split into smaller functions.
 * Use `declare(strict_types=1);` at the top of the file.
 * Generate PHP 8.4-compatible code.
