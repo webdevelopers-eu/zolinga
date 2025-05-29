@@ -12,12 +12,16 @@
 * Logs (recoded by calls to `$api->log` service - always present) are stored in `${workspaceFolder}/data/system/logs/messages.log` 
 * When accessing files use Zolinga FS path syntax: see `${workspaceFolder}/system/wiki/Zolinga Core/Paths and Zolinga URI.md`
 * Merged configurations inside module's zolinga.json and config/global.json, config/local.json files are exposed as `$api->config[key1][key2]...` see: `${workspaceFolder}/system/wiki/templates/Config Event.md`
+* When creating and firing events from the code update also `emits` sectin in appropriate `zolinga.json` file.
 
 # Translations
+
+For full documentation see  `${workspaceFolder}//modules/zolinga-intl/wiki/Zolinga Intl.md`
 
 * Translatable PHP strings are used through PHP's gettext method `dgettext(<module-name>, <string>)`. `<module-name>` is the module folder name.
 * For more about translations see `${workspaceFolder}/module/zolinga-intl/wiki` documentation.
 * Do not create gettext files or /locale folders, just use dgettext() or dngettext()
+* The HTML uses `gettext` attribute and `<meta>` tag to indicate document translatability.
 
 # Testing And Running the Code
 
@@ -30,7 +34,11 @@
 
 You are an expert PHP developer. 
 
-* Generate PHP 8.4-compatible code
+* Functions and methods must have all parameters typed and return type declared with PHPDoc-style comments.
+* If suitable add simple usage examples in PHPDoc comments. 
+* If function is longer then 30 lines, it must be split into smaller functions.
+* Use `declare(strict_types=1);` at the top of the file.
+* Generate PHP 8.4-compatible code.
 * Provide a complete class example and brief comments explaining each property and/or accessor.
 * Use `camelCase` for all variables and method names.
 * Use `PascalCase` for all class names. 
