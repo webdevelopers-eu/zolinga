@@ -132,10 +132,10 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
         if (count($groups[SeverityEnum::ERROR->value] ?? [])) {
             return "❗Failed components: " . implode(', ', $groups[SeverityEnum::ERROR->value]) . ".";
         } elseif (count($groups[SeverityEnum::WARNING->value] ?? [])) {
-            return "🤔 All components are healthy (warnings: " . implode(', ', $groups[SeverityEnum::WARNING->value]) . ").";
+            return "☺️ All components are healthy (warnings: " . implode(', ', $groups[SeverityEnum::WARNING->value]) . ").";
         }
 
-        return "☺️ All components are healthy."; 
+        return "🥳 All components are healthy."; 
     }
 
     public function getFailedComponents(): array
