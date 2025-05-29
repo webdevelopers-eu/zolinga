@@ -91,7 +91,10 @@ class HealthCheckCli implements ListenerInterface
         $body .= json_encode($event->response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
         // Using PHP's mail function as a fallback
-        if (mail($email, $subject, $body)) {
+        if (mail($email, $subject, $body, [
+            'From' => 'info@' . parse_url($api->config['baseURL'], PHP_URL_HOST),
+            'Content-Type' => 'text/plain; charset=UTF-8',
+            ])) {
             $api->log->info("system", "Health check notification sent to $email");
         } else {
             $api->log->error("system", "Failed to send health check notification to $email");
