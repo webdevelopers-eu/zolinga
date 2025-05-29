@@ -103,6 +103,22 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
         return parent::setStatus($status, $message);
     }
 
+    private function getGroupedComponents(): array
+    {
+        // Group components by severity
+        $grouped = [
+            SeverityEnum::ERROR->value => [],
+            SeverityEnum::WARNING->value => [],
+            SeverityEnum::INFO->value => []
+        ];
+        
+        foreach ($this->reports as $report) {
+            $grouped[$report['severity']->value][$report['component']] = $report['component'];
+        }
+        
+        return $grouped;
+    }
+
     /**
      * Get a formatted summary of all health reports
      * 
@@ -110,30 +126,22 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
      */
     public function getSummary(): string
     {
-        if ($this->status->isOk()) {
-            return "☺️ All components are healthy.";
-        }
-        
         // Generate a summary of the health check reports
-        $errors = [];        
-        foreach ($this->reports as $report) {
-            if (!in_array($report['severity'], [SeverityEnum::INFO, SeverityEnum::WARNING])) {
-                $errors[$report['component']] = $report['component'];
-            }
+        $groups = $this->getGroupedComponents();
+
+        if (count($groups[SeverityEnum::ERROR->value] ?? [])) {
+            return "❗Failed components: " . implode(', ', $groups[SeverityEnum::ERROR->value]) . ".";
+        } elseif (count($groups[SeverityEnum::WARNING->value] ?? [])) {
+            return "🤔 All components are healthy (warnings: " . implode(', ', $groups[SeverityEnum::WARNING->value]) . ").";
         }
-        
-        return "❗Failed components: " . implode(', ', $errors) . ".";
+
+        return "☺️ All components are healthy."; 
     }
 
     public function getFailedComponents(): array
     {
-        $failed = [];
-        foreach ($this->reports as $report) {
-            if (!in_array($report['severity'], [SeverityEnum::INFO, SeverityEnum::WARNING])) {
-                $failed[] = $report['component'];
-            }
-        }
-        return $failed;
+        $grouped = $this->getGroupedComponents();
+        return $grouped[SeverityEnum::ERROR->value] ?? [];
     }
 
     public function getReportsAsTexts(): array
