@@ -12,7 +12,14 @@
 * Logs (recoded by calls to `$api->log` service - always present) are stored in `${workspaceFolder}/data/system/logs/messages.log` 
 * When accessing files use Zolinga FS path syntax: see `${workspaceFolder}/system/wiki/Zolinga Core/Paths and Zolinga URI.md`
 * Merged configurations inside module's zolinga.json and config/global.json, config/local.json files are exposed as `$api->config[key1][key2]...` see: `${workspaceFolder}/system/wiki/templates/Config Event.md`
+    * `global.json` and other config files in `config/{module-name}/...` folder (accessible through `config://{module-name}/...` Zolinga URI) are global per-project configuration shared between development and production environments 
+    * `local.json` is a local configuration with settings valid only for this particular environment.
+    * Modules may choose if to put things into `global.json` or `local.json` files. Both files are loaded at runtime and merged and available through `$api->config`. Bigger/complex/non-JSON config files should go to separate `config://{module-name}/...` files and modules should handle them independently.   
 * When creating and firing events from the code update also `emits` sectin in appropriate `zolinga.json` file.
+* Do not use dependency injection logic - no need for it it is PHP, e.g. for accessing `$api` services use `global $api` and then use `$api->serviceName` 
+* The module structure is as follows: `${workspaceFolder}/system/wiki/Zolinga Core/Module Anatomy.md`
+   * It also explains where to put PHP scripts and other code that needs to be accessible from the web.
+
 
 # Translations
 
@@ -29,6 +36,9 @@ For full documentation see  `${workspaceFolder}//modules/zolinga-intl/wiki/Zolin
     * Using `bin/zolinga` command you can run any CLI sourced event - `bin/zolinga EVENT1 <params>`
     * You can run even test scripts directly from the command line like this: `bin/zolinga --execute=".../my-script.php"` or `bin/zolinga --eval="echo 'Hello World';"`. 
     * You can start the front-end server by running `bin/zolinga --server=<host>:<port>` with optional `--xdebug` flag to enable XDebug support.
+* Accessing the web front-end is done through `http://{hostname}/...`
+    * if the front-end is run using `bin/zolinga --server=localhost:8080` then the hostname is `localhost` and the port is `8080`.
+    * if it runs through existing webserver the URL address is in `config/local.json` (higher priority) or `config/global.json` (lower) `baseURL` property.  
 
 # Coding Style
 
@@ -48,3 +58,14 @@ You are an expert PHP developer.
 * Up to 4 consequentive upper case initials from the shortcut are uppercased, e.g. `XMLHttpRequest` or `HTTPClient` or `getURL()`.
 * Use `kebab-case` (also known as `lisp-case`) for all file names, e.g. `my-class.php`, `my-module.json`, `my-event.md`. 
     * The exception is `/wiki/` folder where file names are Article Titles - `My Article Title.md`.
+
+# Services
+
+* All listeners implement `Zolinga\System\ListenerInterface` 
+* All services implement `Zolinga\System\ServiceInterface`
+
+# Custom API Endpoints
+
+* They go to `${module}/install/dist/...` folder and can be accessed through `https://example.com/dist/{module}/...`
+* How to structure it, load the system - refer to default Zolinga API endpoint `${workspaceFolder}/system/install/dist/gate/index.php`
+

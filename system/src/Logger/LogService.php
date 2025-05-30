@@ -130,12 +130,16 @@ class LogService implements ServiceInterface
             return;
         }
 
-        $this->path = $api->fs->toPath("private://system/logs/messages.log");
-        if (!is_dir(dirname($this->path))) {
-            mkdir(dirname($this->path), 0777, true);
+        if ($api->serviceExists('fs')) {
+            $this->path = $api->fs->toPath("private://system/logs/messages.log");
+            if (!is_dir(dirname($this->path))) {
+                mkdir(dirname($this->path), 0777, true);
+            }
+            $this->rotate();
+        } else {
+            $this->write(SeverityEnum::ERROR, 'system', 'Cannot start logger: File system service is not available. Logging to stderr instead.', null);
+            $this->path = 'php://stderr';
         }
-
-        $this->rotate();
 
         // Flush the buffer
         file_put_contents($this->path, $this->buffer, FILE_APPEND | LOCK_EX);

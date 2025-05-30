@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Config\Atom;
 
+use Zolinga\System\Config\ConfigException;
 use Zolinga\System\Events\Event;
 use Zolinga\System\Types\OriginEnum;
 
@@ -52,14 +53,31 @@ class ListenAtom extends \ArrayObject implements AtomInterface
         sort($data['origin']);
 
         if (!empty($data['right']) && !is_string($data['right'])) {
-            throw new \Exception("The right attribute must be a string or false: " . json_encode($data));
+            throw new ConfigException("The right attribute must be a string or false: " . json_encode($data));
         }
 
+        $class = $data['class'] ?? null
+            or throw new ConfigException("The class attribute is required in the listen atom: " . json_encode($data));
+        $eventName = $data['event'] ?? null
+            or throw new ConfigException("The event attribute is required in the listen atom: " . json_encode($data));
+
+        $origin = array_map(function ($originName) use ($data) {
+            $origin = OriginEnum::tryFrom($originName);
+            if (!$origin) {
+                throw new ConfigException(
+                    "Invalid origin value " . json_encode($originName) ." in listen atom. " .
+                    "Valid values are: " . json_encode(array_column(OriginEnum::cases(), 'value')) . " " .
+                    "Atom: " . json_encode($data)
+                );
+            }
+            return $origin;
+        }, $data['origin'] ?? []);
+
         $data = [
-            "event" => $data['event'],
-            "class" => '\\' . ltrim($data['class'], '\\'),
+            "event" => $eventName,
+            "class" => '\\' . ltrim($class, '\\'),
             "method" => $data['method'] ?? null,
-            "origin" => array_map(fn ($originName) => OriginEnum::from($originName), $data['origin']),
+            "origin" => $origin,
             "description" => $data['description'] ?? null,
             "priority" => floatval($data['priority'] ?? 0.5),
             "right" => empty($data['right']) ? false : (string) $data['right'],
