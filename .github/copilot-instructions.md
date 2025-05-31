@@ -19,7 +19,8 @@
 * Do not use dependency injection logic - no need for it it is PHP, e.g. for accessing `$api` services use `global $api` and then use `$api->serviceName` 
 * The module structure is as follows: `${workspaceFolder}/system/wiki/Zolinga Core/Module Anatomy.md`
    * It also explains where to put PHP scripts and other code that needs to be accessible from the web.
-
+* The System caches all zolinga.json files. If the contents changes it gets automatically reloaded. So bump up minor version of the module in `zolinga.json` file to trigger the reload.
+* Database is usually accessed through `$api->db` with `query` and `queryExpand` methods. DB installation scripts are stored in `${workspaceFolder}/modules/{module-name}/install/install/*.sql` - see `Module Installation and Updates.md`
 
 # Translations
 
@@ -58,11 +59,13 @@ You are an expert PHP developer.
 * Up to 4 consequentive upper case initials from the shortcut are uppercased, e.g. `XMLHttpRequest` or `HTTPClient` or `getURL()`.
 * Use `kebab-case` (also known as `lisp-case`) for all file names, e.g. `my-class.php`, `my-module.json`, `my-event.md`. 
     * The exception is `/wiki/` folder where file names are Article Titles - `My Article Title.md`.
+* The `zolinga.json` is documented in `${workspaceFolder}/system/wiki/Zolinga Core/Manifest File.md` and must follow the rules described there.
+    * In need refer to other `zolinga.json` files in `${workspaceFolder}/modules/*/zolinga.json` files.
 
 # Services
 
-* All listeners implement `Zolinga\System\ListenerInterface` 
-* All services implement `Zolinga\System\ServiceInterface`
+* All listeners implement `Zolinga\System\Events\ListenerInterface` 
+* All services implement `Zolinga\System\Events\ServiceInterface`
 
 # Custom API Endpoints
 

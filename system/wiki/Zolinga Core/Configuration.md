@@ -9,6 +9,10 @@ Since this is a default configuration that is meant to be changed by the user, t
 - `./config/local.json`
   - On start it is merged with the `global.json` a all `zolinga.json` files overwriting them all.
   - This file is meant to contain configurations that pertain to this particular machine installation and is not supposed to be synced or deployed to other machines.
+- `./config/{module-name}/...`
+  - This directory is meant for storing of any type module-specific configuration files that are not required to be loaded on every system load. The `local.json` and `global.json` are loaded automatically on startup so they are not meant for complex or rarely used configurations.
+  - These files can be accessed using the Zolinga URI scheme, e.g., `config://{my-module}/...`.
+  - Modules are responsible for loading and parsing these specific configuration files themselves.
 
 # Rules
 
