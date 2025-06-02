@@ -86,6 +86,7 @@ set_error_handler(function ($errNo, $errStr, $errFile, $errLine) {
     file_put_contents("php://stderr", "$severity: $errStr [" . basename($errFile) . ":$errLine]\n");
 });
 
+$api->log->info('cli', '🟣 Starting Zolinga CLI script: bin/zolinga ' . implode(' ', array_slice($argv, 1)));
 (new Cli)->run($argv);
 
 // End of file
