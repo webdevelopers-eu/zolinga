@@ -27,8 +27,8 @@ use const Zolinga\System\IS_INTERACTIVE;
  * 
  * The log format is with and without context as follows:
  * 
- *   [{date}] [{severity}] {ip|sapi} {runtimeId}/pid{pid} [{category}] "{JSON_STRING}"   
- *   [{date}] [{severity}] {ip|sapi} {runtimeId}/pid{pid} [{category}] "{JSON_STRING}" """" {JSON_CONTEXT_ARRAY}
+ *   [{date}] [{severity}] {ip|sapi} {logId}/pid{pid} [{category}] "{JSON_STRING}"   
+ *   [{date}] [{severity}] {ip|sapi} {logId}/pid{pid} [{category}] "{JSON_STRING}" """" {JSON_CONTEXT_ARRAY}
  * 
  * Examples: 
  * 
@@ -47,7 +47,19 @@ class LogService implements ServiceInterface
 
     private ?string $path = null;
     private string $buffer = '';
-    private readonly string $runtimeId;
+
+    /**
+     * A short string to uniquely identify the runtime logs from this run.
+     * 
+     * This is used to differentiate logs from different runs of the same script.
+     * It is a random string generated at the start of the script.
+     * 
+     * It is short 4 characters so it is not entirely unique. In logs it is
+     * printed together with the process ID (pid) to make it more unique.
+     *
+     * @var string
+     */
+    public readonly string $logId;
 
     /**
      * Count of messages logged with severity ERROR.
@@ -72,7 +84,7 @@ class LogService implements ServiceInterface
 
     public function __construct() {
         // Short string to uniquely identify the runtime logs from this run.
-        $this->runtimeId = substr(base_convert(strval(rand(1000000000, 9999999999)), 10, 36), 0, 4);
+        $this->logId = substr(base_convert(strval(rand(1000000000, 9999999999)), 10, 36), 0, 4);
     }
 
     /**
@@ -281,7 +293,7 @@ class LogService implements ServiceInterface
             '['.date('c').']',
             $_SERVER['REMOTE_ADDR'] ?? php_sapi_name(),
             '['.$category.':'.$severity->value.']',
-            $this->runtimeId . '/' . getmypid(),
+            $this->logId . '/' . getmypid(),
             sprintf("%.1F", memory_get_usage() / 1024 / 1024) . 'M',
             $severity->getEmoji(),
             json_encode($message, $jsonFlags),
