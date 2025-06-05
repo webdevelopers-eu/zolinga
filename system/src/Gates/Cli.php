@@ -90,6 +90,8 @@ class Cli
         $this->parseCliArguments($args);
         $this->parseOptions();
 
+        $this->printError("🏁 Start[pid#" . getmypid() . "]: bin/zolinga " . (implode(' ', array_slice($args, 1)) ?: '-'));
+        
         if (!count($this->parsedArgs) && !count(array_filter($this->options))) {
             $this->printError("No events or options provided. Use --help to see the help message.\n");
             return;
