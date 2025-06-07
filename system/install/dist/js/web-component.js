@@ -102,6 +102,7 @@ export default class WebComponent extends HTMLElement {
    * Resolves when the component is attached to the DOM.
    */
   #connectedPromise;
+  #connectedResolve;
 
   /**
      * The broadcast channel to send and receive messages.
@@ -126,7 +127,12 @@ export default class WebComponent extends HTMLElement {
     });
     this.#readyResolve = resolve;
 
-    this.#connectedPromise = new Promise((accept) => this.isConnected ? accept() : this.addEventListener('connected', accept, { once: true }));
+    this.#connectedPromise = new Promise((resolve) => {
+      this.#connectedResolve = resolve;
+    });
+    if (this.isConnected) {
+      this.#connectedResolve();
+    }
 
     if (this.hasAttribute('disabled')) {
       this.#installWaitEnabledPromise();
@@ -323,7 +329,6 @@ export default class WebComponent extends HTMLElement {
     */
   async waitEnabled() {
     await this.#enabledPromise;
-    await this.#connectedPromise; // Ensure the component is connected to the DOM
   }
 
   /**
@@ -436,6 +441,11 @@ export default class WebComponent extends HTMLElement {
         this.#enabledPromise = null;
       }
     }
+  }
+
+  connectedCallback() {
+    this.#connectedResolve();
+    this.#connectedPromise = null; // Clear the promise after resolving it
   }
 
   #onMessage(ev) {
