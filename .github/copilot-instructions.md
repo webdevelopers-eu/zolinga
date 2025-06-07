@@ -1,7 +1,7 @@
 # Basics
 
 * All modules are stored in `${workspaceFolder}/modulesp/` directory.
-    * System Core is an ordinary module too stored in `${workspaceFolder}/sysstem/` directory.
+    * System Core is an ordinary module too stored in `${workspaceFolder}/system/` directory.
 * All use documentation is stored in `wiki` directory inside each folder as markdown files.
 * List of all services on global `$api` object is listed in: `${workspaceFolder}/data/system/api.stub.php`
 * Each module caries `zolinga.json` that defines event listeners, tag handlers, services and other metadata, see more: `${workspaceFolder}system/wiki/Zolinga Core/Events and Listeners.md`
@@ -21,13 +21,21 @@
    * It also explains where to put PHP scripts and other code that needs to be accessible from the web.
 * The System caches all zolinga.json files. If the contents changes it gets automatically reloaded. So bump up minor version of the module in `zolinga.json` file to trigger the reload.
 * Database is usually accessed through `$api->db` with `query` and `queryExpand` methods. DB installation scripts are stored in `${workspaceFolder}/modules/{module-name}/install/install/*.sql` - see `Module Installation and Updates.md`
+* Note that modules `install/dist` folder is automatically symlinked to public folder `${workspaceFolder}/public/dist/{module-name}` and can be accessed through `https://example.com/dist/{module-name}/...` URL.
+
+# Web Components
+
+* All web components are stored in `${workspaceFolder}/modules/{module-name}/install/dist/web-components/` folder.
+* For whole documentation see `${workspaceFolder}/system/wiki/Zolinga Core/Web Components.md`
+* When creating a web component, do not forget to update `zolinga.json` in respective module folder - this replaces the need for `customElements.define()` call - system does it.
+* The web components documentation is stored in the same file as main `.js` component but has `.md` extension, e.g. `${workspaceFolder}/modules/{module-name}/install/dist/web-components/my-component/my-component.md`
 
 # Translations
 
-For full documentation see  `${workspaceFolder}//modules/zolinga-intl/wiki/Zolinga Intl.md`
+For full documentation see  `${workspaceFolder}/modules/zolinga-intl/wiki/Zolinga Intl.md`
 
 * Translatable PHP strings are used through PHP's gettext method `dgettext(<module-name>, <string>)`. `<module-name>` is the module folder name.
-* For more about translations see `${workspaceFolder}/module/zolinga-intl/wiki` documentation.
+* For more about translations see `${workspaceFolder}/modules/zolinga-intl/wiki` documentation.
 * Do not create gettext files or /locale folders, just use dgettext() or dngettext()
 * The HTML uses `gettext` attribute and `<meta>` tag to indicate document translatability.
 

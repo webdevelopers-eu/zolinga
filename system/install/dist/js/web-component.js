@@ -16,6 +16,53 @@ import components from '/dist/system/js/web-components.js';
  * @author Daniel Sevcik <danny@zolinga.net>
  * @since 2024-02-10
  */
+/**
+ * A base class for creating custom web components with advanced features including
+ * content loading, broadcasting, modal handling, and lifecycle management.
+ * 
+ * This class extends HTMLElement and provides a foundation for building complex
+ * web components with features like:
+ * - Asynchronous content loading from external HTML files
+ * - Inter-component communication via broadcast messaging
+ * - Modal component patterns with promise-based resolution
+ * - Automatic script and stylesheet loading with timeout handling
+ * - Shadow DOM support with style inheritance options
+ * - Component readiness tracking and waiting mechanisms
+ * - Automatic URL rewriting with cache-busting revision parameters
+ * 
+ * @class WebComponent
+ * @extends HTMLElement
+ * 
+ * @example
+ * // Basic usage - extend WebComponent to create custom components
+ * class MyComponent extends WebComponent {
+ *   constructor() {
+ *     super();
+ *     this.loadContent('./templates/my-template.html')
+ *       .then(() => this.ready());
+ *   }
+ * }
+ * customElements.define('my-component', MyComponent);
+ * 
+ * @example
+ * // Using broadcast messaging
+ * component.listen('user-action', (data) => console.log('Received:', data));
+ * component.broadcast('user-action', { action: 'click', target: 'button' });
+ * 
+ * @example
+ * // Modal component pattern
+ * const result = await WebComponent.watchModal(modalComponent);
+ * // In modal component: this.resolveModal(data) or this.rejectModal(error)
+ * 
+ * @example
+ * // Loading content with options
+ * await component.loadContent('./content.html', {
+ *   mode: 'open',
+ *   allowScripts: true,
+ *   inheritStyles: true,
+ *   timeout: 10000
+ * });
+ */
 export default class WebComponent extends HTMLElement {
   /**
      * The unique web component ID. This is used to filter out broadcast messages.
@@ -23,8 +70,18 @@ export default class WebComponent extends HTMLElement {
   #componentId;
 
   /**
-     * The list of attributes to observe for changes.
-     */
+   * The list of attributes to observe for changes.
+   * 
+   * When extending this class use in your class:
+   * 
+   *     static observedAttributes = ['data-my-attribute', ...WebComponent.observedAttributes];
+   * 
+   * or using a getter
+   * 
+   *     static get observedAttributes() {
+   *        return ['data-my-attribute', ...WebComponent.observedAttributes];
+   *    }
+   */
   static observedAttributes = ['disabled'];
 
   /**
@@ -343,6 +400,17 @@ export default class WebComponent extends HTMLElement {
     return WebComponent.waitForComponent(component);
   }
 
+  /**
+   * Handles changes to observed attributes of the web component.
+   * When the 'disabled' attribute changes, manages the enabled/disabled state
+   * by installing or resolving the wait enabled promise.
+   * 
+   * The list of monitored attributes is defined in the static `observedAttributes` property.
+   * 
+   * @param {string} name - The name of the attribute that changed
+   * @param {string|null} oldValue - The previous value of the attribute
+   * @param {string|null} newValue - The new value of the attribute
+   */
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'disabled') {
       if (newValue !== null) {
