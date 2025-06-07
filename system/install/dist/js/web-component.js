@@ -404,8 +404,16 @@ export default class WebComponent extends HTMLElement {
     });
   }
 
+
+  /**
+   * Waits for a web component to be fully initialized and ready.
+   * 
+   * @async
+   * @param {WebComponent} [component] - The web component to wait for. If not provided, defaults to the current instance (this).
+   * @returns {Promise<WebComponent>} A promise that resolves when the component is ready.
+   */
   async waitForComponent(component) {
-    return WebComponent.waitForComponent(component);
+    return WebComponent.waitForComponent(component || this);
   }
 
   /**

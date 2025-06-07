@@ -29,6 +29,7 @@
 * For whole documentation see `${workspaceFolder}/system/wiki/Zolinga Core/Web Components.md`
 * When creating a web component, do not forget to update `zolinga.json` in respective module folder - this replaces the need for `customElements.define()` call - system does it.
 * The web components documentation is stored in the same file as main `.js` component but has `.md` extension, e.g. `${workspaceFolder}/modules/{module-name}/install/dist/web-components/my-component/my-component.md`
+* There is no `this.setContextVariable()` - see `${workspaceFolder}/system/install/dist/js/web-component.js` for parent class that all web components extend. 
 
 # Translations
 
