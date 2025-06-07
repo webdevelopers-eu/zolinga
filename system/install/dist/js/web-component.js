@@ -8,7 +8,7 @@ import components from '/dist/system/js/web-components.js';
  * - loadContent(url, options): Load the content of an HTML file into the component.
  * - broadcast(name, detail, global): Send a broadcast message to all subscribers of the name.
  * - listen(name, callback): Listen to a broadcast message with the given name.
- * - waitEnabled(): Wait until the "disabled" attribute is removed if it exists.
+ * - waitEnabled(): Wait until the "disabled" attribute is removed if it exists and the component is attached to the DOM.
  *
  * If you create a new custom element with attribute "disabled",
  * the component will not initialize until the attribute is removed.
@@ -98,6 +98,11 @@ export default class WebComponent extends HTMLElement {
   #readyPromise;
   #readyResolve;
 
+  /** 
+   * Resolves when the component is attached to the DOM.
+   */
+  #connectedPromise;
+
   /**
      * The broadcast channel to send and receive messages.
      */
@@ -120,6 +125,8 @@ export default class WebComponent extends HTMLElement {
       this.dispatchEvent(new CustomEvent('web-component-ready'));
     });
     this.#readyResolve = resolve;
+
+    this.#connectedPromise = new Promise((accept) => this.isConnected ? accept() : this.addEventListener('connected', accept, { once: true }));
 
     if (this.hasAttribute('disabled')) {
       this.#installWaitEnabledPromise();
@@ -533,7 +540,12 @@ export default class WebComponent extends HTMLElement {
   async #waitForLoad(element, timeout = 30000) {
     const { promise, resolve, reject } = Promise.withResolvers();
 
-    if (element instanceof HTMLImageElement && (element.complete || element.loading == 'lazy')) { 
+    await this.#connectedPromise; // Wait until the component is connected to the DOM
+
+    if (!element.isConnected) {
+       console.warn(`WebComponent.#waitForLoad(): Element ${element.tagName} is not connected to the DOM.`, element);
+       resolve();
+    } else if (element instanceof HTMLImageElement && (element.complete || element.loading == 'lazy')) { 
       // HTMLImageElement.complete is true when the image is loaded
       resolve();
     } else if (element instanceof HTMLLinkElement && element.sheet) { 
