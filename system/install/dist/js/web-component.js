@@ -323,6 +323,7 @@ export default class WebComponent extends HTMLElement {
     */
   async waitEnabled() {
     await this.#enabledPromise;
+    await this.#connectedPromise; // Ensure the component is connected to the DOM
   }
 
   /**
