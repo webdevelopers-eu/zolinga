@@ -39,6 +39,7 @@ For full documentation see  `${workspaceFolder}/modules/zolinga-intl/wiki/Zoling
 * For more about translations see `${workspaceFolder}/modules/zolinga-intl/wiki` documentation.
 * Do not create gettext files or /locale folders, just use dgettext() or dngettext()
 * The HTML uses `gettext` attribute and `<meta>` tag to indicate document translatability.
+* When translating single words for which translator needs context, note the context by prepending it to translatable string with `GETTEXT_CTX_END` separator. E.g. `dgettext('zolinga-intl', 'Confirm form submission' . GETTEXT_CTX_END . 'Send')`
 
 # Testing And Running the Code
 
