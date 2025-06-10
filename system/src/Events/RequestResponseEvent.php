@@ -53,10 +53,10 @@ class RequestResponseEvent extends RequestEvent {
      *
      * @param string $name The name of the event to broadcast
      * @param mixed $detail Optional detail to pass with the event
-     * @param bool $global Whether the event should be broadcast globally to all browser windows (default: false)
+     * @param bool $global Whether the event should be broadcast globally to all browser windows (default: true)
      * @return void
      */
-    public function broadcastBack(string $name, mixed $detail = null, bool $global = false): void {
+    public function broadcastBack(string $name, mixed $detail = null, bool $global = true): void {
         $this->broadcastBack[] = [
             'name' => $name,
             'detail' => $detail,
