@@ -109,6 +109,12 @@ class Api {
             event.response = responseData.response;
             event.request = data;
 
+            (responseData.broadcastBack || [])
+                .forEach((broadcastEvent) => {
+                    console.log('AJAX API BroadcastBack: %s %o (%s)', broadcastEvent.name, broadcastEvent.detail, broadcastEvent.global ? 'global' : 'local'); 
+                    this.broadcast(broadcastEvent.name, broadcastEvent.detail, broadcastEvent.global || false);
+                });
+
             console.log('AJAX API Event %s (%s) with Response:', event.type, op, event);
             this.broadcast('event-response:' + event.type, event);
 

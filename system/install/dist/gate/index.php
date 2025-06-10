@@ -50,6 +50,7 @@ foreach ($requests as $data) {
         "statusNiceName" => $event->statusNiceName,
         "message" => $event->message,
         "response" => $event->response,
+        "broadcastBack" => $event->broadcastBack,
         "time" => microtime(true) - $time,
         "ok" => $event->isOk()
     );
