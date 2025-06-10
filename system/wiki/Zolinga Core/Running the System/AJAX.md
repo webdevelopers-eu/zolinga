@@ -63,6 +63,24 @@ api.listen("example:broadcast", eventData => {
 api.broadcast("example:broadcast", { data: 'Hello, World!' }, true /* to all windows */);
 ```
 
+## Server-Side Broadcast Back
+
+Server-side event handlers can trigger client-side events using the `broadcastBack()` method on `RequestResponseEvent` objects. This allows the server to push events back to the client that initiated the request.
+
+```php
+public function onMyEvent(RequestResponseEvent $event): void {
+    // Process the request...
+    
+    // Broadcast an event back to the client
+    $event->broadcastBack('data-updated', ['newValue' => 42]);
+    
+    // Or broadcast globally to all open windows/tabs
+    $event->broadcastBack('system-notification', ['message' => 'Data saved'], true);
+}
+```
+
+These broadcast-back events are automatically sent to the client and can be listened to using the standard event listening mechanisms using `WebComponent.listen()` or `API.listen()`.
+
 # Server Side Processing
 
 You can declare your event listeners the [usual way](:Zolinga Core:Events and Listeners). Do not forget to add the `remote` to `zolinga.json`'s listener declaration.

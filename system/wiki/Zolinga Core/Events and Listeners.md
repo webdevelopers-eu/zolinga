@@ -110,6 +110,7 @@ The standard event classes.
     - Zolinga Core uses this event class for POST or GET requests. See more in [Zolinga Core/Running the System/Page Request](:Zolinga Core:Running the System:Page Request) section.
 - `\Zolinga\System\Events\RequestResponseEvent`
     - This is the extension of the `\Zolinga\System\Events\RequestEvent` class. In addition to `request` property, it has the `response` property that is an array. This event can be used for any events that need to carry the request data and expect some response data.
+    - Includes `broadcastBack()` method for sending client-side events back to the browser that initiated the request.
     - Zolinga Core uses these event class for AJAX requests. See more in [Zolinga Core/Running the System/AJAX](:Zolinga Core:Running the System:AJAX) section.
 - `\Zolinga\System\Events\AuthorizeEvent`
     - This special event is supposed to be dispatched when you want to check if the user has the right to do something. The event has the `right` property that is a string and holds the right name. It has the method `AuthorizeEvent::authorize()` that sets the status OK on the event which signalizes to emitter that the user has the right.
