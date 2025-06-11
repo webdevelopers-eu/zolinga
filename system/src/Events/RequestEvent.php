@@ -23,6 +23,18 @@ class RequestEvent extends Event {
     public ArrayAccess|array $request;
 
     /**
+     * Client-side events to broadcast back to the client.
+     * 
+     * Format: broadcastBack = [
+     *  [name:string, detail:mixed, global:bool]
+     *   ...
+     * ]
+     * 
+     * @var array
+     */
+    public private(set) array $broadcastBack = [];
+
+    /**
      * Constructor.
      *
      * @param string $type The event type in the form of URI
@@ -36,6 +48,22 @@ class RequestEvent extends Event {
     }
 
     /**
+     * Request client-side javacript broadcast message.
+     *
+     * @param string $name The name of the event to broadcast
+     * @param mixed $detail Optional detail to pass with the event
+     * @param bool $global Whether the event should be broadcast globally to all browser windows (default: true)
+     * @return void
+     */
+    public function broadcastBack(string $name, mixed $detail = null, bool $global = true): void {
+        $this->broadcastBack[] = [
+            'name' => $name,
+            'detail' => $detail,
+            'global' => $global
+        ];
+    }
+
+    /**
      * Specify data which should be serialized to JSON
      *
      * @return mixed
@@ -43,7 +71,8 @@ class RequestEvent extends Event {
     public function jsonSerialize() : mixed {
         return [
             ...parent::jsonSerialize(),
-            'request' => $this->request
+            'request' => $this->request,
+            'broadcastBack' => $this->broadcastBack,
         ];
     }
 
