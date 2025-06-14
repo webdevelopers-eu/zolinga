@@ -42,7 +42,10 @@ class HealthCheckCli implements ListenerInterface
         }
         
         // Create and dispatch an internal healthcheck event
-        $healthcheckEvent = new HealthCheckEvent('healthcheck', OriginEnum::INTERNAL, $notifyEmail);
+        $healthcheckEvent = new HealthCheckEvent('healthcheck', OriginEnum::INTERNAL,
+            request: $event->request, 
+            notifyEmail: $notifyEmail
+        );
         $healthcheckEvent->dispatch();
         
         // Copy the status from the internal event

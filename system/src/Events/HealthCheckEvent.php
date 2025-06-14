@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Events;
 
+use ArrayAccess;
+use ArrayObject;
 use Zolinga\System\Types\StatusEnum;
 use Zolinga\System\Types\OriginEnum;
 use Zolinga\System\Types\SeverityEnum;
@@ -40,9 +42,15 @@ class HealthCheckEvent extends RequestResponseEvent implements StoppableInterfac
      * @param OriginEnum $origin Event origin
      * @param string|null $notifyEmail Optional email to send notifications to
      */
-    public function __construct(string $type, OriginEnum $origin, ?string $notifyEmail = null)
+    public function __construct(
+        string $type, 
+        OriginEnum $origin, 
+        ArrayAccess|array $request = new ArrayObject,
+        ArrayAccess|array $response = new ArrayObject, 
+        ?string $notifyEmail = null
+        )
     {
-        parent::__construct($type, $origin);
+        parent::__construct($type, $origin, $request, $response);
         $this->notifyEmail = $notifyEmail;
     }
 
