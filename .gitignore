@@ -1,7 +1,6 @@
 # @todo remove: Temporary during Intl development
 locale/
 *.??-??.*
-* copy.*
 
 # Resouces just on local machine
 /local
