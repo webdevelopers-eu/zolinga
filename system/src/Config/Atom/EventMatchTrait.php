@@ -47,7 +47,8 @@ trait EventMatchTrait
 
     private function matchEventNames(string $pattern, string $name): bool
     {
-        $pattern = str_replace(['\\*'], ['.*'], preg_quote($pattern, '/'));
-        return (bool) preg_match("/^$pattern$/", $name);
+        $pattern = '^'. str_replace(['\\*'], ['.*'], preg_quote($pattern, '/')) . '$';
+        $match = (bool) preg_match("/$pattern/", $name);
+        return $match;
     }
 }
