@@ -123,7 +123,7 @@ class Bootstrap
         session_set_cookie_params([
             'secure' => IS_HTTPS, // set to true when HTTPS is available
             'httponly' => true,
-            'samesite' => 'Strict'
+            'samesite' => 'Lax'
         ]);
 
         if (session_status() === PHP_SESSION_NONE) {
