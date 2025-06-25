@@ -18,6 +18,9 @@ locale/
 !/public/dist/README.txt
 
 /public/robots.txt
+/public/robots-*.txt
+/public/.htaccess
+/public/favicon.ico
 
 /modules/*
 !/modules/README.txt
