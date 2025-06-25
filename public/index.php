@@ -27,6 +27,12 @@ use Exception, ArrayObject;
 // .html, .htm, .php, .asp, or directories due to performance concerns.
 // Skilled users should configure web server so this is not needed here...
 if (!preg_match('@(?:\.html?|\.php|\.asp|/[^.]*/?)$@', $_SERVER['PATH_INFO'] ?? '/')) {
+    if ($_SERVER['PATH_INFO'] ?? '' === '/favicon.ico') {
+        http_response_code(200);
+        header('Content-Type: image/x-icon');
+        echo file_get_contents(__DIR__ . '/favicon-zolinga.ico');
+        exit;
+    }
     http_response_code(404);
     exit;
 }
