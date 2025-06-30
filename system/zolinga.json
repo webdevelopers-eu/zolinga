@@ -8,6 +8,11 @@
   "attributes": {},
   "listen": [
     {
+      "description": "Simple analytics helper.",
+      "service": "analytics",
+      "class": "\\Zolinga\\System\\Analytics\\AnalyticsService"
+    },
+    {
       "description": "System health check command (CLI).",
       "event": "healthcheck",
       "class": "\\Zolinga\\System\\Health\\HealthCheckCli",

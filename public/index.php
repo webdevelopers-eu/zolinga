@@ -46,6 +46,11 @@ if (php_sapi_name() === 'cli') {
 require(dirname(__DIR__) . '/system/loader.php');
 
 (function ($api) {
+    // Analytics
+    if (!$api->analytics->initialized) {
+        $api->analytics->initialize();
+    }
+
     // Process requests by iterating through keys and triggering "system:request:$key" events.
     // While we don't necessarily anticipate a response, the response object is included for compatibility
     // with AJAX requests that may require a response.
