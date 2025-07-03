@@ -65,6 +65,7 @@ enum StatusEnum: int
     {
         return match (true) {
             $this === self::UNDETERMINED => '⚫',
+            $this === self::NOT_MODIFIED => '💤',
             $this->value < 200 => '🔵',
             $this->value < 300 => '🟢',
             $this->value < 400 => '🟠',
