@@ -17,6 +17,9 @@ locale/
 /public/dist/
 !/public/dist/README.txt
 
+/public/documents/
+/public/resources/
+
 /public/robots.txt
 /public/robots-*.txt
 /public/.htaccess
