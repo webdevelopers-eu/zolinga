@@ -99,7 +99,7 @@ class WebComponentLoader {
 
         // IMPORTANT: Using nested CSS crashes all Safari browsers up to OSX 14.5 - we need to repeat the selector...
         this.stylesheet.replaceSync(`
-            *:where(${selector}):where(:not([data-ready], [data-error])) { /* least specific */
+            *:where(${selector}):where(:not([data-ready="true"], [data-error])) { /* least specific */
                 display: inline-block;
             }
 
@@ -107,7 +107,7 @@ class WebComponentLoader {
                 --web-component-loader: url("data:image/svg+xml;random=0,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMidYMid meet' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='0' fill='none' stroke='%23888888' stroke-width='.5' opacity='0' %3E%3Canimate restart='always' attributeName='opacity' dur='5s' from='0' to='1' fill='freeze' begin='.5s' /%3E%3Canimate restart='always' attributeName='r' calcMode='spline' dur='2' keySplines='0 .2 .5 1' keyTimes='0;1' repeatCount='indefinite' values='1;80'/%3E%3Canimate restart='always' attributeName='stroke-width' calcMode='spline' dur='2' keySplines='0 .2 .5 1' keyTimes='0;1' repeatCount='indefinite' values='0;25'/%3E%3Canimate restart='always' attributeName='stroke-opacity' calcMode='spline' dur='2' keySplines='0 .2 .5 1' keyTimes='0;1' repeatCount='indefinite' values='1;0'/%3E%3C/circle%3E%3C/svg%3E%0A");
             }
 
-            *:is(${selector}):not([data-ready]) [slot] {
+            *:is(${selector}):not([data-ready="true"]) [slot] {
                 display: none !important;
             }
 
@@ -115,7 +115,7 @@ class WebComponentLoader {
                 display: none !important;
             }
 
-            *:is(${selector}):not(:defined), *:is(${selector}):not([data-error], [data-ready], [disabled]) {
+            *:is(${selector}):not(:defined), *:is(${selector}):not([data-error], [data-ready="true"], [disabled]) {
                 cursor: wait;
                 content-visibility: hidden;
                 contain-intrinsic-size: 32px 32px;
@@ -204,7 +204,7 @@ class WebComponentLoader {
             mutationList.forEach((mutation) => {
                 switch (mutation.attributeName) {
                     case 'data-ready':
-                        if (element.dataset.ready) {
+                        if (element.dataset.ready == 'true') {
                             element.dispatchEvent(new CustomEvent('web-component-ready'));
                             element.style.removeProperty('--web-component-loader');
                         } else { // data-ready was there and was removed again

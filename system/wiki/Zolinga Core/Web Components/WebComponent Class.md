@@ -27,7 +27,7 @@ You will get following benefits by extending this class:
     - resolves immediately if the component is enabled
     - resolves after the component is enabled if it is disabled
 - `this.waitForComponent(element)` method to wait until the component is ready
-    - resolves immediately if the component has the `data-ready` attribute set
+    - resolves immediately if the component has the `data-ready` attribute set to "true"
     - resolves after the component dispatches the `web-component-ready` event
 
 ## Usage

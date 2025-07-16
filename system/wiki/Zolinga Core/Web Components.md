@@ -32,7 +32,7 @@ To create a component you need to declare it in section `webComponents` of the `
 
 The following common attributes are supported by Zolinga web components:
 
-- `data-ready`: Set to true when the web component is ready to be used. E.g. call `WebComponent.ready()` method or set `this.dataset.ready = true`.
+- `data-ready`: Set to "true" when the web component is ready to be used. E.g. call `WebComponent.ready()` method or set `this.dataset.ready = true`.
 - `data-error`: Set to the error message when the web component fails to initialize. The system will display the error message instead of the component.
 - `disabled`: Set to true to disable the web component. For descendants of `WebComponent`, the web component won't load the content.
 - `hidden`: Set to true to hide the web component.
