@@ -5,16 +5,16 @@ locale/
 # Resouces just on local machine
 /local
 
-/vendor/*
+/vendor/
 !/vendor/README.txt
 
-/data/*
+/data/
 !/data/README.txt
 
-/public/data/*
+/public/data/
 !/public/data/README.txt
 
-/public/dist/*
+/public/dist/
 !/public/dist/README.txt
 
 /public/robots.txt
@@ -22,19 +22,19 @@ locale/
 /public/.htaccess
 /public/favicon.ico
 
-/modules/*
+/modules/
 !/modules/README.txt
 !/modules/*.example
 !/modules/.gitkeep
 /.gitmodules
 
-/config/*
+/config/
 !/config/README.txt
 !/config/*.json.example
 
 
-/tmp
-/public/tmp
+/tmp/
+/public/tmp/
 *~
 
 /composer.json
