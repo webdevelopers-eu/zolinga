@@ -24,6 +24,7 @@ locale/
 /public/robots-*.txt
 /public/.htaccess
 /public/favicon.ico
+/.htpasswd
 
 /modules/
 !/modules/README.txt
