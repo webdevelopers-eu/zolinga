@@ -72,11 +72,24 @@ You are an expert PHP developer.
     * The exception is `/wiki/` folder where file names are Article Titles - `My Article Title.md`.
 * The `zolinga.json` is documented in `${workspaceFolder}/system/wiki/Zolinga Core/Manifest File.md` and must follow the rules described there.
     * In need refer to other `zolinga.json` files in `${workspaceFolder}/modules/*/zolinga.json` files.
-
-# Services
-
 * All listeners implement `Zolinga\System\Events\ListenerInterface` 
 * All services implement `Zolinga\System\Events\ServiceInterface`
+
+# Content Tags
+
+If zolinga-cms is installed then: 
+
+See CMS' module "Zolinga CMS/Custom Elements.md" for documentation. Use the `content` zolinga.json sugar syntax.
+
+* zolinga.json
+    * Handler must handle the event 'cms:content:{tagName}'
+    * Handler must have "internal" origin
+* Handler should have Listerner class name suffix.
+* Handler must implement ListenerInterface
+* Method handling the event must accept on parameter of type ContentElementEvent $event (see ./modules/zolinga-cms/src/Events/ContentElementEvent.php - event fired by zolinga-cms)
+* When handling contents, leverage DOM API - e.g. contentText to modify content, use DOM manipulations techniques exclusively.
+* When needed use DOMXPath to select elements if more complex and inbuilt DOM api is not elegant.
+* At the end always create WIKI MD documentation by creating or updating the file "{module}/wiki/ref/event/cms/content/{tagName}.md"
 
 # Custom API Endpoints
 
