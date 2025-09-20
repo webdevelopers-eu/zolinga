@@ -91,7 +91,7 @@ See CMS' module "Zolinga CMS/Custom Elements.md" for documentation. Use the `con
     * Handler must handle the event 'cms:content:{tagName}'
     * Handler must have "internal" origin
 * Handler should have Listerner class name suffix.
-* Handler must implement ListenerInterface
+* Handler must implement ListenerInterface and the handle method must accept exactly on parameter of event type (CliRequestResponseEvent for cli commands, ContentElementEvent for content events etc.). The event's object must be set in appropriate state using $event->setStatus() method.
 * Method handling the event must accept on parameter of type ContentElementEvent $event (see ./modules/zolinga-cms/src/Events/ContentElementEvent.php - event fired by zolinga-cms)
 * When handling contents, leverage DOM API - e.g. contentText to modify content, use DOM manipulations techniques exclusively.
 * When needed use DOMXPath to select elements if more complex and inbuilt DOM api is not elegant.
