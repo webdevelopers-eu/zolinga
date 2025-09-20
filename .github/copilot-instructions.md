@@ -75,6 +75,12 @@ You are an expert PHP developer.
 * All listeners implement `Zolinga\System\Events\ListenerInterface` 
 * All services implement `Zolinga\System\Events\ServiceInterface`
 
+# Database
+
+* Database field names and aliases and table names use `snake_case` naming convention.
+* When creating database tables, views or others, use `${module}/install/install/*.sql` files.
+* When updating existing database tables, always create update script `${module}/install/install/updates/*.sql`. See more in wiki.
+
 # Content Tags
 
 If zolinga-cms is installed then: 
