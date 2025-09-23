@@ -51,6 +51,9 @@ For full documentation see  `${workspaceFolder}/modules/zolinga-intl/wiki/Zoling
 * Accessing the web front-end is done through `http://{hostname}/...`
     * if the front-end is run using `bin/zolinga --server=localhost:8080` then the hostname is `localhost` and the port is `8080`.
     * if it runs through existing webserver the URL address is in `config/local.json` (higher priority) or `config/global.json` (lower) `baseURL` property.  
+* To start new module run `bin/zolinga skeleton:module  --name=<module-name>`
+* To generate apache config run `bin/zolinga skeleton:apache ...` (see `system/wiki/ref/event/skeleton/apache.md`)
+* To list or install existing modules see `system/wiki/Zolinga Core/Installing Additional Modules.md`
 
 # Coding Style
 
