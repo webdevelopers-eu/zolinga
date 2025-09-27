@@ -44,6 +44,7 @@ For full documentation see  `${workspaceFolder}/modules/zolinga-intl/wiki/Zoling
 
 # Testing And Running the Code
 
+* Run CLI gateway `bin/zolinga --help` for help and for rest of capabilities look in `zolinga.json` files in `listen` section for events with origin `cli`.
 * You can run the system by running `bin/zolinga` command. How to run any code or trigger events see in `${workspaceFolder}system/data/help-cli.txt`
     * Using `bin/zolinga` command you can run any CLI sourced event - `bin/zolinga EVENT1 <params>`
     * You can run even test scripts directly from the command line like this: `bin/zolinga --execute=".../my-script.php"` or `bin/zolinga --eval="echo 'Hello World';"`. 
