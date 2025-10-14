@@ -39,7 +39,7 @@
     {
       "event": "{Event name that your module emits}",
       "description": "{What your event expects from the listener}",
-      "class": "\\Zolinga\\System\\Events\\RequestResponseEvent",
+      "class": "\\Zolinga\\System\\Events\\WebEvent",
       "origin": [
         "internal",
         "remote"

@@ -65,10 +65,10 @@ api.broadcast("example:broadcast", { data: 'Hello, World!' }, true /* to all win
 
 ## Server-Side Broadcast Back
 
-Server-side event handlers can trigger client-side events using the `broadcastBack()` method on `RequestResponseEvent` objects. This allows the server to push events back to the client that initiated the request.
+Server-side event handlers can trigger client-side events using the `broadcastBack()` method on `WebEvent` objects. This allows the server to push events back to the client that initiated the request.
 
 ```php
-public function onMyEvent(RequestResponseEvent $event): void {
+public function onMyEvent(WebEvent $event): void {
     // Process the request...
     
     // Broadcast an event back to the client

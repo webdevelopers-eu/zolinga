@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Wiki\WebComponents;
 
-use Zolinga\System\Events\{WikiRefIntegrationEvent, Event, RequestResponseEvent, ListenerInterface};
+use Zolinga\System\Events\{WikiRefIntegrationEvent, Event, WebEvent, ListenerInterface};
 use Zolinga\System\Wiki\WikiNoFile;
 use Zolinga\System\Wiki\Ref\{WikiAutoloadArticle, WikiWebComponentListArticle, WikiWebComponentArticle, WikiRefArticle, WikiClassArticle, WikiEventListArticle, WikiEventArticle, WikiServiceListArticle};
 use Zolinga\System\Wiki\WikiArticle as WikiFileArticle;
@@ -12,7 +12,7 @@ use Exception;
 
 class WikiArticle implements ListenerInterface
 {
-    public function onArticle(RequestResponseEvent $event): void
+    public function onArticle(WebEvent $event): void
     {
         global $api;
 

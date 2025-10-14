@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 namespace Zolinga\System\Wiki\WebComponents;
-use Zolinga\System\Events\RequestResponseEvent;
+use Zolinga\System\Events\WebEvent;
 use Zolinga\System\Events\ListenerInterface;
 
 class WikiSearch implements ListenerInterface
 {
-    public function onSearch(RequestResponseEvent $event):void
+    public function onSearch(WebEvent $event):void
     {
         global $api;
 

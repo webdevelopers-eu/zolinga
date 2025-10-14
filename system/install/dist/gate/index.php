@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Gates;
 
-use Zolinga\System\Events\RequestResponseEvent;
+use Zolinga\System\Events\WebEvent;
 use const Zolinga\System\ROOT_DIR;
 
 
@@ -37,7 +37,7 @@ foreach ($requests as $data) {
     }
 
 
-    $event = new RequestResponseEvent($data['type'], RequestResponseEvent::ORIGIN_REMOTE, $data['request']);
+    $event = new WebEvent($data['type'], WebEvent::ORIGIN_REMOTE, $data['request']);
     $event->uuid = $data['uuid'];
     $event->dispatch();
 
