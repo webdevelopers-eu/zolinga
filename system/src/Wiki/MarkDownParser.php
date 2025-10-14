@@ -101,6 +101,11 @@ class MarkDownParser extends \Parsedown
     {
         $ret = parent::inlineCode($excerpt);
 
+        if ($ret === null) {
+            trigger_error("inlineCode parent returned null for " . json_encode($excerpt), E_USER_WARNING);
+            return null;
+        }
+
         $ret['element'] = [
             'name' => 'code',
             'attributes' => [
