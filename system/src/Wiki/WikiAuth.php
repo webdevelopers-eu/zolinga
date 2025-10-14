@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Wiki;
 
-use Zolinga\System\Events\{RequestResponseEvent, AuthorizeEvent};
+use Zolinga\System\Events\{WebEvent, AuthorizeEvent};
 use Zolinga\System\Events\ListenerInterface;
 
 /**
@@ -73,10 +73,10 @@ class WikiAuth implements ListenerInterface
     /**
      * Inquires if the user has entered the correct password or if it is currently authorized.
      *
-     * @param RequestResponseEvent $event
+     * @param WebEvent $event
      * @return void
      */
-    public function onLogin(RequestResponseEvent $event): void
+    public function onLogin(WebEvent $event): void
     {
         global $api;
 

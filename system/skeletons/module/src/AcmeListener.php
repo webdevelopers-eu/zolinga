@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Example\Acme;
 
-use Zolinga\System\Events\{WebEvent, RequestResponseEvent, RequestEvent, ListenerInterface, ServiceInterface};
+use Zolinga\System\Events\{CliRequestResponseEvent, WebEvent, RequestResponseEvent, RequestEvent, ListenerInterface, ServiceInterface};
 
 /**
  * This class is a skeleton for a module.
@@ -36,7 +36,7 @@ class AcmeListener implements ListenerInterface /* if you need to act as a servi
      * @param WebEvent $event
      * @return void
      */
-    public function onAcmeEvent(WebEvent $event): void
+    public function onAcmeEvent(CliRequestResponseEvent $event): void
     {
         $event->response['acme'] = "Hello, " . ($event->request['name'] ?? 'unknown') . "!";
         $event->setStatus($event::STATUS_OK, "Hello, Acme!");
