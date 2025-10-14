@@ -5,8 +5,8 @@ import Event from './event.js';
 * 
 * Example:
 * 
-* import {default as zolinga} from '/dist/system/zolinga.js';
-* const event = new zolinga.Event('example.org:api:myEvent', requestData);
+* import api from '/dist/system/js/api.js';
+* const event = new api.Event('example.org:api:myEvent', requestData);
 * event.dispatch(); // same as API.dispatchEvent(event);
 * console.log("Event", event.response);
 * 
