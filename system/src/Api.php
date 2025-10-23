@@ -110,6 +110,9 @@ class Api
                     continue;
                 }
             }
+            if ($subscription['method'] === null) {
+                throw new \RuntimeException("Method not defined for listener " . $subscription['class'] . " for event " . $event->type . ". Update zolinga.json to specify the 'method' property.");
+            }
             /** @var ListenAtom $subscription */
             $this->processEvent($event, $this->getSubscriberByClass($subscription['class']), $subscription['method']);
         }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Zolinga\System\Gates;
 
 use Zolinga\System\Events\CliRequestResponseEvent;
+use Zolinga\System\Events\Event;
+
 use const Zolinga\System\ROOT_DIR;
 use const Zolinga\System\START_TIME;
 
@@ -327,7 +329,17 @@ class Cli
         echo "For more information run bin/zolinga --server=0.0.0.0:8888 and visit Zolinga WIKI at\n\n";
         echo "    🌎 http://127.0.0.1:8888" . $api->config['wiki']['urlPrefix'] . "/:ref:event\n\n";
         echo "All 'cli' (command line interface) events are listed in the 'Zolinga Explorer/Events' article.\n";
-        echo str_repeat("-", intval(getenv('COLUMNS')) ?: 80) . "\n";
+        echo str_repeat("-", intval(getenv('COLUMNS')) ?: 80) . "\n\n";
+
+        echo "Available events for CLI requests (e.g. `zolinga {EVENT} ...`):\n\n";
+        /** @var array(ListenAtom) $events  */
+        $atoms = $api->manifest->findByEvent(new Event("*", CliRequestResponseEvent::ORIGIN_CLI));
+        usort($atoms, fn ($a, $b) => strcmp($a['event'], $b['event']));
+
+        foreach ($atoms as $atom) {
+            echo "    {$atom['event']}\n        {$atom['description']}\n\n";
+        }
+        echo "\n";
     }
 
     /**
