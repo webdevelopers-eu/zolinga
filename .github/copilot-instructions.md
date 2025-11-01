@@ -1,3 +1,7 @@
+# Fundamentals of Zolinga Development
+
+* Always strive for simplicity and practicality. Use Ockham's razor principle where possible.
+
 # Basics
 
 * All modules are stored in `${workspaceFolder}/modulesp/` directory.
