@@ -86,8 +86,11 @@ set_error_handler(function ($errNo, $errStr, $errFile, $errLine) {
     file_put_contents("php://stderr", "$severity: $errStr [" . basename($errFile) . ":$errLine]\n");
 });
 
+$timeStart = microtime(true);
 $api->log->info('cli', '🟣 Starting Zolinga CLI script: bin/zolinga ' . implode(' ', array_slice($argv, 1)));
 (new Cli)->run($argv);
+$totalTime = round(microtime(true) - $timeStart, 3);
+$api->log->info('cli', '🟣 Finished Zolinga CLI script: bin/zolinga ' . implode(' ', array_slice($argv, 1)) . " in $totalTime seconds.");
 
 // End of file
 
