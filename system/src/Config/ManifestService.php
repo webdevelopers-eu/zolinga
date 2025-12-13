@@ -33,6 +33,19 @@ class ManifestService extends ArrayObject implements ServiceInterface
     public readonly string $superHash;
 
     /**
+     * Short revision hash (first 6 characters of the superHash).
+     *
+     * Used primarily for cache busting in URLs. E.g. /style.css?rev={revHash}
+     * 
+     * @var string
+     */
+    public string $revHash {
+        get {
+            return substr($this->superHash, 0, 6);
+        }
+    } 
+
+    /**
      * Alphabetically sorted list of all discovered manifest file paths.
      * 
      * Note:
