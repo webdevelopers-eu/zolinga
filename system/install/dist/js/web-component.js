@@ -192,7 +192,7 @@ export default class WebComponent extends HTMLElement {
      * The content may contain relative links in src and href attributes, which will be resolved
      * against the URL of the HTML file.
      *
-     * @param {string} url - URL of the HTML to load
+     * @param {string|URL} url - URL of the HTML to load
      * @param {Object} options - Options for loading the content
      * @param {string} options.mode - 'open', 'closed': create Shadow Root in this mode and append it, 'seamless': append the content directly
      * @param {boolean} options.allowScripts - Whether to allow executing scripts in the loaded content
@@ -203,6 +203,9 @@ export default class WebComponent extends HTMLElement {
      *                      Promise will resolve to the Shadow Root or the component itself if mode is 'seamless'.
      */
   async loadContent(url, options = { mode: 'open', allowScripts: false, timeout: 60000, filter: null, inheritStyles: false }) {
+    if (url instanceof URL) {
+      url = url.toString();
+    }
     url = this.rewriteURL(url, 'content');
     await this.waitEnabled();
     return fetch(url)
