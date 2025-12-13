@@ -116,6 +116,9 @@ The standard event classes.
     - Includes `broadcastBack()` method for sending client-side events back to the browser that initiated the request.
     - Specifically designed for web-based AJAX requests and responses.
     - Zolinga Core uses this event class for AJAX requests. See more in [Zolinga Core/Running the System/AJAX](:Zolinga Core:Running the System:AJAX) section.
+- `\Zolinga\System\Events\RemoteEvent`
+    - Dispatches an event to another Zolinga instance over HTTP using the same JSON gateway format as the JavaScript client.
+    - See [Remote Events](:Zolinga Core:Events and Listeners:Remote Events) for a practical example.
 - `\Zolinga\System\Events\AuthorizeEvent`
     - This special event is supposed to be dispatched when you want to check if the user has the right to do something. The event has the `right` property that is a string and holds the right name. It has the method `AuthorizeEvent::authorize()` that sets the status OK on the event which signalizes to emitter that the user has the right.
     - The event is dispatched by the Zolinga Core when the `right` property is set in the listener declaration in `zolinga.json`. See details in `\Zolinga\System\Events\AuthorizeEvent` class.
