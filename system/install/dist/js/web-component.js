@@ -203,9 +203,7 @@ export default class WebComponent extends HTMLElement {
      *                      Promise will resolve to the Shadow Root or the component itself if mode is 'seamless'.
      */
   async loadContent(url, options = { mode: 'open', allowScripts: false, timeout: 60000, filter: null, inheritStyles: false }) {
-    if (url instanceof URL) {
-      url = url.toString();
-    }
+    url = url.toString();
     url = this.rewriteURL(url, 'content');
     await this.waitEnabled();
     return fetch(url)
