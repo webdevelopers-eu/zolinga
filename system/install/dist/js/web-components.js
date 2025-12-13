@@ -231,10 +231,10 @@ class WebComponentLoader {
         let src = this.#mapping.find((m) => m.tag == element.localName)?.module;
 
         // Solve caching problem - if there is <html data-revision="..."> use it as URL parameter.
-        // if (document.documentElement.dataset.revision && !src.match(/[?&]rev=/)) {
-        //     const param = `rev=${document.documentElement.dataset.revision}&autorev`
-        //     src += src.match(/[?]/) ? `&${param}` : `?${param}`;
-        // }
+        if (document.documentElement.dataset.revision && !src.match(/[?&]rev=/)) {
+            const param = `rev=${document.documentElement.dataset.revision}&autorev`
+            src += src.match(/[?]/) ? `&${param}` : `?${param}`;
+        }
 
         try {
             const { default: construct } = await import(src);
