@@ -54,7 +54,7 @@ class RemoteEvent extends RequestResponseEvent
     }
 
     public function dispatch(): self
-    {
+    {        
         $startTime = microtime(true);
 
         $url = $this->buildGateURL();
@@ -147,6 +147,8 @@ class RemoteEvent extends RequestResponseEvent
      */
     private function postJson(string $url, mixed $payload): array
     {
+        global $api;
+
         $json = json_encode($payload, JSON_THROW_ON_ERROR);
 
         $context = stream_context_create([
@@ -159,7 +161,9 @@ class RemoteEvent extends RequestResponseEvent
             ]
         ]);
 
+        $api->log->info('event', "RemoteEvent: Sending request to $url with payload " . strlen($json) . " bytes.");
         $body = file_get_contents($url, false, $context);
+        $api->log->info('event', "RemoteEvent: Received response from $url.");
         if ($body === false) {
             throw new \RuntimeException('RemoteEvent: HTTP request failed (no response body).');
         }
