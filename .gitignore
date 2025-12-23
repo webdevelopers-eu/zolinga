@@ -48,3 +48,6 @@ locale/
 !/.github/copilot-instructions.md
 /*.code-workspace
 /*.cache
+
+# allow custom minifiers
+*.min.js
