@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Zolinga\System\Events;
 
 use ArrayObject, ArrayAccess;
+use Zolinga\System\Helpers\ZArgs;
 use Zolinga\System\Types\OriginEnum;
 
 /**
@@ -14,6 +15,8 @@ use Zolinga\System\Types\OriginEnum;
  * @date 2024-02-05
  */
 class RequestEvent extends Event {
+
+    private ?ZArgs $zargs = null;
 
     /**
      * The request object passed to an Event's constructr.
@@ -33,6 +36,150 @@ class RequestEvent extends Event {
     {
         parent::__construct($type, $origin);
         $this->request = $request;
+    }
+
+    /**
+     * Define a CLI option (yargs-like API).
+     *
+     * @param string $key Option key (supports dot-separated paths).
+     * @param ?string $alias Alias key (e.g. 'h' for help).
+     * @param ?string $describe Help description.
+     * @param ?array<int, mixed> $choices Allowed values (supports Enum::cases()).
+     * @param bool $demandOption Require presence (default counts as present).
+     * @param ?string $type Supported: 'string', 'number', 'int', 'float', 'boolean'.
+     * @param mixed $default Default value. If omitted, no default is applied.
+     * @return static
+     */
+    public function option(
+        string $key,
+        ?string $alias = null,
+        ?string $describe = null,
+        ?array $choices = null,
+        bool $demandOption = false,
+        ?string $type = null,
+        mixed $default = null,
+    ): static {
+        if (func_num_args() >= 7) {
+            $this->getZArgs()->option(
+                $key,
+                alias: $alias,
+                describe: $describe,
+                choices: $choices,
+                demandOption: $demandOption,
+                type: $type,
+                default: $default,
+            );
+        } else {
+            $this->getZArgs()->option(
+                $key,
+                alias: $alias,
+                describe: $describe,
+                choices: $choices,
+                demandOption: $demandOption,
+                type: $type,
+            );
+        }
+        return $this;
+    }
+
+    /**
+     * When enabled, unknown parameters cause CliUnknownInputException.
+     * When disabled (default), unknown parameters are allowed.
+     *
+     * @param bool $enabled
+     * @return static
+     */
+    public function strict(bool $enabled = true): static
+    {
+        $this->getZArgs()->strict($enabled);
+        return $this;
+    }
+
+    /**
+     * Apply a custom validation/transformation to an option.
+     *
+     * @param string $key
+     * @param callable $fn function(mixed $value, string $key, array<string, mixed> $all): mixed
+     * @return static
+     */
+    public function coerce(string $key, callable $fn): static
+    {
+        $this->getZArgs()->coerce($key, $fn);
+        return $this;
+    }
+
+    /**
+     * Configure a help flag key.
+     *
+     * If present/truthy in input, parse() prints generated help and returns without validating.
+     *
+     * @param string $key
+     * @return static
+     */
+    public function help(string $key = 'help'): static
+    {
+        $this->getZArgs()->help($key);
+        return $this;
+    }
+
+    /**
+     * Validate and normalize input using ZArgs.
+     *
+     * On success, updates $this->request with normalized values and returns them.
+     *
+     * @return array<string, mixed>
+     */
+    public function parse(): array
+    {
+        $parsed = $this->getZArgs()->parse();
+        $this->setRequestArray($parsed);
+        return $parsed;
+    }
+
+    private function getZArgs(): ZArgs
+    {
+        if ($this->zargs === null) {
+            $this->zargs = new ZArgs($this->getRequestArray());
+        }
+        return $this->zargs;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getRequestArray(): array
+    {
+        if (is_array($this->request)) {
+            return $this->request;
+        }
+
+        if ($this->request instanceof ArrayObject) {
+            /** @var array<string, mixed> */
+            return $this->request->getArrayCopy();
+        }
+
+        if ($this->request instanceof \Traversable) {
+            /** @var array<string, mixed> */
+            return iterator_to_array($this->request);
+        }
+
+        throw new \RuntimeException('Unsupported request container: ' . get_debug_type($this->request));
+    }
+
+    /**
+     * @param array<string, mixed> $request
+     */
+    private function setRequestArray(array $request): void
+    {
+        if (is_array($this->request)) {
+            $this->request = $request;
+            return;
+        }
+        if ($this->request instanceof ArrayObject) {
+            $this->request->exchangeArray($request);
+            return;
+        }
+        throw new \RuntimeException('Unsupported request container: ' . get_debug_type($this->request));
     }
 
     /**
