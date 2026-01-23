@@ -24,5 +24,28 @@ if [ ! -f "$PHP_CLI_BOOTSTRAP" ]; then
     exit 1
 fi
 
-"$PHP_EXECUTABLE" -dxdebug.mode=debug,develop -dxdebug.start_with_request=yes "$PHP_CLI_BOOTSTRAP" "$@"
+# If --debug specified anywhere on the line before first non-option argument, run with Xdebug enabled
+ZOLINGA_DEBUG=0
+for ARG in "$@"; do
+    case "$ARG" in
+        --xdebug)
+            ZOLINGA_DEBUG=1
+            break
+            ;;
+        --*)
+            # continue checking other arguments
+            ;;
+        *)
+            # first non-option argument found, stop checking
+            break
+            ;;
+    esac
+done
+
+if [ "$ZOLINGA_DEBUG" -eq 1 ]; then
+    echo "🐞 Running with Xdebug enabled..." >&2
+    "$PHP_EXECUTABLE" -dxdebug.mode=debug,develop -dxdebug.start_with_request=yes "$PHP_CLI_BOOTSTRAP" "$@"
+else
+    "$PHP_EXECUTABLE" "$PHP_CLI_BOOTSTRAP" "$@"
+fi
 

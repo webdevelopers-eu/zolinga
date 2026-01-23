@@ -48,7 +48,7 @@ if (version_compare(phpversion(), '8.2.0', '<')) {
     exit(1);
 }
 
-// Re-run with debug options?
+// Re-run with debug options if profiling is requested and not already enabled
 $xdebugOpts = array_filter(
     $argv,
     fn ($opt) => str_starts_with($opt, '--xdebug')
