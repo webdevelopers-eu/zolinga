@@ -1,4 +1,4 @@
-import components from '/dist/system/js/web-components.js';
+import components from './web-components.js';
 
 /**
  * A base class for web components that provides a few useful methods.
@@ -51,7 +51,7 @@ import components from '/dist/system/js/web-components.js';
  * 
  * @example
  * // Modal component pattern
- * const result = await WebComponent.watchModal(modalComponent);
+ * const result = await WebComponentElement.watchModal(modalComponent);
  * // In modal component: this.resolveModal(data) or this.rejectModal(error)
  * 
  * @example
@@ -74,12 +74,12 @@ export default class WebComponentElement extends HTMLElement {
    * 
    * When extending this class use in your class:
    * 
-   *     static observedAttributes = ['data-my-attribute', ...WebComponent.observedAttributes];
+   *     static observedAttributes = ['data-my-attribute', ...WebComponentElement.observedAttributes];
    * 
    * or using a getter
    * 
    *     static get observedAttributes() {
-   *        return ['data-my-attribute', ...WebComponent.observedAttributes];
+   *        return ['data-my-attribute', ...WebComponentElement.observedAttributes];
    *    }
    */
   static observedAttributes = ['disabled'];
@@ -149,7 +149,7 @@ export default class WebComponentElement extends HTMLElement {
   }
 
   // destructor() {
-  //   console.log('WebComponent.destructor(): ', this.#componentId);
+  //   console.log('WebComponentElement.destructor(): ', this.#componentId);
   //   this.#broadcast.close();
   //   window.removeEventListener('message', this.#onMessage);
   // }
@@ -357,7 +357,7 @@ export default class WebComponentElement extends HTMLElement {
   /**
    * Waits for the modal component to resolve or reject.
    * 
-   * Example: WebComponent.watchModal(document.querySelector('my-component')).then((data) => console.log(data));
+   * Example: WebComponentElement.watchModal(document.querySelector('my-component')).then((data) => console.log(data));
    *  
    * @param {WebComponent|HTMLElement|null} component - The component to watch for resolve or reject. If not provided, this component is used.
    * @returns {Promise} - A promise that resolves when the modal component resolves or rejects when target components calls this.resolveModal() or this.rejectModal()
@@ -378,17 +378,17 @@ export default class WebComponentElement extends HTMLElement {
   }
 
   /**
-   * Waits for the modal component to resolve or reject. This is a shorthand for WebComponent.watchModal(component).
+   * Waits for the modal component to resolve or reject. This is a shorthand for WebComponentElement.watchModal(component).
    * 
    * Example: this.watchModal(document.querySelector('my-component')).then((data) => console.log(data));
    * 
-   * Note: there is also a static method WebComponent.watchModal(component).
+   * Note: there is also a static method WebComponentElement.watchModal(component).
    * 
    * @param {WebComponent|HTMLElement} component - The component to watch for resolve or reject
    * @returns {Promise} - A promise that resolves when the modal component resolves or rejects when target components calls this.resolveModal() or this.rejectModal()
    */
   async watchModal(component) {
-    return WebComponent.watchModal(component);
+    return WebComponentElement.watchModal(component);
   }
 
   /**
@@ -419,7 +419,7 @@ export default class WebComponentElement extends HTMLElement {
    * @returns {Promise<WebComponent>} A promise that resolves when the component is ready.
    */
   async waitForComponent(component) {
-    return WebComponent.waitForComponent(component || this);
+    return WebComponentElement.waitForComponent(component || this);
   }
 
   /**
@@ -563,7 +563,7 @@ export default class WebComponentElement extends HTMLElement {
     await this.#connectedPromise; // Wait until the component is connected to the DOM
 
     if (!element.isConnected) {
-       console.warn(`WebComponent.#waitForLoad(): Element ${element.tagName} is not connected to the DOM.`, element);
+       console.warn(`WebComponentElement.#waitForLoad(): Element ${element.tagName} is not connected to the DOM.`, element);
        resolve();
     } else if (element instanceof HTMLImageElement && (element.complete || element.loading == 'lazy')) { 
       // HTMLImageElement.complete is true when the image is loaded
@@ -582,7 +582,7 @@ export default class WebComponentElement extends HTMLElement {
       element.addEventListener('error', reject, { once: true });
 
       promise.finally(() => {
-        // console.log('WebComponent.#waitForLoad(): ', element.href ?? element.src);
+        // console.log('WebComponentElement.#waitForLoad(): ', element.href ?? element.src);
         clearTimeout(timer);
         element.removeEventListener('load', resolve);
         element.removeEventListener('error', reject);
