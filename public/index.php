@@ -79,7 +79,9 @@ require(dirname(__DIR__) . '/system/loader.php');
         } else {
             header('Content-Type: text/html; charset=utf-8');
         }
-        http_response_code($contentEvent->status->value);
+        if (http_response_code() === 200) { // if we set other then 200 then we keep that
+            http_response_code($contentEvent->status->value);
+        }
         echo $contentEvent->getContentHTML();
     }
 
