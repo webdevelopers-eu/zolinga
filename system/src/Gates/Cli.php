@@ -322,6 +322,7 @@ class Cli
     {
         global $api;
 
+        $wikiBase = ($api->config['baseURL'] ?? '') . ($api->config['wiki']['urlPrefix'] ?? '/wiki');
         echo file_get_contents(__DIR__ . "/../../data/help-cli.txt");
         echo "\n\n";
 
@@ -337,7 +338,9 @@ class Cli
         usort($atoms, fn ($a, $b) => strcmp($a['event'], $b['event']));
 
         foreach ($atoms as $atom) {
-            echo "    {$atom['event']}\n        {$atom['description']}\n\n";
+            // example: https://v2.ipdefender.eu/w/:ref:event:tmview:daq
+            $url = "$wikiBase/:ref:event:{$atom['event']}";
+            echo "    {$atom['event']}\n        {$atom['description']}\n        More info: $url\n\n";
         }
         echo "\n";
     }

@@ -110,3 +110,11 @@ See CMS' module "Zolinga CMS/Custom Elements.md" for documentation. Use the `con
 * They go to `${module}/install/dist/...` folder and can be accessed through `https://example.com/dist/{module}/...`
 * How to structure it, load the system - refer to default Zolinga API endpoint `${workspaceFolder}/system/install/dist/gate/index.php`
 
+# Documentation
+
+* All documentation is in markdown files in `${module}/wiki/` folder. For the core module it is in `${workspaceFolder}/system/wiki/Zolinga Core/` folder.
+* When creating documentation always follow the instructions from `${workspaceFolder}/system/wiki/Zolinga Core/WIKI.md`
+    * Focus more on practical examples and usage rather than on theoretical explanations. Simply how to get things done.
+    * Focus on brief practical usage rather than technical implementation details.
+* When creating documentation for content tags, create or update the file "{module}/wiki/ref/event/cms/content/{tagName}.md" and follow the instructions there.
+* For all events from the origin 'cli' (command line callable events) create {module}/wiki/ref/event/{str_replace(':', '/', $eventName)}.md file, e.g. {module}/wiki/ref/event/tmview/daq.md for event 'tmview:daq' and document the command-line usage including all supported parameters ($event->request object parameters) and examples of usage. Those events are callable through `bin/zolinga EVENT_NAME <parameters>` command. Note that all events should be optionally documented the sameway but for 'cli' events it is mandatory.
