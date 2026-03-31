@@ -282,6 +282,22 @@
       "origin": [
         "remote"
       ]
+    },
+    {
+      "event": "system:wiki:login",
+      "description": "WIKI login or authorization status inquiry, dispatched by the wiki-login web component.",
+      "class": "\\Zolinga\\System\\Events\\WebEvent",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "event": "system:wiki:ref:discovery",
+      "description": "Dispatched when rendering WIKI :ref pages to allow modules to contribute reference documentation entries.",
+      "class": "\\Zolinga\\System\\Events\\WikiRefIntegrationEvent",
+      "origin": [
+        "internal"
+      ]
     }
   ],
   "webComponents": [
