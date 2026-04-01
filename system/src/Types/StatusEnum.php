@@ -56,10 +56,15 @@ enum StatusEnum: int
     case NOT_FOUND = 404;
     case TIMEOUT = 408;
     case CONFLICT = 409;
+    case GONE = 410;
     case PRECONDITION_FAILED = 412;
     case I_AM_A_TEAPOT = 418;
     case LOCKED = 423;
     case ERROR = 500;
+    case NOT_IMPLEMENTED = 501;
+    case BAD_GATEWAY = 502;
+    case SERVICE_UNAVAILABLE = 503;
+    case GATEWAY_TIMEOUT = 504;
 
     public function getEmoji(): string
     {

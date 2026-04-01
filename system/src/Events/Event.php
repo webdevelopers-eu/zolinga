@@ -94,9 +94,14 @@ class Event implements JsonSerializable
     final const STATUS_PROCESSING = StatusEnum::PROCESSING;
     final const STATUS_TIMEOUT = StatusEnum::TIMEOUT;
     final const STATUS_CONFLICT = StatusEnum::CONFLICT;
+    final const STATUS_GONE = StatusEnum::GONE;
     final const STATUS_PRECONDITION_FAILED = StatusEnum::PRECONDITION_FAILED;
     final const STATUS_I_AM_A_TEAPOT = StatusEnum::I_AM_A_TEAPOT;
     final const STATUS_LOCKED = StatusEnum::LOCKED;
+    final const STATUS_NOT_IMPLEMENTED = StatusEnum::NOT_IMPLEMENTED;
+    final const STATUS_BAD_GATEWAY = StatusEnum::BAD_GATEWAY;
+    final const STATUS_SERVICE_UNAVAILABLE = StatusEnum::SERVICE_UNAVAILABLE;
+    final const STATUS_GATEWAY_TIMEOUT = StatusEnum::GATEWAY_TIMEOUT;
 
 
     final const ORIGIN_INTERNAL = OriginEnum::INTERNAL;
