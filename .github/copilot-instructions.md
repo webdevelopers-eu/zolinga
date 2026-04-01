@@ -7,7 +7,7 @@
 * All modules are stored in `${workspaceFolder}/modulesp/` directory.
     * System Core is an ordinary module too stored in `${workspaceFolder}/system/` directory.
 * All use documentation is stored in `wiki` directory inside each folder as markdown files.
-* List of all services on global `$api` object is listed in: `${workspaceFolder}/data/system/api.stub.php`
+* List of all services on global `$api` object is listed in: `${workspaceFolder}/data/system/api.stub.php` - those services are available globally through `$api->serviceName` syntax, e.g. `$api->db` or `$api->log` or `$api->config` etc.
 * Each module caries `zolinga.json` that defines event listeners (section `listen`): content tag handlers (events `cms:content:{{tagName}}`), services (property `service`), front-end routed events (origin `remote`), other events and other metadata, see more: `${workspaceFolder}system/wiki/Zolinga Core/Events and Listeners.md`
     * All joined `zolinga.json` files are stored in `${workspaceFolder}/data/system/system.cache.json` file.
 * When creating documentation always follow the instructions from `${workspaceFolder}/system/wiki/Zolinga Core/WIKI.md`
@@ -27,6 +27,7 @@
 * The System caches all zolinga.json files. If the contents changes it gets automatically reloaded. So bump up minor version of the module in `zolinga.json` file to trigger the reload.
 * Database is usually accessed through `$api->db` with `query` and `queryExpand` methods. DB installation scripts are stored in `${workspaceFolder}/modules/{module-name}/install/install/*.sql` - see `Module Installation and Updates.md`
 * Note that modules `install/dist` folder is automatically symlinked to public folder `${workspaceFolder}/public/dist/{module-name}` and can be accessed through `https://example.com/dist/{module-name}/...` URL.
+* All mappings of namespace/class names to file paths are defined in zolinga.json inside each module - you can search those at once in cache file `${workspaceFolder}/data/system/system.cache.json` - `autoload` section - it contains joined records from all current zolinga.json files.
 
 # Web Components
 
