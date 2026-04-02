@@ -332,6 +332,8 @@
     "Parsedown": "vendor/parsedown/Parsedown.php"
   },
   "config": {
+    "# version": "Version of the application. Increment this to force reload of all pages and bypass any caching.",
+    "version": "",
     "# baseURL": "Base URL of the application. This is used for generating links and redirects.",
     "baseURL": "http://localhost:8080",
     "health": {
