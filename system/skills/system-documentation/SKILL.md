@@ -1,6 +1,6 @@
 ---
 name: system-documentation
-description: Use when writing module or core documentation, including required locations and mandatory docs for CLI events and CMS content tags.
+description: Use when writing features, modules or modifying APIs in any way, including required locations and mandatory docs and CMS content tags.
 argument-hint: "<module-name> [event-or-topic]"
 ---
 
@@ -9,7 +9,6 @@ argument-hint: "<module-name> [event-or-topic]"
 ## Use When
 
 - Adding or updating docs for features, events, or content tags.
-- Documenting CLI-origin events.
 
 ## Workflow
 
@@ -17,22 +16,18 @@ argument-hint: "<module-name> [event-or-topic]"
 2. Place core docs under `system/wiki/Zolinga Core/`.
 3. Follow formatting and style guidance from `system/wiki/Zolinga Core/WIKI.md`.
 4. Focus on practical usage and short actionable examples.
-5. For `cli` origin events, create docs at:
+5. For events, create docs at:
 `modules/<module-name>/wiki/ref/event/<event-name-with-colons-replaced-by-slashes>.md`
 6. For content tags, create/update:
 `modules/<module-name>/wiki/ref/event/cms/content/<tagName>.md`
+7. For API changes, update relevant wiki docs and add cross-references to new docs.
+8. Consider updating appropriate `SKILL.md` files to reference new docs and ensure the skill's documentation abstract is up to date. If appropriate create a new skill for documentation if the change is large enough to warrant its own skill.
 
-## CLI Event Docs Must Include
+## Event Docs Must Include
 
 - Supported request parameters.
-- Command-line usage syntax.
+- Usage syntax.
 - Practical invocation examples.
-
-## Documentation Abstract
-
-- Start with `WIKI.md` to follow authoring format and writing conventions.
-- Use `Zolinga Core.md` as a topic map to select canonical reference pages.
-- Use wiki event reference pages when documenting wiki behavior itself.
 
 ## References
 
