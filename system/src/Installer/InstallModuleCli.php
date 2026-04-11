@@ -185,7 +185,11 @@ class InstallModuleCli implements ListenerInterface
      */
     private function readDatabase(): array
     {
-        if (!file_exists('private://system/repo/master.json')) {
+        if (
+            !file_exists('private://system/repo/master.json')
+            ||
+            (time() - filemtime('private://system/repo/master.json')) > 24 * 3600
+        ) {
             $this->downloadDatabase();
         }
         $data = json_decode(file_get_contents('private://system/repo/master.json') ?: 'null', true)

@@ -23,6 +23,7 @@ argument-hint: "[host:port or setup goal]"
 6. If you use Apache instead, generate an example config with `bin/zolinga skeleton:apache ...` and serve the `public/` directory.
 7. Open the local site and then visit `/wiki/` to confirm the framework booted and documentation is available.
 8. If startup fails, check writable-path errors first, then review `data/system/logs/messages.log`.
+9. The framework by itself does nothing much you need modules installed to see real behavior. Use `bin/zolinga install --list` to see available modules and `bin/zolinga install --module=<module-name>` to install them.
 
 ## Quick Checks
 
