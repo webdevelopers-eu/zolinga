@@ -24,9 +24,13 @@ This is the folder structure of a module:
 │   │   ├── 📁 ...
 │   │   └── 📄 ... 
 │   │
-│   └── 📁 dist     ▶ symlinked too ./public/dist/{module}
+│   └── 📁 dist     ▶ symlinked to ./public/dist/{module}
 │       ├── 📁 ...
 │       └── 📄 ... 
+│
+├── 📁 skills       ▶ each sub-folder symlinked into .agents/skills/{module}-{skill-name}
+│   └── 📁 {module}-{skill-name}
+│       └── 📄 SKILL.md
 │   
 ├── 📁 src          ▶ your source code
 │   ├── 📁 ...
@@ -51,6 +55,7 @@ This is the folder structure of a module:
         > contains the default files that will be _copied_ during installation to the _read-write_ file data storage `./public/data/MODULE` (`https://example.com/data/MODULE`) accessible from the web server. No `.php` files are allowed in this folder.
     - `dist`
         > this _read-only_ folder will be _symlinked_ to the public folder `public/dist/MODULE` (`https://example.com/dist/MODULE`) so that the files are accessible from the web server. It may contain `.php` files that are executed on HTTP request.
+- The optional `skills` folder bundles [Agent Skills](https://code.visualstudio.com/docs/copilot/customization/agent-skills) for this module. Each immediate sub-directory's name must start with the module name prefix '<module>-<skill-name>' and must contain a `SKILL.md` file. On every install/update run the system automatically creates a symlink `.agents/skills/{module}-{skill-name}` → `modules/{module}/skills/{module}-{skill-name}` for each skill directory found. The module name prefix prevents naming conflicts between skills from different modules. This makes module-provided skills available to Copilot and compatible agents without any manual setup.
 - The optional `wiki` folder is meant to house the documentation for your module. This folder will be automatically used by inbuilt [Zolinga WIKI](:Zolinga Core:WIKI).
 
 ## Example
@@ -75,6 +80,9 @@ The example of the simple 'hello-world' module with more advanced "install" fold
 │   └── 📁 dist
 │       ├── 📄 logo.png
 │       └── 📄 soap.php
+├── 📁 skills
+│   └── 📁 hello-world-example-skill
+│       └── 📄 SKILL.md
 ├── 📁 src
 │   └── 📄 Server.php
 └── 📄 zolinga.json

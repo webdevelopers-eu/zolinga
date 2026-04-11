@@ -46,6 +46,12 @@ class ModuleSkeleton implements ListenerInterface
 
         $this->copyRecursive(ROOT_DIR . "/system/skeletons/module", $dst);
 
+        // Rename skill to contain the prefix of the module
+        rename("$dst/skills/example-skill", "$dst/skills/$moduleName-example-skill");
+        $contents = file_get_contents("$dst/skills/$moduleName-example-skill/SKILL.md");
+        $contents = str_replace("example-skill", "$moduleName-example-skill", $contents);
+        file_put_contents("$dst/skills/$moduleName-example-skill/SKILL.md", $contents);
+
         $event->setStatus($event::STATUS_OK, "Module $moduleName created successfully.");
     }
 

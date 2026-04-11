@@ -24,10 +24,11 @@ class Bootstrap
         }
 
         // Check rw permissions on
+        // ROOT_DIR . '/.agents/skills/'
         // ROOT_DIR . '/data/'
         // ROOT_DIR . '/public/data/'
         // ROOT_DIR . '/public/dist/'
-        foreach(['/data/', '/public/data/', '/public/dist/'] as $dir) {
+        foreach(['/.agents/skills/', '/data/', '/public/data/', '/public/dist/'] as $dir) {
             $path = ROOT_DIR . $dir;
             if (!is_writable($path)) {
                 $this->throwNotWritableException($path);

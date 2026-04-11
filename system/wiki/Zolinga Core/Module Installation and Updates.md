@@ -69,6 +69,18 @@ Once the script is executed you are supposed to set the event status to OK by ca
 
 That way you can any number of file types to be executed during the installation and update process. For example you can add support for `*.myspecial.php` files by registering a listener for the [system:install:script:php](:ref:event:system:install:script:php) event with higher enough priority so it runs before default listener for PHP installation scripts. If the `$event->patchFile` ends with `.myspecial.php` you can execute the script accordingly. If not leave the event status as is and let the default listener deal with the script.
 
+## Agent Skills Auto-Symlink
+
+In addition to installation scripts, the installer automatically manages [Agent Skills](https://code.visualstudio.com/docs/copilot/customization/agent-skills) symlinks on every install/update run:
+
+- If a module has a `skills/` directory at its root, each immediate sub-directory that contains `SKILL.md` is treated as a skill.
+- A symlink `.agents/skills/{module}-{skill-name}` → `modules/{module}/skills/{module}-{skill-name}` is created (or refreshed).
+- The module name prefix prevents naming conflicts between skills from different modules.
+- The `.agents/skills/` directory is created automatically if it does not exist.
+- Stale symlinks with the module prefix are removed when corresponding source skill folders no longer exist.
+
+This means you can ship AI agent skills with a module by placing them in `modules/{module}/skills/{module}-{skill-name}/SKILL.md` — no manual configuration required.
+
 # Related
 
 - [Installing Additional Modules](:Zolinga Core:Installing Additional Modules) - for information how to install new modules.

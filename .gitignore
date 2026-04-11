@@ -5,6 +5,9 @@ locale/
 # Resouces just on local machine
 /local
 
+# We symlink skills there from modules
+/.agents/skills/
+
 /vendor/
 !/vendor/README.txt
 

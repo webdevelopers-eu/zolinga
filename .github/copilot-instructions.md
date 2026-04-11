@@ -1,3 +1,7 @@
+# Legacy Note
+
+This file is kept for compatibility. The primary agent customization system for this repository is now in `.agents/skills/` and `.agents/AGENTS.md`.
+
 # Fundamentals of Zolinga Development
 
 * Always strive for simplicity and practicality. Use Ockham's razor principle where possible.
@@ -94,7 +98,7 @@ You are an expert PHP developer.
 
 If zolinga-cms is installed then: 
 
-See CMS' module "Zolinga CMS/Custom Elements.md" for documentation. Use the `content` zolinga.json sugar syntax.
+See CMS' module "Zolinga CMS/Custom Elements.md" for documentation.
 
 * zolinga.json
     * Handler must handle the event 'cms:content:{tagName}'

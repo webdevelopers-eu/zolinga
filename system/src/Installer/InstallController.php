@@ -76,40 +76,105 @@ class InstallController implements ListenerInterface
     {
         global $api;
 
-        if (!is_dir(ROOT_DIR . '/data/system/installed')) {
-            mkdir(ROOT_DIR . '/data/system/installed', 0777, true);
-        }
+        $this->ensureDirectory(ROOT_DIR . '/data/system/installed');
 
         foreach ($api->manifest->manifestList as $fn) {
             $dir = dirname($fn);
             $state = $api->manifest->getState($fn);
             $name = basename($dir);
 
-            $privateDir = ROOT_DIR . "/data/{$name}";
+            $this->syncModuleDataDirectories($dir, $name, $state);
+            $this->syncModuleDistSymlink($dir, $name);
+            $this->syncModuleSkills($dir, $name);
+        }
+    }
 
-            if (!is_dir($privateDir)) {
-                mkdir($privateDir, 0777, true)
-                    or throw new RuntimeException("Failed to create directory: {$privateDir} ({$this->getSystemUserInfo()})");
-            }
+    /**
+     * Ensure a directory exists.
+     *
+     * @throws RuntimeException
+     */
+    private function ensureDirectory(string $path): void
+    {
+        if (!is_dir($path) && !mkdir($path, 0777, true)) {
+            throw new RuntimeException("Failed to create directory: {$path} ({$this->getSystemUserInfo()})");
+        }
+    }
 
-            if ($state === ModuleStatesEnum::NEW) {
-                $this->copyRecursive(ROOT_DIR . $dir . '/install/private', $privateDir);
-            }
+    /**
+     * Ensure module data directories exist and optionally copy defaults.
+     */
+    private function syncModuleDataDirectories(string $dir, string $name, ModuleStatesEnum $state): void
+    {
+        $privateDir = ROOT_DIR . "/data/{$name}";
+        $publicDir = ROOT_DIR . "/public/data/{$name}";
 
-            $publicDir = ROOT_DIR . "/public/data/{$name}";
-            if (!is_dir($publicDir) && !mkdir($publicDir, 0777, true)) {
-                throw new RuntimeException("Failed to create directory: {$publicDir} ({$this->getSystemUserInfo()})");
-            }
-            if ($state === ModuleStatesEnum::NEW) {
-                $this->copyRecursive(ROOT_DIR . $dir . '/install/public', $publicDir);
-            }
+        $this->ensureDirectory($privateDir);
+        $this->ensureDirectory($publicDir);
 
-            $symlink = ROOT_DIR . "/public/dist/{$name}";
-            if (is_link($symlink) && !unlink($symlink)) {
-                throw new RuntimeException("Failed to remove symlink: {$symlink} ({$this->getSystemUserInfo()})");
+        if ($state === ModuleStatesEnum::NEW) {
+            $this->copyRecursive(ROOT_DIR . $dir . '/install/private', $privateDir);
+            $this->copyRecursive(ROOT_DIR . $dir . '/install/public', $publicDir);
+        }
+    }
+
+    /**
+     * Ensure install/dist symlink is refreshed.
+     */
+    private function syncModuleDistSymlink(string $dir, string $name): void
+    {
+        $target = ROOT_DIR . "/public/dist/{$name}";
+        $source = ROOT_DIR . $dir . '/install/dist';
+
+        if (is_link($target) && !unlink($target)) {
+            throw new RuntimeException("Failed to remove symlink: {$target} ({$this->getSystemUserInfo()})");
+        }
+
+        if (is_dir($source) && !symlink($source, $target)) {
+            throw new RuntimeException("Failed to create symlink from {$dir}/install/dist to {$target} ({$this->getSystemUserInfo()})");
+        }
+    }
+
+    /**
+     * Sync module skills to .agents/skills.
+     */
+    private function syncModuleSkills(string $dir, string $moduleName): void
+    {
+        $skillsSource = ROOT_DIR . $dir . '/skills';
+        $agentsSkillsDir = ROOT_DIR . '/.agents/skills';
+
+        $this->ensureDirectory($agentsSkillsDir);
+
+        // Remove all symlinks with module prefix
+        foreach (new \DirectoryIterator($agentsSkillsDir) as $agentSkillLink) {
+            if (!$agentSkillLink->isDot() 
+                && $agentSkillLink->isLink()
+                && str_starts_with($agentSkillLink->getFilename(), $moduleName . '-')
+                && !unlink($agentSkillLink->getPathname())) {
+                    trigger_error("Failed to remove existing skill symlink: {$agentSkillLink->getPathname()} ({$this->getSystemUserInfo()})", E_USER_WARNING);
             }
-            if (is_dir(ROOT_DIR . $dir . '/install/dist') && !symlink(ROOT_DIR . $dir . '/install/dist', $symlink)) {
-                throw new RuntimeException("Failed to create symlink from {$dir}/install/dist to {$symlink} ({$this->getSystemUserInfo()})");
+        }
+
+        // Create new symlinks
+        if (is_dir($skillsSource)) {
+            foreach (new \DirectoryIterator($skillsSource) as $skillDir) {
+                if ($skillDir->isDot() || !$skillDir->isDir()) {
+                    continue;
+                }
+                if (!is_file($skillDir->getPathname() . '/SKILL.md')) {
+                    trigger_error("Skipping skill directory {$skillDir->getPathname()} because it does not contain a SKILL.md file", E_USER_WARNING);
+                    continue;
+                }
+                if (!str_starts_with($skillDir->getFilename(), $moduleName . '-')) {
+                    trigger_error(
+                        "Skipping skill directory {$skillDir->getPathname()} because its folder name does not start with the module name prefix '{$moduleName}-' " .
+                        "The expected name is 'modules/<module>/skills/{$moduleName}-<skill-name>'", E_USER_WARNING);
+                    continue;
+                }
+                $skillSymlink = $agentsSkillsDir . '/' . $skillDir->getFilename();
+                if (!symlink($skillDir->getPathname(), $skillSymlink)) {
+                    trigger_error("Failed to create skill symlink: {$skillSymlink} ({$this->getSystemUserInfo()})", E_USER_WARNING);
+                }
             }
         }
     }
