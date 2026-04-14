@@ -39,6 +39,12 @@ enum StatusEnum: int
     case CONTINUE = 100;
     case PROCESSING = 102;
     case OK = 200;
+    case CREATED = 201;
+    case ACCEPTED = 202;
+    case NON_AUTHORITATIVE_INFORMATION = 203;
+    case NO_CONTENT = 204;
+    case RESET_CONTENT = 205;
+    case PARTIAL_CONTENT = 206;
 
         // Redirects
     case MULTIPLE_CHOICES = 300;

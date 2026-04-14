@@ -77,6 +77,11 @@ class Event implements JsonSerializable
     final const STATUS_ERROR = StatusEnum::ERROR;
     final const STATUS_NOT_FOUND = StatusEnum::NOT_FOUND;
     final const STATUS_OK = StatusEnum::OK;
+    final const STATUS_CREATED = StatusEnum::CREATED;
+    final const STATUS_ACCEPTED = StatusEnum::ACCEPTED;
+    final const STATUS_NO_CONTENT = StatusEnum::NO_CONTENT;
+    final const STATUS_RESET_CONTENT = StatusEnum::RESET_CONTENT;
+    final const STATUS_PARTIAL_CONTENT = StatusEnum::PARTIAL_CONTENT;
 
     final const STATUS_MULTIPLE_CHOICES = StatusEnum::MULTIPLE_CHOICES;
     final const STATUS_MOVED_PERMANENTLY = StatusEnum::MOVED_PERMANENTLY;
