@@ -38,12 +38,48 @@ class Event {
     response;
 
     // Enum shortcuts
-    static STATUS_ERROR = 500;
-    static STATUS_NOT_FOUND = 404;
     static STATUS_OK = 200;
+    static STATUS_CREATED = 201;
+    static STATUS_ACCEPTED = 202;
+    static STATUS_NO_CONTENT = 204;
+    static STATUS_RESET_CONTENT = 205;
+    static STATUS_PARTIAL_CONTENT = 206;
+    static STATUS_MULTIPLE_CHOICES = 300;
+    static STATUS_MOVED_PERMANENTLY = 301;
+    static STATUS_FOUND = 302;
+    static STATUS_SEE_OTHER = 303;
+    static STATUS_NOT_MODIFIED = 304;
+    static STATUS_TEMPORARY_REDIRECT = 307;
+    static STATUS_PERMANENT_REDIRECT = 308;
+
+    static STATUS_BAD_REQUEST = 400;
     static STATUS_UNAUTHORIZED = 401;
     static STATUS_FORBIDDEN = 403;
+    static STATUS_NOT_FOUND = 404;
+    static STATUS_TEMPORARY_REDIRECT = 307;
+    static STATUS_PERMANENT_REDIRECT = 308;
+
+
     static STATUS_BAD_REQUEST = 400;
+    static STATUS_UNAUTHORIZED = 401;
+    static STATUS_FORBIDDEN = 403;
+    static STATUS_NOT_FOUND = 404;
+    static STATUS_METHOD_NOT_ALLOWED = 405;
+    static STATUS_TIMEOUT = 408;
+    static STATUS_CONFLICT = 409;
+    static STATUS_GONE = 410;
+    static STATUS_PRECONDITION_FAILED = 412;
+    static STATUS_I_AM_A_TEAPOT = 418;
+    static STATUS_LOCKED = 423;
+
+
+    static STATUS_ERROR = 500;
+    static STATUS_NOT_IMPLEMENTED = 501;
+    static STATUS_BAD_GATEWAY = 502;
+    static STATUS_SERVICE_UNAVAILABLE = 503;
+    static STATUS_GATEWAY_TIMEOUT = 504;
+
+
     static STATUS_UNDETERMINED = 0;
 
     // Is not used on the client side, just for compatibility with server side Event class

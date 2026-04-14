@@ -74,8 +74,6 @@ class Event implements JsonSerializable
     private ?string $message = null;
 
     // Just shortcuts to the enums. It may be easier to use $event::STATUS_OK instead of importing enums... 
-    final const STATUS_ERROR = StatusEnum::ERROR;
-    final const STATUS_NOT_FOUND = StatusEnum::NOT_FOUND;
     final const STATUS_OK = StatusEnum::OK;
     final const STATUS_CREATED = StatusEnum::CREATED;
     final const STATUS_ACCEPTED = StatusEnum::ACCEPTED;
@@ -83,6 +81,7 @@ class Event implements JsonSerializable
     final const STATUS_RESET_CONTENT = StatusEnum::RESET_CONTENT;
     final const STATUS_PARTIAL_CONTENT = StatusEnum::PARTIAL_CONTENT;
 
+    // 3xx Redirects
     final const STATUS_MULTIPLE_CHOICES = StatusEnum::MULTIPLE_CHOICES;
     final const STATUS_MOVED_PERMANENTLY = StatusEnum::MOVED_PERMANENTLY;
     final const STATUS_FOUND = StatusEnum::FOUND;
@@ -91,8 +90,11 @@ class Event implements JsonSerializable
     final const STATUS_TEMPORARY_REDIRECT = StatusEnum::TEMPORARY_REDIRECT;
     final const STATUS_PERMANENT_REDIRECT = StatusEnum::PERMANENT_REDIRECT;
 
+    // 4xx client errors
     final const STATUS_UNAUTHORIZED = StatusEnum::UNAUTHORIZED;
     final const STATUS_FORBIDDEN = StatusEnum::FORBIDDEN;
+    final const STATUS_NOT_FOUND = StatusEnum::NOT_FOUND;
+    final const STATUS_METHOD_NOT_ALLOWED = StatusEnum::METHOD_NOT_ALLOWED;
     final const STATUS_BAD_REQUEST = StatusEnum::BAD_REQUEST;
     final const STATUS_UNDETERMINED = StatusEnum::UNDETERMINED;
     final const STATUS_CONTINUE = StatusEnum::CONTINUE;
@@ -103,6 +105,9 @@ class Event implements JsonSerializable
     final const STATUS_PRECONDITION_FAILED = StatusEnum::PRECONDITION_FAILED;
     final const STATUS_I_AM_A_TEAPOT = StatusEnum::I_AM_A_TEAPOT;
     final const STATUS_LOCKED = StatusEnum::LOCKED;
+
+    // 5xx server errors
+    final const STATUS_ERROR = StatusEnum::ERROR;
     final const STATUS_NOT_IMPLEMENTED = StatusEnum::NOT_IMPLEMENTED;
     final const STATUS_BAD_GATEWAY = StatusEnum::BAD_GATEWAY;
     final const STATUS_SERVICE_UNAVAILABLE = StatusEnum::SERVICE_UNAVAILABLE;
