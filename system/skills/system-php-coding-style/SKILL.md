@@ -23,12 +23,14 @@ argument-hint: "<module-name> [class-or-file]"
 - `camelCase` for variables/methods.
 - `PascalCase` for classes.
 - Up to 4 consecutive uppercase initials stay uppercased, e.g. `XMLHttpRequest`, `HTTPClient`, `getURL()`.
-- `kebab-case` for filenames (except wiki article titles).
-8. Put DB model classes under `src/Model`.
-9. Put enum-like keyword sets in `src/Types` where useful.
-10. Listeners implement `Zolinga\System\Events\ListenerInterface`.
-11. Services implement `Zolinga\System\Events\ServiceInterface`.
-12. Provide a complete class example and brief comments explaining each public or protected property and/or accessor.
+- `kebab-case` for filenames (except wiki article titles and PHP class files — see rule 8).
+8. **PHP class files must mirror the namespace path after the autoload prefix, using the exact class name as filename.** Given `"Zolinga\\Seo\\": "src/"` in `zolinga.json` autoload, the class `Zolinga\Seo\Listeners\IndexNowListener` must be at `<module>/src/Listeners/IndexNowListener.php`. This is not kebab-case — class files use PascalCase filenames matching the class name. Without this the autoloader won't find the class.
+9. Put DB model classes under `src/Model`.
+10. Put enum-like keyword sets in `src/Types` where useful.
+11. Listeners implement `Zolinga\System\Events\ListenerInterface`.
+12. Services implement `Zolinga\System\Events\ServiceInterface`.
+13. Provide a complete class example and brief comments explaining each public or protected property and/or accessor.
+14. Use `$event::STATUS_*` constants (e.g. `$event::STATUS_OK`, `$event::STATUS_ERROR`, `$event::STATUS_BAD_REQUEST`) when calling `$event->setStatus()`. Never pass raw integers — `setStatus()` accepts `StatusEnum`. For dynamic HTTP codes use `StatusEnum::tryFrom($code) ?? $event::STATUS_ERROR`.
 
 ## Documentation Abstract
 

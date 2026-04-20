@@ -113,7 +113,7 @@ Syntactic effects:
 - If handler logic uses services from other modules, declare those modules in `dependencies` in `zolinga.json`.
 - If handler assumes listeners/providers from other modules are available, declare those modules in `dependencies` too.
 - Update `emit` section if code starts dispatching new events.
-- Add/update wiki docs for CLI and CMS tag handlers as required by project rules.
+- **Always** create or update WIKI documentation for every new handler/event — not only CLI and CMS content-tag handlers. Place the doc at `{module}/wiki/ref/event/{event:name → path}.md` (replace `:` with `/`), e.g. event `ai:text:generated` → `{module}/wiki/ref/event/ai/text/generated.md`. Document: purpose, origin, request/response fields, emitter location, and a usage example.
 
 ## References
 
