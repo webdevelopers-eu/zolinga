@@ -27,16 +27,27 @@ use Exception, ArrayObject;
 // .html, .htm, .php, .asp, or directories due to performance concerns.
 // Skilled users should configure web server so this is not needed here...
 if (!preg_match('@(?:\.html?|\.php|\.asp|/[^.]*/?)$@', $_SERVER['PATH_INFO'] ?? '/')) {
-    if ($_SERVER['PATH_INFO'] ?? '' === '/favicon.ico') {
+    $rootOverlay = realpath(__DIR__ . '/data/system/root/');
+    $requestedPath = realpath($rootOverlay . ($_SERVER['PATH_INFO'] ?? ''));
+    die("[ $rootOverlay ] [ $requestedPath ] [ {$_SERVER['PATH_INFO']} ]");
+    if (
+        ($_SERVER['PATH_INFO'] ?? false) && $rootOverlay && $requestedPath
+        && str_starts_with($requestedPath, $rootOverlay) // prevent path traversal
+        && !str_starts_with('.', basename($requestedPath)) // prevent hidden files
+        && is_file($requestedPath) && is_readable($requestedPath)
+    ) {
         http_response_code(200);
-        header('Content-Type: image/x-icon');
-        readfile(__DIR__ . '/favicon-zolinga.ico');
+        // get mime type based on extension
+        $mime = mime_content_type($requestedPath);
+        header("Content-Type: $mime");
+        readfile($requestedPath);
         exit;
     }
     http_response_code(404);
     exit;
 }
-
+print_r($_SERVER);
+exit;
 // Check if the script is running over HTTP
 if (php_sapi_name() === 'cli') {
     throw new Exception("This script must be run through a web server and not CLI or other means.");

@@ -6,6 +6,10 @@
     RewriteCond %{REQUEST_URI} !^/.well-known
     RewriteRule "(^|/)\." - [F]
 
+    # If the file maps to /data/system/root then serve it directly
+    RewriteCond %{DOCUMENT_ROOT}/data/system/root/%{REQUEST_URI} -f
+    RewriteRule ^(.*)$ /data/system/root/%{REQUEST_URI} [L]
+
     RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-l
     RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
     RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-d
