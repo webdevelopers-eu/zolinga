@@ -30,6 +30,7 @@ argument-hint: "<root-relative-path> [source-file]"
 
 - Dot-files are denied by Apache except `/.well-known` in the generated template.
 - When rewrite routing reaches `public/index.php`, it also has a safe fallback for serving overlay files by path with traversal/hidden-file checks.
+- Do not create manual symlinks for Agent Skills in `.agents/skills`. Skill links are regenerated automatically when manifests are reloaded; if needed, bump a module version in `zolinga.json` and run install/update flow.
 
 ## References
 
