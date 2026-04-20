@@ -2,7 +2,7 @@ Priority: 0.4
 
 # Processing Page Content
 
-Any requests for non-existent resources are routed to the `./public/index.php` script. 
+Requests are routed to `./public/index.php` when no static file exists for the requested URL.
 
 After the [POST and GET requests are processed](:Zolinga Core:Running the System:Page Request:Processing POST and GET), the `./public/index.php` script will dispatch the `\Zolinga\System\Events\ContentEvent` of type [system:content](:ref:event:system:content) with the origin set to *remote*.
 

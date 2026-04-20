@@ -1,6 +1,6 @@
 # Processing POST and GET
 
-Any requests for non-existent resources are routed to the `./public/index.php` script. 
+Requests are handled by `./public/index.php` when they are not matched by a static file in the web root (including files exposed through `./public/data/system/root`).
 
 If there is either a `GET` or `POST` request, the `index.php` will run a simple code similar to this:
 

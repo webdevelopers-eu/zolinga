@@ -20,6 +20,11 @@ Supported parameters:
 - `documentRoot` - Default: `/var/www/${serverName}/public`. The public document root directory.
 - `errorLogPrefix` - Default: `${APACHE_LOG_DIRECTORY}/${serverName}` log files will be named as `${errorLogPrefix}-error.log` and `${errorLogPrefix}-access.log`
 
+Static root overlay:
+
+- The generated vhost includes rewrite rules that expose files from `./public/data/system/root` as if they were in the document root.
+- Example: `./public/data/system/root/favicon.ico` is served as `/favicon.ico`.
+
 Run `bin/zolinga skeleton:apache --help` to see the full list of supported parameters.
 
 
