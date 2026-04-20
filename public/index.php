@@ -29,7 +29,6 @@ use Exception, ArrayObject;
 if (!preg_match('@(?:\.html?|\.php|\.asp|/[^.]*/?)$@', $_SERVER['PATH_INFO'] ?? '/')) {
     $rootOverlay = realpath(__DIR__ . '/data/system/root/');
     $requestedPath = realpath($rootOverlay . ($_SERVER['PATH_INFO'] ?? ''));
-    die("[ $rootOverlay ] [ $requestedPath ] [ {$_SERVER['PATH_INFO']} ]");
     if (
         ($_SERVER['PATH_INFO'] ?? false) && $rootOverlay && $requestedPath
         && str_starts_with($requestedPath, $rootOverlay) // prevent path traversal
@@ -46,8 +45,7 @@ if (!preg_match('@(?:\.html?|\.php|\.asp|/[^.]*/?)$@', $_SERVER['PATH_INFO'] ?? 
     http_response_code(404);
     exit;
 }
-print_r($_SERVER);
-exit;
+
 // Check if the script is running over HTTP
 if (php_sapi_name() === 'cli') {
     throw new Exception("This script must be run through a web server and not CLI or other means.");
