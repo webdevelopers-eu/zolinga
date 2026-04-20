@@ -1,7 +1,7 @@
 # Zolinga PHP Framework
 *Etymology: In the Chichewa language of Africa, the word "zolinga" means "goals."*
 
-Zolinga Framework is the first PHP framework built from the ground up for vibe-coding and AI-powered development. Every part of Zolinga is designed to work naturally with your flow, whether you are just starting out or building your first serious project. It is minimalistic, modular, and immutable, which makes your codebase simple to understand and easy for AI to explore. With self-contained documentation crafted for both humans and AI agents, Zolinga makes it effortless to let AI dive into your project, understand your code, and help you write clean, high-quality code faster.
+Zolinga Framework is a lightweight PHP framework designed from the ground up for AI agents and vibe coding. Fully hand-coded ✋🤚, it avoids AI-generated scaffolding. It is minimal, modular, and structured to keep codebases simple, readable, and easy for both humans and AI to navigate. Its self-contained documentation is written for developers and AI agents, making it easier to explore projects, understand code, and build clean, high-quality software faster.
 
 **Table of Contents**
 
