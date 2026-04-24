@@ -17,6 +17,7 @@ use JsonSerializable;
  * @property-read string $statusName status code name like "UNDETERMINED" or "FORBIDDEN" or "OK"
  * @property-read string $statusNiceName human readable status name like "Undetermined" or "Forbidden" or "Not Found" or "OK"
  * @property-read boolean $ok is the status OK? Same value as returned by $event->isOk()
+ * @property-read boolean $error is the status an error? Same value as returned by $event->isError()
  */
 class Event implements JsonSerializable
 {
@@ -141,6 +142,9 @@ class Event implements JsonSerializable
 
             case 'ok':
                 return $this->isOk();
+
+            case 'error':
+                return $this->isError();
         
             default:
                 throw new \Exception("Property " . self::class . "::$$name does not exist or is inaccessible.");
