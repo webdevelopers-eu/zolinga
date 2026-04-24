@@ -17,6 +17,8 @@ argument-hint: "<implement|review> [area]"
 - Treat every remote request handler as untrusted input.
 - If a `zolinga.json` listener processes a sensitive action through `"request": "..."` or `"event": "system:request:..."`, add a `"right": "..."` key or enforce authorization explicitly in the handler code before doing the sensitive action.
 - Treat manifest `"right"` as coarse-grained access to the request type or feature, not as complete authorization for every concrete resource the request may touch.
+- When building output for `ContentEvent`, prefer DOM APIs (`createElement()`, `setAttribute()`, `appendChild()`, `createTextNode()` or `new \DOMText(...)`) instead of concatenating raw HTML strings. If raw HTML must be emitted, escape untrusted values correctly before inserting them.
+- When using `$api->db`, always pass external values as query parameters via `$api->db->query($sql, ...$params)` or equivalent parameterized calls. Do not concatenate request data, IDs, search terms, or fragments into SQL.
 - Do not rely on hidden UI controls, HTTP method choice, or obscurity as authorization.
 
 ## Short Authorization Flow
@@ -88,6 +90,8 @@ if (!$api->user->hasRight('access page#' . $pageId)) {
 - Does every sensitive remote request have authorization in manifest or code?
 - If a handler touches a specific resource, does it perform a resource-level permission check in code and not only a general manifest `right` check?
 - Is authorization checked before any state change, external API call, file write, or data disclosure?
+- For `ContentEvent` and DOM-producing handlers, is untrusted output added through DOM methods or properly escaped before insertion?
+- For database access, are all untrusted values bound as query parameters instead of being interpolated into SQL strings?
 - Are request parameters validated instead of trusted as-is?
 - Are dangerous actions limited to POST-like flows in practice, even if routing allows both GET and POST?
 - Are error messages free of secrets, tokens, stack traces, or internal paths?
@@ -99,6 +103,7 @@ if (!$api->user->hasRight('access page#' . $pageId)) {
 - `system/wiki/Zolinga Core/Events and Listeners.md`
 - `system/wiki/Zolinga Core/Events and Listeners/Event Authorization.md`
 - `system/wiki/ref/event/system/request/wildcard.md`
+- `system/src/Events/ContentEvent.php`
 - `system/src/Api.php`
 - `modules/zolinga-rms/zolinga.json`
 - `modules/zolinga-rms/src/UserService.php`
