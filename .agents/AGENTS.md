@@ -20,6 +20,7 @@ Repository core skills:
 - `system-create-skill`
 - `system-create-handler`
 - `system-create-service`
+- `system-inspect`
 - `system-security-practices`
 - `system-authoring-manifest`
 - `system-coding-standards`
