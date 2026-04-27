@@ -24,7 +24,8 @@ modules/<module>/install/dist/web-components/<tag>/<tag>.md    # documentation
 
 The `install/dist/` directory is symlinked to `public/dist/<module>/` at install time, so the public URL becomes `/dist/<module>/web-components/<tag>/<tag>.js`.
 
-## Registration (zolinga.json)
+
+## Registration (zolinga.json) & Naming Rules
 
 Add to the module's `webComponents` array — **never** call `customElements.define()` manually; the loader does it:
 
@@ -38,7 +39,15 @@ Add to the module's `webComponents` array — **never** call `customElements.def
 ]
 ```
 
-- `tag` — must contain a hyphen (WHATWG rule).
+**Naming requirements for web components:**
+- The `tag` **must contain at least one dash** (e.g. `my-widget`).
+- Only ASCII lowercase letters, digits, and dashes (`-`) are allowed.
+- Must not start with a digit.
+- Must not contain uppercase letters or underscores.
+- Must conform to HTML custom element naming rules: see [MDN](https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/define#custom_element_name_requirements).
+- Examples: `my-widget`, `c-resources`, `popup-container` (✅); `mywidget`, `MyWidget`, `1-widget`, `my_widget` (❌)
+
+- `tag` — must follow the above rules.
 - `module` — path relative to the module's `install/dist/` directory.
 - After changing `zolinga.json`, bump the module version to trigger cache refresh.
 
