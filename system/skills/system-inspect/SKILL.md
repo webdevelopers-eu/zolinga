@@ -35,6 +35,34 @@ The file `data/system/system.cache.json` is a single JSON object merging all mod
 
 So when querying the cache, always filter by `event` — the original sugar keys no longer exist.
 
+### Listener Object Format
+
+Every entry in the `listen` array is normalized to the same 7 fields — no partial entries, no missing keys:
+
+```json
+{
+  "event": "system:content",
+  "class": "\\Zolinga\\System\\Cms\\Page",
+  "method": "onContent",
+  "origin": ["remote"],
+  "description": "Super low priority default page handler that displays a placeholder page if event has not status set/is not handled already.",
+  "priority": 0.001,
+  "right": false
+}
+```
+
+| Field | Values | Description |
+|-------|--------|-------------|
+| `event` | string | Full event name (sugar syntax already expanded) |
+| `class` | string | Fully qualified class name with leading `\` |
+| `method` | string \| null | Method name on the class, or `null` (class itself is invoked) |
+| `origin` | string[] | Array of allowed origins, e.g. `["remote"]`, `["cli"]`, `["remote","internal"]` |
+| `description` | string | Human-readable description |
+| `priority` | float | Execution priority, default `0.5`; lower = runs later |
+| `right` | false \| string | `false` = no auth required, or a right string like `"member of administrators"` |
+
+**Note:** This file is automatically regenerated whenever any `zolinga.json` changes (detected via checksum mismatch, e.g. version bump). No manual refresh needed.
+
 ```bash
 # List all registered event listeners (array of {event, class, method, origin, ...})
 jq '.listen' data/system/system.cache.json
@@ -121,17 +149,21 @@ The log file `data/system/logs/messages.log` can grow to gigabytes. **Never `cat
 ### Log Format
 
 ```
-[2026-01-12T11:15:01+00:00] cli [cli:info] 4fgg/104607 1.0M 🔵 "🟣 Starting Zolinga CLI script: bin/zolinga gtm:inbox"
+[2026-01-12T11:15:01+00:00] ::1 [cli:info] 4fgg/104607 1.0M 🔵 "🟣 Starting Zolinga CLI script: bin/zolinga gtm:inbox"
 ```
 
-Fields:
-- `[timestamp]` — ISO 8601 with timezone
-- `cli` — origin (cli, remote, internal, cron, etc.)
-- `[cli:info]` — `[{source}:{severity}]` where severity is `info`, `warning`, `error`
-- `4fgg/104607` — unique run ID / PID
-- `1.0M` — current memory usage
-- `🔵` — blue = info, 🟠 = warning, 🔴 = error
-- `"message"` — the actual log message
+Format: `[{date}] {client} [{category}:{severity}] {logId}/{pid} {memory} {emoji} "{message}" """" {context}`
+
+| Field | Description |
+|-------|-------------|
+| `[timestamp]` | ISO 8601 with timezone |
+| `client` | `$_SERVER['REMOTE_ADDR']` for web requests, or `php_sapi_name()` for CLI (usually `cli`) |
+| `[category:severity]` | First param to `$api->log->*()` — module-dot-separated category, colon, then severity (`info`, `warning`, `error`) |
+| `logId/pid` | Short random run ID (4 chars) / process ID — grep by run ID to trace a single request |
+| `memory` | Current memory usage (e.g. `1.0M`) |
+| `emoji` | 🔵 = info, 🟠 = warning, 🔴 = error |
+| `"message"` | The logged string (JSON-encoded) |
+| `"""" {context}` | Optional — extra JSON context array passed as 3rd argument |
 
 ### Useful Commands
 
@@ -146,21 +178,20 @@ tail -f data/system/logs/messages.log
 grep '4fgg' data/system/logs/messages.log
 
 # Filter by severity
-grep '\[.*:error\]' data/system/logs/messages.log
-grep '\[.*:warning\]' data/system/logs/messages.log
+grep '\[:error\]' data/system/logs/messages.log
+grep '\[:warning\]' data/system/logs/messages.log
 
-# Filter by origin
-grep '\[cron:' data/system/logs/messages.log
-grep '\[remote:' data/system/logs/messages.log
+# Filter by category prefix (e.g. all ipd:xxx categories)
+grep '\[ipd\.' data/system/logs/messages.log
 
-# Filter by source+severity
+# Filter by category+severity (e.g. cron errors)
 grep '\[cron:error\]' data/system/logs/messages.log
 
 # Count errors per day
-grep -c '\[.*:error\]' data/system/logs/messages.log
+grep -c '\[:error\]' data/system/logs/messages.log
 
 # Show only errors with context
-grep -B 2 '\[.*:error\]' data/system/logs/messages.log | tail -100
+grep -B 2 '\[:error\]' data/system/logs/messages.log | tail -100
 
 # Check log size
 ls -lh data/system/logs/messages.log
