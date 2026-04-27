@@ -90,9 +90,9 @@ You are an expert PHP developer.
 
 # Database
 
-* Database field names and aliases and table names use `snake_case` naming convention.
+* Database field names and aliases and table names use `camelCase` naming convention.
 * When creating database tables, views or others, use `${module}/install/install/*.sql` files.
-* When updating existing database tables, always create update script `${module}/install/install/updates/*.sql`. See more in wiki.
+* When updating existing database tables, always create update script `${module}/install/update/*.sql`. See more in wiki.
 
 # Content Tags
 

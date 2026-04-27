@@ -11,11 +11,13 @@ argument-hint: "<module-name> [table-or-view]"
 - Creating new schema objects.
 - Updating existing tables, views, or indexes.
 
+> **See also:** `system-install-scripts` — covers the full install-vs-update lifecycle, naming, ordering, and the rule that install scripts must stay complete while update scripts must only be added. Essential reading before creating any install or update script.
+
 ## Workflow
 
-1. Use `snake_case` for DB table names, field names, and aliases.
+1. Use `camelCase` for DB table names, field names, and aliases (e.g. `rmsUsers`, `cronJobs`, `ipdAccounts`, `trialStart`, `subscriptionEnd`).
 2. Put initial install SQL in `modules/<module-name>/install/install/*.sql`.
-3. Put incremental schema updates in `modules/<module-name>/install/install/updates/*.sql`.
+3. Put incremental schema updates in `modules/<module-name>/install/update/*.sql`.
 4. Use `$api->db` (`query`, `queryExpand`) from PHP code for DB access.
 
 ## Validation
