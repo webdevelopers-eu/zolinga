@@ -97,7 +97,7 @@ $listeners = array_filter($cache['listen'], fn($l) => $l['event'] === 'cms:conte
 
 ## Inspecting API Services
 
-The file `data/system/api.stub.php` defines the `ApiStub` class with `@property` annotations for every service on `$api`.
+The file `data/system/api.stub.php` defines the `ApiStub` class with `@property` annotations for every service on `$api`. This is meant primarily for editors to provide autocomplete and type hints, but it can also be grepped to see what services are available and their types.
 
 ```bash
 # List all available services
