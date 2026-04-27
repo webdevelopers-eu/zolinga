@@ -17,13 +17,15 @@ argument-hint: "<query-type: cache|api|config|log> [details]"
 
 | What | Path | Notes |
 |------|------|-------|
-| Merged manifest (all `zolinga.json`) | `data/system/system.cache.json` | Top-level keys: `signatures`, `manifests`, `autoload`, `listen`. Best queried with `jq` or PHP's `json_decode()` |
-| API service stubs | `data/system/api.stub.php` | `$api->*` services with class types and doc comments |
-| Merged config | `data/system/config.cache.json` | May contain secrets (DB passwords, API keys). `#`-prefixed keys are origin markers |
-| Global config | `config/global.json` | Shared across environments |
-| Local config | `config/local.json` | Environment-specific, overrides global |
-| Log file | `data/system/logs/messages.log` | Can be gigabytes — always use `tail` |
-| Web components registry | `public/data/system/web-components.json` | All custom HTML tags and their JS module paths |
+| Merged manifest (all `zolinga.json`) | `data/system/system.cache.json` | ⚠️ Auto-generated — do not edit. Regenerated from all `zolinga.json` files on change. |
+| API service stubs | `data/system/api.stub.php` | ⚠️ Auto-generated — do not edit. Regenerated from service registrations. |
+| Web components registry | `public/data/system/web-components.json` | ⚠️ Auto-generated — do not edit. Regenerated from `webComponents` sections in `zolinga.json`. |
+| Merged config | `data/system/config.cache.json` | ⚠️ Auto-generated — do not edit. Merged from `global.json` + `local.json` + module configs. |
+| Global config | `config/global.json` | ✏️ Editable — shared defaults across environments. |
+| Local config | `config/local.json` | ✏️ Editable — environment-specific overrides. |
+| Log file | `data/system/logs/messages.log` | ⚠️ Auto-generated — do not edit. Can be gigabytes — always use `tail`. |
+
+> **Rule of thumb:** Only `config/global.json` and `config/local.json` are meant to be directly edited. All other files listed above are auto-generated from module manifests and runtime state — editing them will have no lasting effect (they get overwritten on the next cache rebuild). To change services, events, autoload mappings, or web components, edit the relevant module's `zolinga.json` instead.
 
 ## Querying the Merged Manifest
 
@@ -95,6 +97,48 @@ In PHP:
 $cache = json_decode(file_get_contents('data/system/system.cache.json'), true);
 $listeners = array_filter($cache['listen'], fn($l) => $l['event'] === 'cms:content:my-tag');
 ```
+
+## Class-to-File Mapping (Autoload)
+
+The `autoload` section in `data/system/system.cache.json` maps PSR-4 namespace prefixes to source directories. Each module's `zolinga.json` declares its autoload rules, and they are merged into this single object.
+
+```bash
+# View all autoload mappings
+jq '.autoload' data/system/system.cache.json
+
+# Find which directory a namespace maps to
+jq '.autoload["Zolinga\\Cms\\"]' data/system/system.cache.json
+```
+
+Example output:
+```json
+{
+  "Zolinga\\Cms\\": "modules/zolinga-cms/src/",
+  "Zolinga\\System\\": "system/src/",
+  "Ipd\\Base\\": "modules/ipdefender-base/src/"
+}
+```
+
+### Resolving a Class to Its File
+
+To find the PHP file for any class, match the class's namespace against the autoload prefix, then append the relative class path:
+
+1. Take the fully qualified class name, e.g. `Zolinga\Cms\Abc\Def`
+2. Find the longest matching autoload prefix: `Zolinga\Cms\` → `modules/zolinga-cms/src/`
+3. Strip the prefix from the class name: `Abc\Def`
+4. Replace `\` with `/` and append `.php`: `Abc/Def.php`
+5. Prepend the directory: `modules/zolinga-cms/src/Abc/Def.php`
+
+```bash
+# Quick one-liner: given class Zolinga\Cms\Abc\Def, find the file
+# 1. Get the base path for the namespace
+jq -r '.autoload["Zolinga\\Cms\\"]' data/system/system.cache.json
+# → "modules/zolinga-cms/src/"
+# 2. Build the full path
+echo "modules/zolinga-cms/src/Abc/Def.php"
+```
+
+**Important:** PHP class filenames use PascalCase matching the class name (e.g. `Def.php`), **not** kebab-case. This is the only exception to the kebab-case filename convention in Zolinga.
 
 ## Inspecting API Services
 
