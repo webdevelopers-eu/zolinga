@@ -23,6 +23,7 @@ argument-hint: "<query-type: cache|api|config|log> [details]"
 | Global config | `config/global.json` | Shared across environments |
 | Local config | `config/local.json` | Environment-specific, overrides global |
 | Log file | `data/system/logs/messages.log` | Can be gigabytes — always use `tail` |
+| Web components registry | `public/data/system/web-components.json` | All custom HTML tags and their JS module paths |
 
 ## Querying the Merged Manifest
 
@@ -196,6 +197,42 @@ grep -B 2 '\[:error\]' data/system/logs/messages.log | tail -100
 # Check log size
 ls -lh data/system/logs/messages.log
 ```
+
+## Inspecting Web Components
+
+The file `public/data/system/web-components.json` lists all registered custom HTML tags and the JS modules that implement them. Each entry:
+
+```json
+{
+  "tag": "call-to-action",
+  "module": "/dist/ipdefender/web-components/call-to-action/call-to-action.js",
+  "priority": 0.5,
+  "description": "Call-to-action button that opens the alert editor with optional pre-filled brand name."
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `tag` | Custom element tag name (used as `<call-to-action>` in HTML) |
+| `module` | JS module path relative to `public/` — the system auto-registers via `customElements.define()` |
+| `priority` | Execution priority (default `0.5`) |
+| `description` | Human-readable description |
+
+```bash
+# List all registered web components
+jq '.' public/data/system/web-components.json
+
+# List just the tag names
+jq '[.[] | .tag]' public/data/system/web-components.json
+
+# Find a specific component by tag
+jq '[.[] | select(.tag == "call-to-action")]' public/data/system/web-components.json
+
+# Find all components from a specific module
+jq '[.[] | select(.module | startswith("/dist/ipdefender/"))]' public/data/system/web-components.json
+```
+
+See `system/wiki/Zolinga Core/Web Components.md` for the full web components documentation.
 
 ## References
 
