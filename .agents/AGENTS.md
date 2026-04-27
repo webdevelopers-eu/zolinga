@@ -28,7 +28,7 @@ Repository core skills:
 - `system-module-development`
 - `system-php-coding-style`
 - `system-database-schema-updates`
-- `system-install-scripts`
+ - `system-install-scripts`
 - `system-content-tags`
 - `system-web-components`
 - `system-translations`
