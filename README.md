@@ -3,9 +3,21 @@
 
 Zolinga Framework is a lightweight PHP framework designed from the ground up for AI agents and vibe coding. Fully ✋hand-coded🤚, it avoids AI-generated scaffolding. It is minimal, modular, and structured to keep codebases simple, readable, and easy for both humans and AI to navigate. Its self-contained documentation is written for developers and AI agents, making it easier to explore projects, understand code, and build clean, high-quality software faster.
 
+## Advantages
+
+- **Event-Driven Architecture** — Everything is an event. Local, remote (HTTP), and CLI origins are first-class citizens. Dispatch an event from a cron job, a web request, or another Zolinga instance over the network — same API, zero ceremony. No service container boilerplate, no event bus packages to install.
+- **Built-in Multilingual** — Core-supported `gettext`/`dngettext` pipeline with context-aware disambiguation, automatic string extraction, `.po`/`.mo` compilation, and JS-side `gettext` imports. No third-party i18n packages needed — it just works out of the box.
+- **Database-less CMS with Dynamic Content Tags** — HTML pages are stored as files, not database rows. Pluggable `<content-tag>` elements let any module inject dynamic output via event listeners. `<include-file>`, `<replace-vars>`, `<ai-text>` — compose pages declaratively without touching PHP. Swap to a DB-backed CMS later without rewriting templates.
+- **AI-Native Content Generation** — `<ai-text>` tag generates and caches AI-powered content directly in pages. Set a `uuid` for stable caching, add `remove-invalid-links` for sanitization, use `{{random}}` variables for variation. No prompt-chaining libraries, no LangChain — it's a CMS tag.
+- **Immutable API, 10-Year Stability** — No major-version upgrade treadmill. The core API is designed to stay stable for a decade. Dependencies are WHATWG Web Components, bare PHP, and own modules — all under your control. No `composer update` surprises breaking your app.
+- **Self-Contained, Git-Tracked Documentation** — Every module ships its own `wiki/` folder. Documentation lives next to the code, versioned in git, and can include private docs without external wiki servers. AI agents and developers read the same source of truth.
+- **Zero-Config Web Components** — Register a component in `zolinga.json`, drop the `.js` file in `install/dist/web-components/`, done. The system auto-defines it with `customElements.define()`. Shadow DOM, event broadcasting, and modal handling come built-in via the base `WebComponent` class.
+- **Unified CLI & Web Gateway** — `bin/zolinga event:name <params>` fires any CLI-origin event from the terminal. Run health checks, trigger imports, execute test scripts — same event system, same listeners, no separate CLI framework needed.
+
 **Table of Contents**
 
 - [Zolinga PHP Framework](#zolinga-php-framework)
+  - [Advantages](#advantages)
   - [But... why?](#but-why)
   - [Introduction](#introduction)
   - [Target Audience](#target-audience)

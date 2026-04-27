@@ -17,6 +17,7 @@ This is a modular system with multiple independent git repositories. The main gi
 ## Skills Available
 
 Repository core skills:
+- `system-reuse-first`
 - `system-create-skill`
 - `system-create-handler`
 - `system-create-service`
