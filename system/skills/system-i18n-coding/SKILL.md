@@ -1,6 +1,6 @@
 ---
 name: system-i18n-coding
-description: Use when writing localizable code in Zolinga — PHP dgettext/dngettext, JS gettext/ngettext imports, static HTML gettext attributes, WebComponentIntl templates, and locale service usage.
+description: Use when writing localizable code in Zolinga — PHP dgettext/dngettext, JS gettext/ngettext imports, static HTML gettext attributes and texts, WebComponentIntl templates, and locale service usage.
 argument-hint: "<module-name> [scope:php|js|html|web-component]"
 ---
 
