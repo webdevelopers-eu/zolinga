@@ -3,6 +3,8 @@
 
 Zolinga Framework is a lightweight PHP framework designed from the ground up for AI agents and vibe coding. Fully ✋hand-coded🤚, it avoids AI-generated scaffolding. It is minimal, modular, and structured to keep codebases simple, readable, and easy for both humans and AI to navigate. Its self-contained documentation is written for developers and AI agents, making it easier to explore projects, understand code, and build clean, high-quality software faster.
 
+> "You will recognize a well designed framework by the speed and ease with which you can add new features and fix bugs without modifying it, and by its ability to remain stable and unchanged for years while still supporting evolving requirements."
+
 ## Advantages
 
 - **Event-Driven Architecture** — Everything is an event. Local, remote (HTTP), and CLI origins are first-class citizens. Dispatch an event from a cron job, a web request, or another Zolinga instance over the network — same API, zero ceremony. No service container boilerplate, no event bus packages to install.
