@@ -16,6 +16,11 @@ argument-hint: "<module-name> [change-type] [description]"
 
 **Every `zolinga.json` version bump must be accompanied by a corresponding `CHANGELOG.md` entry.** If you change the `version` field, you must also add or update the changelog. No exceptions.
 
+## File Location
+
+- **Regular modules**: `modules/<module-name>/CHANGELOG.md`
+- **System module** (`system/`): the framework's changelog lives at the **project root** as `CHANGELOG.md`, not inside `system/`. The `system/` pseudo-module is the Zolinga framework itself, so its changelog is the project-level changelog.
+
 ## Format: Keep a Changelog
 
 Follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Key principles:
@@ -53,6 +58,8 @@ Zolinga modules use a simplified `MAJOR.MINOR` version in `zolinga.json` (e.g. `
 ## Workflow
 
 1. **Before bumping `zolinga.json` version**, check if the module has a `CHANGELOG.md`.
+   - For `system/` module, check `CHANGELOG.md` at the project root.
+   - For other modules, check `modules/<module-name>/CHANGELOG.md`.
 2. **If no `CHANGELOG.md` exists**, create one using the boilerplate below.
 3. **Add entries under `[Unreleased]`** (or directly under the new version if releasing now) in the appropriate section(s): `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`.
 4. **If releasing**, replace `[Unreleased]` with the new version and date: `## [x.y.z] - YYYY-MM-DD`.
