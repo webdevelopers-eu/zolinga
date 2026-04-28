@@ -13,13 +13,18 @@ argument-hint: "<module-name> [table-or-view]"
 
 > **See also:** `system-install-scripts` — covers the full install-vs-update lifecycle, naming, ordering, and the rule that install scripts must stay complete while update scripts must only be added. Essential reading before creating any install or update script.
 
+## Critical: Always Bump Module Version
+
+**Any schema change — adding an update script, modifying install SQL, or altering any `install/` artifact — requires bumping the module version in `zolinga.json`.** The system detects version changes to trigger the install/update pipeline. Without a version bump, new update scripts will never execute on existing installations.
+
 ## Workflow
 
 1. Use `camelCase` for DB table names, field names, and aliases (e.g. `rmsUsers`, `cronJobs`, `ipdAccounts`, `trialStart`, `subscriptionEnd`).
 2. Prefix every table name with the **module abbreviation** (e.g. `ipd` for `ipdefender`, `rms` for `zolinga-rms`, `cron` for `zolinga-cron`). The prefix is derived from the module folder name, shortened to a short lowercase identifier. Examples: `ipdAccounts`, `ipdWatchlist`, `rmsUsers`, `cronJobs`.
-2. Put initial install SQL in `modules/<module-name>/install/install/*.sql`.
-3. Put incremental schema updates in `modules/<module-name>/install/update/*.sql`.
-4. Use `$api->db` (`query`, `queryExpand`) from PHP code for DB access.
+3. Put initial install SQL in `modules/<module-name>/install/install/*.sql`.
+4. Put incremental schema updates in `modules/<module-name>/install/update/*.sql`.
+5. Use `$api->db` (`query`, `queryExpand`) from PHP code for DB access.
+6. **Bump the module version** in `modules/<module-name>/zolinga.json` (e.g. `"version": "1.3"` → `"1.4"`).
 
 ## Idempotency (IF NOT EXISTS / IF EXISTS)
 

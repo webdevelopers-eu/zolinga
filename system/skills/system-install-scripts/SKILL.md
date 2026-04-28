@@ -13,6 +13,10 @@ argument-hint: "<module-name> [script-type]"
 - Placing static assets that ship with a module (`install/dist/`).
 - Understanding why an update script didn't run or why install scripts were skipped.
 
+## Critical: Always Bump Module Version
+
+**Any change to `install/` artifacts — adding an update script, modifying install SQL, adding dist files, or any other install/update change — requires bumping the module version in `zolinga.json`.** The system detects version changes to trigger the install/update pipeline. Without a version bump, new update scripts will never execute on existing installations.
+
 ## Key Concept: Two-Phase Lifecycle
 
 Every module has two script directories under `install/`:
