@@ -348,12 +348,18 @@ class Cli
         $atoms = $api->manifest->findByEvent(new Event("*", CliRequestResponseEvent::ORIGIN_CLI));
         usort($atoms, fn ($a, $b) => strcmp($a['event'], $b['event']));
 
+        $list = [];
         foreach ($atoms as $atom) {
             // example: https://v2.ipdefender.eu/w/:ref:event:tmview:daq
-            $url = "$wikiBase/:ref:event:{$atom['event']}";
-            echo "    {$atom['event']}\n        {$atom['description']}\n        More info: $url\n\n";
+            $list[$atom['event']] = array_merge($list[$atom['event']] ?? [], [$atom['description']]);
         }
-        echo "\n";
+
+        foreach ($list as $ev => $descriptions) {
+            $url = "$wikiBase/:ref:event:{$ev}";
+            echo "     $ev ($url)\n";
+            echo "         - " . implode("\n         - ", $descriptions) . "\n";
+            echo "\n";
+        }
     }
 
     /**
