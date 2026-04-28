@@ -16,9 +16,24 @@ argument-hint: "<module-name> [table-or-view]"
 ## Workflow
 
 1. Use `camelCase` for DB table names, field names, and aliases (e.g. `rmsUsers`, `cronJobs`, `ipdAccounts`, `trialStart`, `subscriptionEnd`).
+2. Prefix every table name with the **module abbreviation** (e.g. `ipd` for `ipdefender`, `rms` for `zolinga-rms`, `cron` for `zolinga-cron`). The prefix is derived from the module folder name, shortened to a short lowercase identifier. Examples: `ipdAccounts`, `ipdWatchlist`, `rmsUsers`, `cronJobs`.
 2. Put initial install SQL in `modules/<module-name>/install/install/*.sql`.
 3. Put incremental schema updates in `modules/<module-name>/install/update/*.sql`.
 4. Use `$api->db` (`query`, `queryExpand`) from PHP code for DB access.
+
+## Idempotency (IF NOT EXISTS / IF EXISTS)
+
+All DDL statements that support `IF NOT EXISTS` or `IF EXISTS` **must** use them so scripts are safe to run multiple times without failing:
+
+- `CREATE TABLE IF NOT EXISTS ...`
+- `CREATE VIEW IF NOT EXISTS ...`
+- `CREATE INDEX IF NOT EXISTS ...` (MySQL 8.0+; for older versions, check existence first)
+- `ALTER TABLE ... ADD COLUMN IF NOT EXISTS ...` (MySQL 8.0+; for older versions, use a separate check)
+- `DROP TABLE IF EXISTS ...`
+- `DROP VIEW IF EXISTS ...`
+- `DROP INDEX IF EXISTS ...` (MySQL 8.0+)
+
+For MySQL versions that do not support `IF NOT EXISTS` on a given statement (e.g. `ADD COLUMN` before 8.0), wrap the operation in a conditional check using a `DO` block or a stored procedure that queries `INFORMATION_SCHEMA`.
 
 ## Validation
 
