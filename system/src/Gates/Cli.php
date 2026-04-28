@@ -266,7 +266,7 @@ class Cli
                 continue;
             }
             $this->printError("$event");
-            echo json_encode($event, $this->jsonOptions) . "\n";
+            $this->printResponse(json_encode($event, $this->jsonOptions) . "\n");
         }
     }
 
@@ -301,13 +301,24 @@ class Cli
                 }
             }
             if (is_scalar($response)) {
-                echo $response . "\n";
+                $this->printResponse($response . "\n");
             } else {
-                echo json_encode($response, $this->jsonOptions) . "\n";
+                $this->printResponse(json_encode($response, $this->jsonOptions) . "\n");
             }
         } else {
             $responseAll = array_map(fn ($event) => $event->response, $this->events);
-            echo json_encode($responseAll, $this->jsonOptions) . "\n";
+            $this->printResponse(json_encode($responseAll, $this->jsonOptions) . "\n");
+        }
+    }
+
+    // If output didn't start print response to stdout, if there is foreign output
+    // print it to stderr to not break JSON output and to make sure it is visible to user.
+    private function printResponse(string $string): void
+    {
+        if (headers_sent($file, $line)) {
+            $this->printError("Headers already sent in $file on line $line. Output: $string");
+        } else {
+            echo $string;
         }
     }
 
