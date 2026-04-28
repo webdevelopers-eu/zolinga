@@ -24,6 +24,12 @@ argument-hint: "<module-name> [goal]"
 8. Use Zolinga path conventions (`config://`, module-relative paths) when reading config files.
 9. Logs are recorded via `$api->log` and stored in `data/system/logs/messages.log`.
 
+## Runtime Constants (defined in `system/define.php`)
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `Zolinga\System\ROOT_DIR` | `dirname(__DIR__, 1)` | Absolute filesystem path to the project root (parent of `system/`). Use to build absolute paths to any file in the project without hardcoding. |
+
 ## Quick Checks
 
 - Verify namespace and autoload mapping in module `zolinga.json`.

@@ -85,6 +85,12 @@ if (!$api->user->hasRight('access page#' . $pageId)) {
 }
 ```
 
+## Connection Security Constants (defined in `system/define.php`)
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `Zolinga\System\IS_HTTPS` | `in_array($_SERVER['HTTPS'] ?? '0', ['on', '1']) \|\| ($_SERVER['REQUEST_SCHEME'] ?? '0') === 'https'` | `true` when the current request arrived over HTTPS. Use to enforce HTTPS-only redirects, set `Secure` flag on cookies, or build absolute URLs with the correct scheme. |
+
 ## Review Checklist
 
 - Does every sensitive remote request have authorization in manifest or code?

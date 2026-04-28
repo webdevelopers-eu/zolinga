@@ -1,6 +1,6 @@
 {
   "name": "Zolinga Framework",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "Zolinga PHP framework that makes sense.",
   "authors": [
     "Danny Sevcik <danny@zolinga.net>"
@@ -58,6 +58,15 @@
         "internal"
       ],
       "priority": 0.5
+    },
+    {
+      "description": "Process HTML/XML content through the CMS pipeline from CLI.",
+      "event": "process:content",
+      "class": "\\Zolinga\\System\\Cms\\ProcessContentCli",
+      "method": "onProcessContent",
+      "origin": [
+        "cli"
+      ]
     },
     {
       "description": "Super low priority default page handler that displays a placeholder page if event has not status set/is not handled already.",

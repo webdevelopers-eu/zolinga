@@ -13,6 +13,13 @@ argument-hint: "<query-type: cache|api|config|log> [details]"
 - You need to inspect merged configuration or find where a config key is set.
 - You need to read logs to debug a request, cron run, or error.
 
+## Runtime Constants (defined in `system/define.php`)
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `Zolinga\System\ROOT_DIR` | `dirname(__DIR__, 1)` | Absolute filesystem path to the project root (parent of `system/`). Use to build absolute paths to any file in the project without hardcoding. |
+| `Zolinga\System\START_TIME` | `microtime(true)` | Unix timestamp with microseconds captured at script start. Use to measure elapsed time: `$elapsed = microtime(true) - START_TIME;`. |
+
 ## Key Files
 
 | What | Path | Notes |

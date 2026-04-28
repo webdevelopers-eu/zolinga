@@ -57,9 +57,4 @@ All the .md files from all modules are merged into a single wiki. The links to t
 
 The base parser is great [Parsedown](https://github.com/erusev/parsedown/wiki/) with few tweaks.
 
-Syntax should be [standard Markdown](https://www.markdownguide.org/basic-syntax/).
-
-The custom tweaks are:
-
-- **\{{YOUR NAME}}** - will be replaced with the content of the template file from the `{module}/wiki/templates/YOUR NAME.md` file.
-- **\`NAMESPACE\CLASS\`** - the class names and links inside backticks will be converted to links to the class documentation.
+See [:Zolinga Core:Markdown Syntax] for the complete formatting reference including all standard Markdown and Zolinga-specific extensions.

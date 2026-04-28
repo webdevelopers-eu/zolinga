@@ -26,6 +26,12 @@ Zolinga uses GNU gettext as its i18n backbone. The `zolinga-intl` module provide
 
 For the extract → translate → compile pipeline, see the `system-i18n-translation` skill.
 
+## Runtime Constants (defined in `system/define.php`)
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `GETTEXT_CTX_END` | `"\004"` | Separator between context and text in gettext keys. Use to disambiguate single words: `dgettext('mod', 'Verb: submit' . GETTEXT_CTX_END . 'Submit')`. The `.po` file stores the full key including the `\x04` separator; translators see the context prefix. |
+
 ## Locale Configuration
 
 Locales are configured in `config/global.json`:

@@ -106,6 +106,27 @@ class MyListener implements ListenerInterface
 }
 ```
 
+# Stdout vs Stderr
+
+`bin/zolinga` writes system logs, warnings, and debug messages to **stderr**, while the actual event response (JSON) and any listener `echo` output go to **stdout**. This lets you separate structured output from diagnostic noise using shell redirection:
+
+```bash
+# Capture only the JSON response
+bin/zolinga my:event > response.json
+
+# Capture response and suppress logs
+bin/zolinga my:event > response.json 2> /dev/null
+
+# Capture response and logs separately
+bin/zolinga my:event > response.json 2> debug.log
+
+# Extract a single value from the response using built-in --single
+bin/zolinga --single=response.data my:event
+
+# Print raw JSON responses only (no human-readable wrapper)
+bin/zolinga --json my:event
+```
+
 
 # Related
 {{Running the System}}

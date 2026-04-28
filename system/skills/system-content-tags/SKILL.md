@@ -20,6 +20,7 @@ argument-hint: "<module-name> <tag-name>"
 5. For content tags, accept `ContentElementEvent $event` and set status via `$event->setStatus(...)`.
 6. Manipulate content with DOM API (and `DOMXPath` when needed).
 7. Create/update documentation at `modules/<module-name>/wiki/ref/event/cms/content/<tagName>.md`.
+8. Test content tags from CLI with `bin/zolinga process:content --input=page.html` (see `system/wiki/ref/event/process/content.md`).
 
 ## Documentation Abstract
 
