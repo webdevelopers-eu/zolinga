@@ -14,15 +14,16 @@ argument-hint: "[event-name] [params]"
 
 ## Workflow
 
-1. Discover CLI capabilities with `bin/zolinga --help`.
-2. Trigger CLI-origin events with `bin/zolinga <event-name> <params>`.
-3. Execute ad hoc scripts with `bin/zolinga --execute=\"<path>\"`.
-4. Evaluate short snippets with `bin/zolinga --eval=\"<php-code>\"`.
-5. Start local web server with `bin/zolinga --server=<host>:<port>` and optional `--xdebug`.
-6. Use `config/local.json` then `config/global.json` (`baseURL`) to determine front-end URL defaults.
-7. Create a new module with `bin/zolinga skeleton:module --name=<module-name>`.
-8. Generate Apache config with `bin/zolinga skeleton:apache ...` (see `system/wiki/ref/event/skeleton/apache.md`).
-9. Process HTML/XML content through the CMS pipeline from CLI with `bin/zolinga process:content --input=<file> --url=/test/page` (see `system/wiki/ref/event/process/content.md`).
+1. **Always use `bin/zolinga`** — never run `php -f` or other direct PHP invocations. The `bin/zolinga` wrapper sets up the full framework environment (autoloading, config, services, error handling). Direct `php -f` calls will miss framework initialization and fail.
+2. Discover CLI capabilities with `bin/zolinga --help`.
+3. Trigger CLI-origin events with `bin/zolinga <event-name> <params>`.
+4. Execute ad hoc scripts with `bin/zolinga --execute=\"<path>\"`.
+5. Evaluate short snippets with `bin/zolinga --eval=\"<php-code>\"`.
+6. Start local web server with `bin/zolinga --server=<host>:<port>` and optional `--xdebug`.
+7. Use `config/local.json` then `config/global.json` (`baseURL`) to determine front-end URL defaults.
+8. Create a new module with `bin/zolinga skeleton:module --name=<module-name>`.
+9. Generate Apache config with `bin/zolinga skeleton:apache ...` (see `system/wiki/ref/event/skeleton/apache.md`).
+10. Process HTML/XML content through the CMS pipeline from CLI with `bin/zolinga process:content --input=<file> --url=/test/page` (see `system/wiki/ref/event/process/content.md`).
 ## Stdout vs Stderr
 
 `bin/zolinga` writes system logs, warnings, and debug messages to **stderr**, while the actual event response (JSON) and any listener `echo` output go to **stdout**. This lets you separate structured output from diagnostic noise using shell redirection:
