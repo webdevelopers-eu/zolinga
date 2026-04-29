@@ -49,7 +49,7 @@ Add to the module's `webComponents` array — **never** call `customElements.def
 
 - `tag` — must follow the above rules.
 - `module` — path relative to the module's `install/dist/` directory.
-- After changing `zolinga.json`, bump the module version to trigger cache refresh.
+- After changing `zolinga.json`, bump the module version and run `bin/zolinga` (no parameters) to trigger cache refresh and apply updates.
 
 ## Page Bootstrap
 

@@ -163,7 +163,7 @@ If after all checks nothing covers the need:
    - Content tag → `system-content-tags` skill
    - Web component → `system-web-components` skill
 2. Register it in the module's `zolinga.json`.
-3. Bump the module version to trigger cache reload.
+3. Bump the module version to trigger cache reload, then run `bin/zolinga` (no parameters) to apply the change.
 
 ## Quick Reference — Where to Look
 

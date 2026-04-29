@@ -100,7 +100,7 @@ No install script is needed for dist files — the symlink is created automatica
 1. **New module**: Create `install/install/` scripts for complete from-scratch setup.
 2. **Schema change**: Add a new numbered script to `install/update/` AND update the corresponding `install/install/` script to reflect the current full state.
 3. **Bug in update script**: Do NOT edit the broken script. Add a new fix script with a higher number.
-4. **Trigger install/update**: Bump the module version in `zolinga.json` — the system detects the change and runs pending scripts.
+4. **Trigger install/update**: Bump the module version in `zolinga.json`, then run `bin/zolinga` (no parameters). The system detects the version change, rescans manifests, and runs pending install/update scripts.
 5. **Add custom script type**: Create a listener for `system:install:script:{ext}` event with `internal` origin. See `system/wiki/Zolinga Core/Module Installation and Updates.md`.
 
 ## Related Skills

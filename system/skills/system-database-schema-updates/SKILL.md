@@ -24,7 +24,7 @@ argument-hint: "<module-name> [table-or-view]"
 3. Put initial install SQL in `modules/<module-name>/install/install/*.sql`.
 4. Put incremental schema updates in `modules/<module-name>/install/update/*.sql`.
 5. Use `$api->db` (`query`, `queryExpand`) from PHP code for DB access.
-6. **Bump the module version** in `modules/<module-name>/zolinga.json` (e.g. `"version": "1.3"` → `"1.4"`).
+6. **Bump the module version** in `modules/<module-name>/zolinga.json` (e.g. `"version": "1.3"` → `"1.4"`), then run `bin/zolinga` (no parameters) to trigger the install/update pipeline.
 
 ## Idempotency (IF NOT EXISTS / IF EXISTS)
 

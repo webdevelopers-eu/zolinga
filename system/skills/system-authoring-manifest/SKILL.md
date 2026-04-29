@@ -101,7 +101,7 @@ Each item includes:
 - `autoload` for namespace mapping.
 - `dependencies` for cross-module requirements.
 2. Validate behavior against merged cache in `data/system/system.cache.json`.
-3. Bump module minor version when needed to force manifest cache refresh.
+3. Bump module minor version when needed to force manifest cache refresh, then run `bin/zolinga` (no parameters) to apply the change.
 4. **Always update `CHANGELOG.md`** when bumping the version — see `system-changelog` skill.
 
 ## Practical Checklist

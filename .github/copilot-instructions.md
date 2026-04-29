@@ -28,7 +28,7 @@ This file is kept for compatibility. The primary agent customization system for 
 * Do not use dependency injection logic - no need for it it is PHP, e.g. for accessing `$api` services use `global $api` and then use `$api->serviceName` 
 * The module structure is as follows: `${workspaceFolder}/system/wiki/Zolinga Core/Module Anatomy.md`
    * It also explains where to put PHP scripts and other code that needs to be accessible from the web.
-* The System caches all zolinga.json files. If the contents changes it gets automatically reloaded. So bump up minor version of the module in `zolinga.json` file to trigger the reload.
+* The System caches all zolinga.json files. If the contents changes it gets automatically reloaded. So bump up minor version of the module in `zolinga.json` file to trigger the reload, then run `bin/zolinga` (no parameters) to apply the changes.
 * Database is usually accessed through `$api->db` with `query` and `queryExpand` methods. DB installation scripts are stored in `${workspaceFolder}/modules/{module-name}/install/install/*.sql` - see `Module Installation and Updates.md`
 * Note that modules `install/dist` folder is automatically symlinked to public folder `${workspaceFolder}/public/dist/{module-name}` and can be accessed through `https://example.com/dist/{module-name}/...` URL.
 * All mappings of namespace/class names to file paths are defined in zolinga.json inside each module - you can search those at once in cache file `${workspaceFolder}/data/system/system.cache.json` - `autoload` section - it contains joined records from all current zolinga.json files.

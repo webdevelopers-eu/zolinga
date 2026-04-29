@@ -25,7 +25,7 @@ argument-hint: "<scope:system|module> <skill-name> [goal]"
 - Core system skills: `system/skills/<skill-name>/SKILL.md`
 - Module-specific skills: `modules/<module>/skills/<module>-<skill-name>/SKILL.md`
 - `.agents/skills/` is derived/symlinked during install/update; do not treat it as canonical source and never create symlinks there manually.
-- If a new/changed skill is not visible yet, bump module version in `zolinga.json` (to refresh cache) and run either visit the page or run `bin/zolinga` from CLI - system will autodetect change and regenerate symlinks.
+- If a new/changed skill is not visible yet, bump module version in `zolinga.json` and run `bin/zolinga` (no parameters). The system autodetects the change, rescans manifests, and regenerates symlinks.
 
 ## Naming Rules
 

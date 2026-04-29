@@ -36,7 +36,7 @@ argument-hint: "[host:port or setup goal]"
 
 - If bootstrap reports permission errors, fix ownership or write access for the required directories.
 - If the site opens on the wrong host or port, re-check `baseURL` and how the server was started.
-- If module assets are missing, run the install/update flow so `public/dist/{module}` symlinks are refreshed.
+- If module assets are missing, run `bin/zolinga` (no parameters) to trigger the install/update flow so `public/dist/{module}` symlinks are refreshed.
 - If a module behaves as if it is not loaded, inspect `data/system/system.cache.json` and the module `zolinga.json` file.
 
 ## References

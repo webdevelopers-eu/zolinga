@@ -20,7 +20,7 @@ argument-hint: "<module-name> [goal]"
 4. List of all services is in `data/system/api.stub.php`.
 5. Add or update listeners/services in module `zolinga.json`.
 6. When adding or firing events, update the `emits` section in `zolinga.json`.
-7. If `zolinga.json` changes, bump minor module version to force cache reload.
+7. If `zolinga.json` changes, bump minor module version to force cache reload, then run `bin/zolinga` (no parameters) to trigger manifest rescan and install/update pipeline.
 8. Use Zolinga path conventions (`config://`, module-relative paths) when reading config files.
 9. Logs are recorded via `$api->log` and stored in `data/system/logs/messages.log`.
 

@@ -102,7 +102,7 @@ Syntactic effects:
 - `autoload` for new class namespaces.
 - `dependencies` when relying on other modules.
 2. Validate merged manifest output in `data/system/system.cache.json`.
-3. Bump module minor version when needed to force manifest cache refresh.
+3. Bump module minor version when needed to force manifest cache refresh, then run `bin/zolinga` (no parameters) to apply the change.
 
 ## Handler Implementation Checklist
 
