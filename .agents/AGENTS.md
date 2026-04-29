@@ -35,6 +35,7 @@ Repository core skills:
 - `system-custom-api-endpoints`
 - `system-documentation`
 - `system-run-and-test`
+- `system-concurrency`
 - `system-web-root-overlay`
 - `system-i18n-coding`
 - `system-i18n-translation`
