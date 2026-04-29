@@ -16,6 +16,8 @@ argument-hint: "<module-name> [change-type] [description]"
 
 **Every `zolinga.json` version bump must be accompanied by a corresponding `CHANGELOG.md` entry.** If you change the `version` field, you must also add or update the changelog. No exceptions.
 
+Inner workings that are not public methods/service APIs, event APIs should be described only briefly - high level, without going into implementation details.  
+
 ## File Location
 
 - **Regular modules**: `modules/<module-name>/CHANGELOG.md`
