@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Events;
 
-use Zolinga\System\Types\{StatusEnum, SeverityEnum, OriginEnum};
+use Zolinga\System\Exceptions\MissingUuidException;
+use Zolinga\System\Types\{StatusEnum, OriginEnum};
 use JsonSerializable;
 
 /**
@@ -28,7 +29,7 @@ class Event implements JsonSerializable
      *
      * @var string
      */
-    public $uuid;
+    public ?string $uuid;
 
     /**
      * Event type in the format of an URI. Example: example.org:api:myEvent
@@ -168,9 +169,11 @@ class Event implements JsonSerializable
      * Shortcut to calling $api->dispatchEvent($event)
      *
      * @return self
+     * @throws MissingUuidException
      */
     public function dispatch(): self
     {
+        $this->assertUuid();
         global $api;
         $api->dispatchEvent($this);
         return $this;
@@ -260,12 +263,27 @@ class Event implements JsonSerializable
     }
 
     /**
+     * Assert that the event has a non-null, non-empty UUID.
+     *
+     * @return void
+     * @throws MissingUuidException
+     */
+    private function assertUuid(): void
+    {
+        if (empty($this->uuid)) {
+            throw new MissingUuidException($this::class);
+        }
+    }
+
+    /**
      * Specify data which should be serialized to JSON
      *
      * @return array<string, mixed>
+     * @throws MissingUuidException
      */
     public function jsonSerialize(): mixed
     {
+        $this->assertUuid();
         return [
             "uuid" => $this->uuid,
             "type" => $this->type,
