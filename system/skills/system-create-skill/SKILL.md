@@ -26,6 +26,7 @@ argument-hint: "<scope:system|module> <skill-name> [goal]"
 - Module-specific skills: `modules/<module>/skills/<module>-<skill-name>/SKILL.md`
 - `.agents/skills/` is derived/symlinked during install/update; do not treat it as canonical source and never create symlinks there manually.
 - If a new/changed skill is not visible yet, bump module version in `zolinga.json` and run `bin/zolinga` (no parameters). The system autodetects the change, rescans manifests, and regenerates symlinks.
+- **Never add module-specific skills to the global `.agents/AGENTS.md`**. Modules are optional and vary between installations. Module skills are auto-discovered at runtime; listing them in AGENTS.md creates a false dependency.
 
 ## Naming Rules
 
