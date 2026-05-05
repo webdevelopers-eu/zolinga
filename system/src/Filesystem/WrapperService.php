@@ -78,6 +78,7 @@ class WrapperService implements ServiceInterface
      * $api->fs->toPath('private://my-module/file.txt'); // Returns '/var/www/html/data/my-module/file.txt'
      * $api->fs->toPath('dist://my-module/file.txt');  // Returns '/var/www/html/modules/my-module/install/dist/file.txt'
      * $api->fs->toPath('config://my-module/settings.json'); // Returns '/var/www/html/config/my-module/settings.json'
+     * $api->fs->toPath('wiki://my-module/file.txt');  // Returns '/var/www/html/modules/my-module/wiki/file.txt'
      *
      * @param string $uri The scheme to convert into file system path.
      * @return string|false The corresponding file path and false if the scheme is not recognized.
@@ -88,9 +89,18 @@ class WrapperService implements ServiceInterface
             return $uri;
         }
 
-        $urlScheme = parse_url($uri, PHP_URL_SCHEME);
-        $urlPath = parse_url($uri, PHP_URL_PATH);
-        $urlHost = parse_url($uri, PHP_URL_HOST);
+        $parts = parse_url($uri);
+
+        if (!$parts && preg_match('@^(' . implode('|', self::SCHEMES) . ')://$@', $uri)) {
+            // Support for private://, public://, dist://, config:// and wiki:// without domain/host part
+            $urlScheme = substr($uri, 0, strlen($uri) - 3);
+            $urlHost = null;
+            $urlPath = null;
+        } else {
+            $urlScheme = $parts['scheme'] ?? null;
+            $urlPath = $parts['path'] ?? null;
+            $urlHost = $parts['host'] ?? null;
+        }
 
         return match ($urlScheme) {
             'wiki' => isset($this->moduleLocations[$urlHost]) ? ROOT_DIR . $this->moduleLocations[$urlHost]['dirname'] . '/wiki' . $urlPath : false,
