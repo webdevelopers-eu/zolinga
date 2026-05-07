@@ -2,7 +2,8 @@
 declare(strict_types=1);
 namespace Zolinga\System;
 
-// gettext($context . "\004" . $text);
+// gettext("Some context\004String to translate");
+// The gettext extractor should deal with it.
 define('GETTEXT_CTX_END', "\004");
 
 /**

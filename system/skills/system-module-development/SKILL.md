@@ -23,6 +23,7 @@ argument-hint: "<module-name> [goal]"
 7. If `zolinga.json` changes, bump minor module version to force cache reload, then run `bin/zolinga` (no parameters) to trigger manifest rescan and install/update pipeline.
 8. Use Zolinga path conventions (`config://`, module-relative paths) when reading config files.
 9. Logs are recorded via `$api->log` and stored in `data/system/logs/messages.log`.
+10. **Temporary scripts** (ad-hoc test/debug) go in `./tmp/ai-*.*` with the `ai-` prefix. For other folders: `./data/system/tmp/`, `./public/data/system/tmp/`, `./public/dist/system/tmp/`, or `./public/tmp/` (for public URL access). Create `tmp/` dirs if needed. Clean up after use.
 
 ## Runtime Constants (defined in `system/define.php`)
 

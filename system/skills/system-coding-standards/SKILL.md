@@ -23,4 +23,4 @@ argument-hint: "<module-name> [code-change-description]"
 7. Keep methods at 30 lines of code or less (excluding comments and whitespace).
 8. Split long methods into smaller methods.
 9. Keep classes focused on one responsibility.
-10. Prefer simple algorithms over complex ones.
+10. Prefer simple algorithms over complex ones.11. **Temporary scripts** (ad-hoc test/debug scripts) go in `./tmp/ai-*.*` with the `ai-` prefix. For other folders: `./data/system/tmp/`, `./public/data/system/tmp/`, `./public/dist/system/tmp/`, or `./public/tmp/` (for public URL access). Create `tmp/` dirs if needed. Clean up after use.

@@ -207,7 +207,9 @@ class WrapperService implements ServiceInterface
         if ($realpath) {
             foreach ($this->moduleLocations as $module => ["realpath" => $moduleRealpath, "dirname" => $moduleDirname]) {
                 if (str_starts_with((string) $realpath, $moduleRealpath) !== false) {
-                    $path = '/' . substr($realpath, strlen($moduleRealpath)) . implode('/', $nonExistentParts);
+                    $path =
+                        '/' . ltrim(substr($realpath, strlen($moduleRealpath)), '/') 
+                        . (count($nonExistentParts) ? '/' . ltrim(implode('/', $nonExistentParts), '/') : '');
                     if (preg_match('@^/wiki(/|$)$@', $path)) {
                         $ret = 'wiki://' . $module . substr($path, 5);
                     } else {

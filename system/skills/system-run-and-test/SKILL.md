@@ -19,11 +19,24 @@ argument-hint: "[event-name] [params]"
 3. Trigger CLI-origin events with `bin/zolinga <event-name> <params>`.
 4. Execute ad hoc scripts with `bin/zolinga --execute=\"<path>\"`.
 5. Evaluate short snippets with `bin/zolinga --eval=\"<php-code>\"`.
-6. Start local web server with `bin/zolinga --server=<host>:<port>` and optional `--xdebug`.
+6. Start local web server with `bin/zolinga --server[=[HOST:]PORT]` and optional `--xdebug`. Default is `0.0.0.0:8888`. Omit the argument to use the default, e.g. `bin/zolinga --server`. See `bin/zolinga --help` for details.
 7. Use `config/local.json` then `config/global.json` (`baseURL`) to determine front-end URL defaults.
 8. Create a new module with `bin/zolinga skeleton:module --name=<module-name>`.
 9. Generate Apache config with `bin/zolinga skeleton:apache ...` (see `system/wiki/ref/event/skeleton/apache.md`).
 10. Process HTML/XML content through the CMS pipeline from CLI with `bin/zolinga process:content --input=<file> --url=/test/page` (see `system/wiki/ref/event/process/content.md`).
+
+## Temporary Scripts
+
+Ad-hoc temporary, debugging, or testing scripts must follow these placement rules:
+
+- **Default:** `./tmp/ai-*.*` — always use the `ai-` prefix (e.g. `ai-test-db.php`, `ai-check-urls.php`).
+- **Data folder:** `./data/system/tmp/ai-*.*`
+- **Public data folder:** `./public/data/system/tmp/ai-*.*`
+- **Dist folder:** `./public/dist/system/tmp/ai-*.*`
+- **Public URL access:** `./public/tmp/ai-*.*` — for scripts that must be reachable via HTTP.
+
+Create the `tmp/` directory if it does not exist. Always clean up temporary scripts after use.
+
 ## Stdout vs Stderr
 
 `bin/zolinga` writes system logs, warnings, and debug messages to **stderr**, while the actual event response (JSON) and any listener `echo` output go to **stdout**. This lets you separate structured output from diagnostic noise using shell redirection:
