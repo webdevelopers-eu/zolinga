@@ -38,7 +38,6 @@ Repository core skills:
 - `system-concurrency`
 - `system-web-root-overlay`
 - `system-i18n-coding`
-- `system-i18n-translation`
 - `system-changelog`
 
 Module-provided skills appear as `{module-name}-{skill-name}` in `.agents/skills/` after module installation.
