@@ -1,0 +1,20 @@
+---
+name: release
+description: Guidance preparing a release of the system core or any module, including updating the changelog and version number.
+---
+
+# Release Preparation
+
+When preparing a release of the system core or any module, follow these steps to ensure a smooth and consistent release process:
+
+1. **Find the Last Release**: Check the git tags to find the last release version and date using `git tag` and `git show <tag>`. Versioning of tags follows the semantic versioning rules ("v<MAJOR>.<MINOR>.<PATCH>"). Note, you may be asked to relase something that is not commited yet but may have already been prepared (e.g. version is already bumped up) and is waiting for the final commit. In that case leave the version as it is if it was not commited yet.
+2. **Update the Version Number**: In `zolinga.json`, update the version number according to semantic versioning rules (MAJOR.MINOR.PATCH) based on the changes made since the last release. It may have be already done so check `git tag` if it is the new version already updated or old one. If not sure, ask for confirmation.
+3. **Update the Changelog**: Make sure `CHANGELOG.md` reflects all the last release (see `git tag`), if not add or update a new section with the new version number and date, and list all the changes since the last release under appropriate categories (Added, Changed, Fixed, etc.). If there is no `CHANGELOG.md`, create one using the standard format. Note only the user-facing changes should be listed in the changelog, not internal refactors or non-user-facing changes. If they are some, mention them very briefly - high level only, without technical details.
+4. **Syntax Check**: Run quick php-lint checks on modified files to ensure there are no syntax errors in the code.
+
+OTHER RULES:
+
+- do not create any release notes except for the CHANGELOG.md file
+- do not create git tags - those are done automatically in CI
+- do not push changes to remotes - the release process is handled in CI and pushing may
+- do not actually commit the changes. Just suggest the commit message and tag command.
