@@ -43,7 +43,7 @@ foreach ($requests as $data) {
     try {
         ob_start();
         $event->dispatch();
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         $event->status = WebEvent::STATUS_ERROR;
         $event->message = "Error processing event: " . $e->getMessage();
     } finally {
