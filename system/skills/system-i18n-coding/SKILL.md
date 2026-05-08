@@ -19,6 +19,7 @@ argument-hint: "<module-name> [scope:php|js|html|web-component]"
 Zolinga uses GNU gettext as its i18n backbone. The `zolinga-intl` module provides:
 
 - **`$api->locale`** service — current locale, language detection, gettext initialization.
+- **`$api->i18n`** service — gettext domain discovery (`getGettextDomains()` returns all module domains + built-in `default` domain).
 - **PHP gettext** — `dgettext()` / `dngettext()` at runtime.
 - **JavaScript gettext** — `gettext()` / `ngettext()` imported from `/dist/zolinga-intl/gettext.js?{MODULE}`.
 - **Static HTML translation** — `<meta name="gettext" content="translate"/>` + `gettext` attribute; compiler generates `*.{lang-REGION}.html` files.

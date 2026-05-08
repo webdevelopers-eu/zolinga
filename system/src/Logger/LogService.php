@@ -182,6 +182,20 @@ class LogService implements ServiceInterface
     }
 
     /**
+     * Log a message with the severity TIP meant to display helpful tips to the user.
+     * 
+     * Example: $api->log->tip("acme", "Did you know? You can do X to achieve Y!");
+     * 
+     * @param string $category
+     * @param string|Throwable $message
+     * @param array|null $context
+     * @return void
+     */
+    public function tip(string $category, string|Throwable $message, ?array $context = null): void {
+        $this->write(SeverityEnum::TIP, $category, $message, $context);
+    }
+
+    /**
      * Log a message with the severity WARNING.
      * 
      * Example: $api->log->warning("ecs.installation", "Folder $target is writeable by everybody", ["dir" => $target]);

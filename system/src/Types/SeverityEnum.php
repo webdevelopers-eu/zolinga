@@ -12,6 +12,7 @@ namespace Zolinga\System\Types;
  */
 enum SeverityEnum: string
 {
+    case TIP = 'tip';
     case INFO = 'info';
     case WARNING = 'warning';
     case ERROR = 'error';
@@ -19,6 +20,7 @@ enum SeverityEnum: string
     public function getEmoji(): string
     {
         return match (true) {
+            $this === self::TIP => '💡',
             $this === self::INFO => '🔵',
             $this === self::WARNING => '🟠',
             $this === self::ERROR => '🔴',
