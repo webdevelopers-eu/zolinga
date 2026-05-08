@@ -5,6 +5,7 @@ namespace Zolinga\System;
 // gettext("Some context\004String to translate");
 // The gettext extractor should deal with it.
 define('GETTEXT_CTX_END', "\004");
+define('BOM', "\xEF\xBB\xBF");  
 
 /**
  * The root directory of the system. Contains trailing slash removed.
