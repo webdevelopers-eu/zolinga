@@ -13,6 +13,9 @@ argument-hint: "<scope:system|module> <skill-name> [goal]"
 - Keep core/general skills in `system/skills/`.
 - Keep module-specific skills in `modules/<module>/skills/<module>-<skill-name>/SKILL.md`.
 - Keep `.agents/AGENTS.md` concise; avoid duplicating full procedures documented in skills.
+ 
+ - Placement: prefer `system/skills/` for cross-cutting flows and `modules/<module>/skills/` for module-scoped flows.
+ - When to create: create new skills only for reusable workflows that require more than 3 steps or involve multiple modules.
 
 ## Use When
 
@@ -35,6 +38,8 @@ argument-hint: "<scope:system|module> <skill-name> [goal]"
 - Module skills must be prefixed with module name: `<module>-<skill-name>`.
 - Keep names stable once referenced by docs or other instructions.
 
+ - Verify the `SKILL.md` file conforms to this `modules/<module-name>/skills/<module-name>-<skill-name>/SKILL.md` before publishing and for `system` itself `system/skills/system-<skill-name>/SKILL.md`.
+
 ## Minimal Skill File Contract
 
 Frontmatter:
@@ -55,6 +60,7 @@ Body sections (recommended):
 2. Choose scope:
 - cross-module/general -> `system/skills/...`
 - module-specific -> `modules/<module>/skills/...`
+- If the module name is invalid or unsupported (no matching directory under `modules/`), fix the module name or create/rename it to be the required directory.
 3. Create the skill folder and `SKILL.md`.
 4. Write concise, actionable instructions and constraints.
 5. If this replaces an older skill, merge useful content and remove deprecated duplicate skill paths.
@@ -65,6 +71,8 @@ Body sections (recommended):
 - Keep `.agents/AGENTS.md` as policy/index, not a long how-to.
 - If guidance is detailed and procedural, move it into a dedicated skill and reference that skill by name.
 - Keep the “Skills Available” list aligned with current canonical system skills.
+
+ - Concision guideline: AGENTS.md entries should be short — limit to a maximum of 3 sentences or 50 words per skill entry; link to the canonical `SKILL.md` for details.
 
 ## Quality Checklist
 
