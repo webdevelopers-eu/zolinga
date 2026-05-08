@@ -74,7 +74,7 @@ foreach ($requests as $data) {
 
 try {
     echo json_encode($responses);
-} catch (\Exception $e) {
+} catch (\Throwable $e) {
     echo json_encode([
         "uuid" => "error:" . uniqid(),
         "type" => "error",
@@ -84,4 +84,5 @@ try {
         "statusNiceName" => "Error",
         "message" => $e->getMessage()
     ]);
+    $api->log->error("system:gate", "Failed to encode response as JSON: " . $e->getMessage());
 }
