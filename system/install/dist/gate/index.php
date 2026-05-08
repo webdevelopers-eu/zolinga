@@ -49,7 +49,7 @@ foreach ($requests as $data) {
     } finally {
         $output = ob_get_clean();
         if ($output) {
-            $event->response['_stdout'] = $output;
+            $event->response['__stdout__'] = $output;
             $api->log->warning(
                 'system:gate', 
                 "Captured unexpected output while dispatching $event: " . var_export($output, true)
