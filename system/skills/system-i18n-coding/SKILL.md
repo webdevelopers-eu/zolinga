@@ -35,10 +35,10 @@ echo sprintf(dngettext('my-module', 'One apple', '%d apples', $count), $count);
 
 ## Context Separator
 
-For ambiguous single-word strings, prepend context using `GETTEXT_CTX_END` (`"\x04"`):
+For ambiguous single-word strings, prepend context using `"\x04"` separator (end of transmission character).
 
 ```php
-echo dgettext('my-module', 'Verb: submit' . GETTEXT_CTX_END . 'Submit');
+echo dgettext('my-module', "Verb: submit\x04Submit");
 ```
 
 The `.po` file stores the full key including the `\x04` separator; translators see the context prefix.
