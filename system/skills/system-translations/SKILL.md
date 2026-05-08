@@ -16,11 +16,11 @@ argument-hint: "<module-name> [string-scope]"
 1. In PHP, use `dgettext('<module-name>', '<string>')` (or `dngettext(...)` for plural forms).
 2. Do not create gettext files or `locale/` folders manually.
 3. In HTML, use `gettext` attribute and related document translation metadata.
-4. For ambiguous single-word labels, prepend context using `GETTEXT_CTX_END`.
+4. For ambiguous single-word labels, prepend context using `"\x04"` separator (end of transmission character).
 
 ## Example
 
-`dgettext('system-intl', 'Confirm form submission' . GETTEXT_CTX_END . 'Send')`
+`dgettext('system-intl', "Confirm form submission\x04Send")`
 
 ## Documentation Abstract
 
