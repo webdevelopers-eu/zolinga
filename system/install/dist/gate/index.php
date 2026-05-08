@@ -39,7 +39,23 @@ foreach ($requests as $data) {
 
     $event = new WebEvent($data['type'], WebEvent::ORIGIN_REMOTE, $data['request']);
     $event->uuid = $data['uuid'];
-    $event->dispatch();
+
+    try {
+        ob_start();
+        $event->dispatch();
+    } catch (\Exception $e) {
+        $event->status = WebEvent::STATUS_ERROR;
+        $event->message = "Error processing event: " . $e->getMessage();
+    } finally {
+        $output = ob_get_clean();
+        if ($output) {
+            $event->response['_stdout'] = $output;
+            $api->log->warning(
+                'system:gate', 
+                "Captured unexpected output while dispatching $event: " . var_export($output, true)
+            );
+        }
+    }
 
     $responses[] = array(
         "uuid" => $event->uuid,
@@ -57,14 +73,14 @@ foreach ($requests as $data) {
 }
 
 try {
-echo json_encode($responses);
+    echo json_encode($responses);
 } catch (\Exception $e) {
     echo json_encode([
         "uuid" => "error:" . uniqid(),
         "type" => "error",
         "origin" => "internal",
         "status" => 500,
-        "statusName" => "Internal Server Error",
+        "statusName" => "Internal Server Error (Encoding Failed)",
         "statusNiceName" => "Error",
         "message" => $e->getMessage()
     ]);
