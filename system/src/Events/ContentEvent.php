@@ -49,6 +49,18 @@ class ContentEvent extends Event implements StoppableInterface
     public string $path;
 
     /**
+     * The original request URL path part without the query string and the trailing slash
+     * before any rewriting by handlers. 
+     * 
+     * Root path is represented by an empty string. 
+     * 
+     * Example: "/api/v1/users"
+     *
+     * @var string
+     */
+    public readonly string $originalPath;
+
+    /**
      * The XPath object for the content.
      *
      * @var \DOMXPath $xpath
@@ -77,6 +89,7 @@ class ContentEvent extends Event implements StoppableInterface
         $this->content->loadHTML('<!DOCTYPE html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET | LIBXML_NOWARNING | LIBXML_NOERROR);
 
         $this->path = rtrim($path ?: '', '/');
+        $this->originalPath = $this->path;
 
         $this->xpath = new \DOMXPath($this->content);
     }
@@ -135,6 +148,27 @@ class ContentEvent extends Event implements StoppableInterface
         // Check that it has child nodes and something is in <body> tag
         return $this->content->documentElement->hasChildNodes()
             && $this->content->getElementsByTagName('body')->item(0)?->hasChildNodes();
+    }
+
+    public function setStatus(StatusEnum $status, string $message): StatusEnum
+    {
+        global $api;
+
+        $ret = parent::setStatus($status, $message);
+
+        if (!in_array($this->status, [StatusEnum::UNDETERMINED, StatusEnum::OK])) {
+            $callerInfo = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1];
+            $callerInfo2 = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3)[0] ?? null;
+            $caller = "" . ($callerInfo['class'] ?? '') . ($callerInfo['type'] ?? '') . ($callerInfo['function'] ?? '');
+            $location = basename($callerInfo2['file'] ?? 'unknown') . ":" . ($callerInfo2['line'] ?? 'unknown');
+            $api->log->log(
+                $this->error ? SeverityEnum::ERROR : SeverityEnum::INFO,
+                'system:content', 
+                "ContentEvent status set to {$this->status->value} by $caller in $location with message: $message"
+            );
+        }
+
+        return $ret;
     }
 
     /**

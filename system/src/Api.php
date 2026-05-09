@@ -20,6 +20,17 @@ use Zolinga\System\Config\Atom\{ListenAtom, EmitAtom, WebComponentAtom, AtomInte
  */
 class Api
 {
+    /**
+     * Is system configured with more then 1 language?
+     *
+     * @var boolean
+     */
+    public bool $isMultilingual {
+        get {
+            global $api;
+            return count($api->config['intl']['locales']) > 1;
+        }
+    }
 
     /**
      * @var array<string, Object> list of lazily instantiated services accesible through $api->myService
