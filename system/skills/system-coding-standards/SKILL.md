@@ -23,4 +23,17 @@ argument-hint: "<module-name> [code-change-description]"
 7. Keep methods at 30 lines of code or less (excluding comments and whitespace).
 8. Split long methods into smaller methods.
 9. Keep classes focused on one responsibility.
-10. Prefer simple algorithms over complex ones.11. **Temporary scripts** (ad-hoc test/debug scripts) go in `./tmp/ai-*.*` with the `ai-` prefix. For other folders: `./data/system/tmp/`, `./public/data/system/tmp/`, `./public/dist/system/tmp/`, or `./public/tmp/` (for public URL access). Create `tmp/` dirs if needed. Clean up after use.
+10. Prefer simple algorithms over complex ones.
+11. **Temporary scripts** (ad-hoc test/debug scripts) go in `./tmp/ai-*.*` with the `ai-` prefix. For other folders: `./data/system/tmp/`, `./public/data/system/tmp/`, `./public/dist/system/tmp/`, or `./public/tmp/` (for public URL access). Create `tmp/` dirs if needed. Clean up after use.
+
+## PHP 8.4 Modern Patterns
+
+### Property Hooks and Asymmetric Visibility
+
+- **Prefer property hooks over getter/setter methods.** Use `public private(set)` for read-only public properties instead of `private` + `getFoo()`.
+- **No getter clutter.** Never write `public function getFoo(): array { return $this->foo; }` — just make the property `public` or `public private(set)` and access it directly.
+- **Computed properties use `get` hooks.** Instead of `getContext(): ?string`, use `public ?string $context { get { ... } }`.
+
+### Type Safety
+
+- **Enforce argument types for polymorphic methods.** If a method accepts `string|array`, validate which one is correct for the current object state and throw `\InvalidArgumentException` on mismatch rather than silently coercing.
