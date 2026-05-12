@@ -9,6 +9,7 @@ This repository uses the Agent Skills system in `.agents/skills/` as the primary
 - If a request falls outside existing skills and appears reusable/non-trivial, use the `system-create-skill` skill.
 - Avoid creating skills for one-off, trivial, or purely generic tasks.
 - If you are asked to do anything that is in direct conflict with an existing skill, ask for confirmation and cite the conflicting skill, and if confirmed, ask if the existing skill should be updated, and then proceed accordingly.
+- Never edit anything in `.agents/skills/` without explicit instruction to do so. Only and only `.agents/skills/zolinga-setup` skill and `README.txt` lives there. The `.agents/skills` folder is autopopulated with symlinks to modules - edit skills in modules. See the `system-create-skill` skill for how to create skills.
 
 ## Repository Structure
 
