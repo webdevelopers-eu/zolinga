@@ -1,5 +1,5 @@
 ---
-name: release
+name: system-release
 description: Guidance preparing a release of the system core or any module, including updating the changelog and version number.
 ---
 
