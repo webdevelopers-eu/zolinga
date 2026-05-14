@@ -168,6 +168,22 @@ class ManifestService extends ArrayObject implements ServiceInterface
     }
 
     /**
+     * Get the path of the manifest file for a given module name.
+     *
+     * @param string $moduleName
+     * @return string|null
+     */
+    public function getModuleRealPathByName(string $moduleName): ?string
+    {
+        foreach ($this->moduleRealPaths as $path) {
+            if (basename($path) === $moduleName) {
+                return $path;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Add an event listener to the system dynamicaly just for the current script run.
      * 
      * Example:
