@@ -171,9 +171,9 @@ class WrapperService implements ServiceInterface
         };
     }
 
-    private function isZolingaUri(string $mixed): bool
+    public function isZolingaUri(string $str): bool
     {
-        return str_contains($mixed, '://') && in_array(parse_url($mixed, PHP_URL_SCHEME), self::SCHEMES);
+        return str_contains($str, '://') && in_array(parse_url($str, PHP_URL_SCHEME), self::SCHEMES);
     }
 
     private function isPath(string $mixed): bool

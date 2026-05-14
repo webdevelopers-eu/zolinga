@@ -117,7 +117,8 @@ class Api
                 $authEvent = new AuthorizeEvent('system:authorize', AuthorizeEvent::ORIGIN_INTERNAL, [$subscription['right']]);
                 $authEvent->dispatch();
                 if (!$authEvent->isAuthorized($subscription['right'])) {
-                    $event->setStatus(StatusEnum::UNAUTHORIZED, _("You are not authorized to perform this action.") . ' (' . $event->type . ')');
+                    // TRANSLATORS: Error message shown when a caller is not authorized to perform the requested action. The event type is appended in parentheses.
+                    $event->setStatus(StatusEnum::UNAUTHORIZED, dgettext('system', "You are not authorized to perform this action.") . ' (' . $event->type . ')');
                     continue;
                 }
             }
@@ -140,9 +141,10 @@ class Api
             }
             $listener->$method($event);
         } catch (\Throwable $e) {
-            $err = $e->getMessage() . ' [' . basename($e->getFile()) . ':' . $e->getLine() . ']';
+            $fileName = basename($e->getFile(), '.php');
+            $err = $e->getMessage() . ' [' . $fileName . ':' . $e->getLine() . ']';
             $this->log->error('system', $err);
-            trigger_error($err . ' [' . basename($e->getFile()) . ':' . $e->getLine() . ']', E_USER_WARNING);
+            trigger_error($err . ' [' . $fileName . ':' . $e->getLine() . ']', E_USER_WARNING);
             $event->setStatus(StatusEnum::ERROR, $err);
         }
     }
