@@ -41,4 +41,6 @@ require(__DIR__ . '/src/Loader/Bootstrap.php');
     $bootstrap->initFilesystem();
     $bootstrap->initDebug();
     $bootstrap->initModules();
+
+    $bootstrap->start();
 })();

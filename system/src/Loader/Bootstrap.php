@@ -262,4 +262,17 @@ class Bootstrap
             $api->dispatchEvent(new Event('system:install', Event::ORIGIN_INTERNAL));
         }
     }
+
+
+    /**
+     * Fire event so important services that need to do something on system start can do it.
+     *
+     * @return void
+     */
+    public function start(): void
+    {
+        global $api;
+
+        $api->dispatchEvent(new Event('system:start', Event::ORIGIN_INTERNAL));
+    }
 }
