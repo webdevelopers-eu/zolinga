@@ -117,7 +117,7 @@ var {
         content: "🔒";
         display: inline-block;
         font-size: 1.2rem;
-        margin-right: 0.5em;
+        margin-inline-end: 0.5em;
     }
 }
 
@@ -135,9 +135,9 @@ var {
     &::before {
         content: "💡";
         font-size: 1.2rem;
-        margin-right: 0.5em;
+        margin-inline-end: 0.5em;
         margin-bottom: 0.5em;
-        float: left;
+        float: inline-start;
     }
 
     &.content-file-tip {

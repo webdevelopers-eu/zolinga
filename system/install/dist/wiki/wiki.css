@@ -184,7 +184,7 @@ body {
             
             &::before {
                 content: '🔍';
-                margin-right: 0.5em;
+                margin-inline-end: 0.5em;
                 font-size: 1.2em;
                 filter: grayscale(100%);
                 opacity: 0.5;
@@ -409,7 +409,7 @@ menu.toc menu {
         align-items: stretch;
         justify-content: start;
         position: relative;
-        margin-left: 0em;
+        margin-inline-start: 0em;
         
         &>a {
             padding: 0.2em 0em;
@@ -433,7 +433,7 @@ menu.toc menu {
             left: -1.5em;
             padding: 0em 0.5em;
             color: color-mix(in oklab, rgb(var(--color-primary)) 40%, rgb(var(--color-bg)) 60%);
-            margin-right: 0.35em;
+            margin-inline-end: 0.35em;
         }
         
         &:has(>menu) {

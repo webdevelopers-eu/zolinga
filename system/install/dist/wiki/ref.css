@@ -14,7 +14,7 @@ main, article {
 
     &::before {
         content: "🔗";
-        margin-right: 0.2em;
+        margin-inline-end: 0.2em;
         display: inline-block;
     }
 
@@ -75,7 +75,7 @@ main, article {
 
 .module::before {
     content: "📦";
-    margin-right: 0.2em;
+    margin-inline-end: 0.2em;
 }
 
 .wiki-ref-class,
@@ -164,7 +164,7 @@ main, article {
 
             margin: 0px 0px 0px 2em;
             &:not(:nth-last-child(2)) {
-               border-left: 1px solid rgb(var(--color-primary));
+               border-inline-start: 1px solid rgb(var(--color-primary));
             }
             & .above {
                 align-items: end;
@@ -183,7 +183,7 @@ main, article {
                 }
             }
             &:nth-last-child(2) .above {
-                border-left: 1px solid rgb(var(--color-primary));
+                border-inline-start: 1px solid rgb(var(--color-primary));
                 border-bottom-left-radius: var(--radius);
             }
             .bellow {
@@ -193,7 +193,7 @@ main, article {
                 display: flex;
                 justify-content: center;
                 flex: 1;
-                padding-left: 2em;
+                padding-inline-start: 2em;
                 padding-right: 2em;
             }
         }
