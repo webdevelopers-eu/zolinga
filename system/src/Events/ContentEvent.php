@@ -39,14 +39,34 @@ class ContentEvent extends Event implements StoppableInterface
 
     /**
      * The request URL path part without the query string and the trailing slash.
+     * This path is writable, allowing handlers to rewrite it. Handlers should use this property 
+     * instead of directly reading $_SERVER['REQUEST_URI'] to determine the content to generate, 
+     * as it may have been rewritten by higher priority handlers.
+     * 
+     * The $this->canonicalPath property can be used to set the canonical path for the content
+     * The $this->originalPath property contains the original request path before any rewriting, and is read-only. 
      * 
      * Root path is represented by an empty string. 
      * 
      * Example: "/api/v1/users"
+     * 
+     * Note, this path can be rewritten by handlers, so it may not be the same as the original request path. 
      *
      * @var string
      */
     public string $path;
+
+    /**
+     * Canonical path to the content, if applicable. 
+     * At the beginning it is the same as $this->path, but handlers can set it to the canonical path of the content
+     * if the content can be accessed by multiple paths. This allows for better SEO and consistent URLs.
+     * 
+     * This path should be used for generating links to the content, while $this->path should be used for determining
+     * what content to generate based on the request URL.
+     *
+     * @var string
+     */
+    public string $canonicalPath;
 
     /**
      * The original request URL path part without the query string and the trailing slash
@@ -90,6 +110,7 @@ class ContentEvent extends Event implements StoppableInterface
 
         $this->path = rtrim($path ?: '', '/');
         $this->originalPath = $this->path;
+        $this->canonicalPath = $this->path;
 
         $this->xpath = new \DOMXPath($this->content);
     }
