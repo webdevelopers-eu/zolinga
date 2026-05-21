@@ -172,6 +172,22 @@ class InstallController implements ListenerInterface
                     continue;
                 }
                 $skillSymlink = $agentsSkillsDir . '/' . $skillDir->getFilename();
+                if (is_dir($skillSymlink) && !is_link($skillSymlink)) {
+                    global $api;
+                    $api->log->error(
+                        "install",
+                        "A real directory exists at '{$skillSymlink}' but it should be a symlink managed by the installer. " .
+                        "Someone has manually created a real folder with that name inside .agents/skills/. " .
+                        "The skill folder belongs to the module at '{$skillDir->getPathname()}' and must not exist as a real directory in .agents/skills/. " .
+                        "Remove the real directory '{$skillSymlink}' and re-run the installer. " .
+                        "See: system/wiki/Zolinga Core/Agent Skills.md"
+                    );
+                    continue;
+                }
+                // Remove stale or leftover symlink before (re)creating it
+                if (is_link($skillSymlink)) {
+                    unlink($skillSymlink);
+                }
                 if (!symlink($skillDir->getPathname(), $skillSymlink)) {
                     trigger_error("Failed to create skill symlink: {$skillSymlink} ({$this->getSystemUserInfo()})", E_USER_WARNING);
                 }

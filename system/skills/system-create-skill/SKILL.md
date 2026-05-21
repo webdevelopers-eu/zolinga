@@ -27,7 +27,7 @@ argument-hint: "<scope:system|module> <skill-name> [goal]"
 
 - Core system skills: `system/skills/<skill-name>/SKILL.md`
 - Module-specific skills: `modules/<module>/skills/<module>-<skill-name>/SKILL.md`
-- `.agents/skills/` is derived/symlinked during install/update; do not treat it as canonical source and never create symlinks there manually.
+- **NEVER edit, create, or modify anything inside `.agents/skills/`**. That directory is auto-populated with symlinks by the framework. Any real files or directories placed there (other than the single permitted `zolinga-setup/` directory) are wrong and must be moved to the canonical module location. Edit skills only in `system/skills/` or `modules/<module>/skills/`.
 - If a new/changed skill is not visible yet, bump module version in `zolinga.json` and run `bin/zolinga` (no parameters). The system autodetects the change, rescans manifests, and regenerates symlinks.
 - **Never add module-specific skills to the global `.agents/AGENTS.md`**. Modules are optional and vary between installations. Module skills are auto-discovered at runtime; listing them in AGENTS.md creates a false dependency.
 
@@ -76,7 +76,7 @@ Body sections (recommended):
 
 ## Quality Checklist
 
-- Skill path is canonical (not `.agents/skills` source edits).
+- **Skill path is canonical — never inside `.agents/skills/`.**
 - Naming follows scope/prefix rules.
 - No contradictory duplicate skill remains.
 - `AGENTS.md` does not duplicate full skill internals.
