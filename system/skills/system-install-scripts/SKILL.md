@@ -53,7 +53,13 @@ If you add a column to a table:
 ```
 
 - `NUMBER` — controls execution order (natural sort across **all** modules).
+- Use **increments of 10** so future scripts can be inserted between existing ones without renaming.
+- Match the last install script number or highest existing update script number, then add 10 for the next script.
 - Examples: `010_database.sql`, `020-database.sql`, `030-data.sql`, `040-add-column-foo.sql`.
+
+### Numbering workflow example
+
+If `install/install/` has `20-database.sql`, the first update script should be `30-...sql` (20 + 10), the next `40-...sql`, and so on.
 
 ### Cross-module ordering
 
