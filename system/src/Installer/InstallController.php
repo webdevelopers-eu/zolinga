@@ -172,7 +172,10 @@ class InstallController implements ListenerInterface
                     continue;
                 }
                 $skillSymlink = $agentsSkillsDir . '/' . $skillDir->getFilename();
-                if (is_dir($skillSymlink) && !is_link($skillSymlink)) {
+                // Remove stale or leftover symlink before (re)creating it
+                if (is_link($skillSymlink)) {
+                    unlink($skillSymlink);
+                } elseif (is_dir($skillSymlink)) { // that should not happen, but AIs are sometime stupid 
                     global $api;
                     $api->log->error(
                         "install",
@@ -184,10 +187,7 @@ class InstallController implements ListenerInterface
                     );
                     continue;
                 }
-                // Remove stale or leftover symlink before (re)creating it
-                if (is_link($skillSymlink)) {
-                    unlink($skillSymlink);
-                }
+
                 if (!symlink($skillDir->getPathname(), $skillSymlink)) {
                     trigger_error("Failed to create skill symlink: {$skillSymlink} ({$this->getSystemUserInfo()})", E_USER_WARNING);
                 }
