@@ -40,6 +40,7 @@ Repository core skills:
 - `system-web-root-overlay`
 - `system-i18n-coding`
 - `system-changelog`
+- `system-debug-database`
 
 Module-provided skills appear as `{module-name}-{skill-name}` in `.agents/skills/` after module installation.
 
