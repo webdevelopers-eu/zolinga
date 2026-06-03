@@ -105,7 +105,7 @@ class McpServer
     {
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
-        if ($method !== 'POST') {
+        if (!in_array($method, ['POST', 'GET', 'DELETE'], true)) {
             $this->sendMethodNotAllowed($method);
             return;
         }
