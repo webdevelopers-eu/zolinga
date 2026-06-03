@@ -52,6 +52,7 @@ When the page is visited and `index.php` fires [system:content](:ref:event:syste
 > - `internal` - The event and its data originate from trusted source - the application itself.
 > - `remote` - the event or its data originate from a remote source. E.g. a POST/GET request, AJAX request, etc.
 > - `cli` - the event or its data originate from a trusted source - command line interface (CLI). E.g. by running `bin/zolinga my:event`
+> - `mcp` - The event is dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) at `public/mcp/index.php` from a JSON-RPC 2.0 request. Handlers that opt in to this origin become MCP tools.
 > - `custom` - future unexpected uses by third party modules not envisioned by the Zolinga Core programmers.
 > - `*` - Any origin. This handler will handle all named events despite their origin.
 - `priority`

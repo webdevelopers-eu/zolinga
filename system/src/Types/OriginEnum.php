@@ -15,6 +15,7 @@ enum OriginEnum: string
     case INTERNAL = 'internal';
     case REMOTE = 'remote';
     case CLI = 'cli';
+    case MCP = 'mcp'; // Model Context Protocol server (non-streaming HTTP) requests.
     case CUSTOM = 'custom'; // Future unexpected uses...
     case ANY = '*'; // This origin behaves like it was any origin.
 }

@@ -1,0 +1,14 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "title": "Echo Input",
+    "description": "Replies with the same payload it received.",
+    "properties": {
+        "message": {
+            "type": "string",
+            "description": "Message text to echo back."
+        }
+    },
+    "required": ["message"],
+    "additionalProperties": false
+}

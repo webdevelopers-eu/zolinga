@@ -1,0 +1,19 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "title": "Echo Output",
+    "description": "The echo reply with a server-side timestamp.",
+    "properties": {
+        "echo": {
+            "type": "string",
+            "description": "The same string the client sent."
+        },
+        "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp on the server."
+        }
+    },
+    "required": ["echo", "receivedAt"],
+    "additionalProperties": false
+}

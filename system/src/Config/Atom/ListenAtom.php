@@ -14,12 +14,13 @@ use Zolinga\System\Types\OriginEnum;
  * @property string $event the event type in the format of an URI. Example: example.org:api:myEvent
  * @property string $class the class name of the listener
  * @property string|null $method the method name of the listener
- * @property array<OriginEnum> $origin the origin of the event. Can be internal, remote or cli.
+ * @property array<OriginEnum> $origin the origin of the event. Can be internal, remote, cli or mcp.
  * @property string|null $description the description of the listener
  * @property float $priority the priority of the listener
  * @property string|false $right the right that needs to be satisfied for the event to be authorized to be processed by the target listener having the rights set.
+ * @property array{request?: string, response?: string}|null $schema optional JSON Schema file paths (Zolinga URI) describing the request/response payloads. Used by discovery surfaces like the MCP server's `initialize` response.
  * @extends \ArrayObject<string, mixed>
- * 
+ *
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2024-03-07
  */
@@ -73,6 +74,18 @@ class ListenAtom extends \ArrayObject implements AtomInterface
             return $origin;
         }, $data['origin'] ?? []);
 
+        // Optional `schema` block: {request?: string, response?: string}. Each value is
+        // a Zolinga URI (e.g. "module://my-module/schema/mcp/tool.json") pointing to a
+        // JSON Schema file. Discovery surfaces (like the MCP `initialize` handler) may
+        // resolve and embed these schemas into their response.
+        if (isset($data['schema']) && !is_array($data['schema'])) {
+            throw new ConfigException("The schema attribute must be an object with optional 'request' and 'response' string keys: " . json_encode($data));
+        }
+        $schema = [
+            'request' => isset($data['schema']['request']) && is_string($data['schema']['request']) ? $data['schema']['request'] : null,
+            'response' => isset($data['schema']['response']) && is_string($data['schema']['response']) ? $data['schema']['response'] : null,
+        ];
+
         $data = [
             "event" => $eventName,
             "class" => '\\' . ltrim($class, '\\'),
@@ -81,6 +94,7 @@ class ListenAtom extends \ArrayObject implements AtomInterface
             "description" => $data['description'] ?? null,
             "priority" => floatval($data['priority'] ?? 0.5),
             "right" => empty($data['right']) ? false : (string) $data['right'],
+            "schema" => $schema,
         ];
 
         parent::__construct($data);

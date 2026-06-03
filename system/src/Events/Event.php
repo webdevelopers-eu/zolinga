@@ -120,6 +120,7 @@ class Event implements JsonSerializable
     final const ORIGIN_INTERNAL = OriginEnum::INTERNAL;
     final const ORIGIN_REMOTE = OriginEnum::REMOTE;
     final const ORIGIN_CLI = OriginEnum::CLI;
+    final const ORIGIN_MCP = OriginEnum::MCP;
     final const ORIGIN_ANY = OriginEnum::ANY;
 
     public function __construct(string $type, OriginEnum $origin)

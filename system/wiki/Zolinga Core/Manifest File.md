@@ -28,9 +28,13 @@ The `listen` section is an array of event subscriptions. Each subscription is an
     - `internal` - Events that were directly emitted by the Zolinga Core or another module.
     - `remote` - Events that originated from a remote source. E.g. a AJAX request, POST/GET requests, etc.
     - `cli` - Events that originated from a command line interface (CLI). E.g. by running `bin/zolinga my:event`
+    - `mcp` - Events that originated from the [MCP gateway](:Zolinga Core:Running the System:MCP) at `public/mcp/index.php`. Listeners that opt in to this origin are exposed as MCP tools.
     - `custom` - future unexpected uses by third party modules not envisioned by the Zolinga Core programmers.
     - `\*` - Any origin. This handler will handle all named events despite their origin.
 - `priority` - Optional. The priority is a float in the range of 0 to 1 (exclusive). The default priority is 0.5. The priority determines the order in which the event listeners are executed in response to an event. Higher numbers mean higher priority.
+- `schema` - Optional. Object of JSON Schema file URIs. Each value is a [Zolinga URI](:Zolinga Core:Paths and Zolinga URI) that resolves to a JSON Schema file. Discovery surfaces (such as the [MCP gateway](:Zolinga Core:Running the System:MCP) `initialize` response) may load and embed the schema. Supported keys:
+    - `request` - Schema for the listener's input (request) payload. Surfaced as `inputSchema` in MCP.
+    - `response` - Schema for the listener's output (response) payload. Surfaced as `outputSchema` in MCP.
 
 Example of a `listen` section:
 
