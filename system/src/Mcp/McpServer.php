@@ -105,7 +105,7 @@ class McpServer
     {
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
-        if (!in_array($method, ['POST', 'GET', 'DELETE'], true)) {
+        if (!in_array($method, ['POST'])) { // only POST all other 405 which means non SSE stream
             $this->sendMethodNotAllowed($method);
             return;
         }
