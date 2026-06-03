@@ -21,15 +21,15 @@ Add a second `listen` entry that points at the **same** class+method as the `rem
 
 ```json
 {
-  "event": "ipd:countries",
-  "class": "Ipd\\App\\Api\\AlertApi",
+  "event": "example:pricing:list",
+  "class": "Example\\App\\Api\\AlertApi",
   "method": "onCountries",
   "origin": ["remote"]
 },
 {
   "event": "tools:call:getPricingList",
   "description": "<human-readable description for the tools/list catalogue>",
-  "class": "Ipd\\App\\Api\\AlertApi",
+  "class": "Example\\App\\Api\\AlertApi",
   "method": "onCountries",
   "origin": ["mcp"],
   "schema": {
