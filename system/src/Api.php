@@ -47,6 +47,9 @@ class Api
      * Magic method to get a service object. If the service object has not been
      * instantiated yet, it will be instantiated and registered.
      * 
+     * To test the existence of a service without instantiating it, 
+     * use $api->serviceExists('myService') or isset($api->myService).
+     * 
      * Example: $api->myService->doSomething();
      * 
      * @param string $name
@@ -63,6 +66,11 @@ class Api
     public function __set(string $name, Object $value): void
     {
         throw new \Exception("Cannot set property $name on Api object.");
+    }
+
+    public function __isset(string $name): bool
+    {
+        return $this->serviceExists($name);
     }
 
     /**
