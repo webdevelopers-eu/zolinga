@@ -21,6 +21,7 @@ Your module has 5 important paths that you should know about:
     - read-write
     - used to override module defaults without modifying module code
     - No `.php` files are allowed in this folder.
+    - default config files are automatically copied from `./modules/{module}/install/config/` on every install/update run; existing files are never overwritten (see [Module Installation and Updates](:Zolinga Core:Module Installation and Updates))
 
 Your module will never need any other folders to write data then your module's private and public data folders. You should never write data anywhere else.
 

@@ -81,6 +81,27 @@ In addition to installation scripts, the installer automatically manages [Agent 
 
 This means you can ship AI agent skills with a module by placing them in `modules/{module}/skills/{module}-{skill-name}/SKILL.md` — no manual configuration required.
 
+## Default Config Files
+
+In addition to installation scripts, the installer automatically copies default configuration files on every install/update run:
+
+- If a module has an `install/config/` directory, its contents are copied to `config/{module}/`.
+- **Existing files are never overwritten** — only files that do not yet exist in `config/{module}/` are copied.
+- This runs on every install/update cycle, not just on first install, so new config files added in module updates are automatically provisioned.
+
+Place default configuration files in `modules/{module}/install/config/` and they will be copied to `config/{module}/` during the next install/update run. To read config files at runtime, use the `config://` Zolinga URI scheme — see [Paths and Zolinga URI](:Zolinga Core:Paths and Zolinga URI).
+
+Example structure:
+
+```
+modules/my-module/
+  install/
+    config/
+      user-defaults.json    → copied to config/my-module/user-defaults.json
+      thresholds.json        → copied to config/my-module/thresholds.json
+```
+
 # Related
 
 - [Installing Additional Modules](:Zolinga Core:Installing Additional Modules) - for information how to install new modules.
+- [Paths and Zolinga URI](:Zolinga Core:Paths and Zolinga URI) - for the `config://` URI scheme to read config files at runtime.

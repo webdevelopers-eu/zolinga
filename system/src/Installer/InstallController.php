@@ -8,8 +8,9 @@ use Zolinga\System\Events\{Event, InstallScriptEvent, ListenerInterface};
 use Zolinga\System\{Mutex};
 use Zolinga\System\Types\ModuleStatesEnum;
 use const Zolinga\System\ROOT_DIR;
-use ArrayObject, RuntimeException, RecursiveIteratorIterator, RecursiveDirectoryIterator;
-use Composer\InstalledVersions;
+use RuntimeException;
+use RecursiveIteratorIterator;
+use RecursiveDirectoryIterator;
 
 /**
  * This is the installer controller that takes care of installing all modules.
@@ -86,6 +87,7 @@ class InstallController implements ListenerInterface
             $this->syncModuleDataDirectories($dir, $name, $state);
             $this->syncModuleDistSymlink($dir, $name);
             $this->syncModuleSkills($dir, $name);
+            $this->syncModuleConfig($dir, $name);
         }
     }
 
@@ -115,6 +117,30 @@ class InstallController implements ListenerInterface
         if ($state === ModuleStatesEnum::NEW) {
             $this->copyRecursive(ROOT_DIR . $dir . '/install/private', $privateDir);
             $this->copyRecursive(ROOT_DIR . $dir . '/install/public', $publicDir);
+        }
+    }
+
+    /**
+     * Copy default config files from modules/<module>/install/config/ to config/<module>/.
+     * Existing files are never overwritten.
+     */
+    private function syncModuleConfig(string $dir, string $name): void
+    {
+        global $api;
+        
+        $source = ROOT_DIR . $dir . '/install/config';
+        $dest = ROOT_DIR . "/config/{$name}";
+
+        if (!is_dir($source)) {
+            return;
+        }
+
+        try {
+            $this->ensureDirectory($dest);
+            $this->copyRecursive($source, $dest);
+        } catch (RuntimeException $e) {
+            global $api;
+            $api->log->error("system.install", "Failed to copy $source to $dest: " . $e->getMessage());
         }
     }
 
@@ -197,6 +223,7 @@ class InstallController implements ListenerInterface
 
     /**
      * Copy files from source to destination recursively.
+     * If file exists in the destinatin it won't be overwritten. 
      *
      * @throws RuntimeException if source directory is not readable or destination directory cannot be created
      * @param string $source
