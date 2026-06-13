@@ -18,9 +18,7 @@ fi
 
 declare -a ERRORS=();
 
-find "$BASE_DIR"/modules/* "$BASE_DIR" -maxdepth 0 -type d -print0 \
-    | grep -zvF ".example" \
-    | while read -d '' -r MODULE
+while read -d '' -r MODULE
 do
     echo "[1;4m`basename "$MODULE" | tr '[:lower:]' '[:upper:]'`[0m";
     echo 
@@ -28,10 +26,10 @@ do
     if [ $? -ne 0 ]
     then
         ERRORS+=("`basename "$MODULE"`");
-        echo "[31mError in module `basename "$MODULE"`[0m";
+        echo "[31m🔴 Error in module `basename "$MODULE"`[0m";
     fi
     echo 
-done
+done < <(find "$BASE_DIR"/modules/* "$BASE_DIR" -maxdepth 0 -type d -print0 | grep -zvF ".example")
 
 if [ ${#ERRORS[@]} -ne 0 ]; then
     echo "[31m🔴 Errors occurred in the following modules: ${ERRORS[*]}[0m"
