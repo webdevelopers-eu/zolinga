@@ -18,6 +18,7 @@ argument-hint: "<module-name> <event-or-request-or-tag> [goal]"
 - Handler methods are public and should accept exactly one typed event argument.
 - For non-service listeners, `method` is required in `zolinga.json` (runtime throws if missing).
 - `origin` filters listener activation. Event names match with `*` wildcards.
+- Handler method names start with the `on` prefix, e.g. `onSystemStart`, `onTranslation`, `onReload`. The `on` prefix is the conventional way to mark a class method as an event handler entry point.
 
 ## Handlers vs Services
 
