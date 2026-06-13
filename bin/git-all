@@ -16,6 +16,8 @@ then
     exit;
 fi
 
+declare -a ERRORS=();
+
 find "$BASE_DIR"/modules/* "$BASE_DIR" -maxdepth 0 -type d -print0 \
     | grep -zvF ".example" \
     | while read -d '' -r MODULE
@@ -23,6 +25,18 @@ do
     echo "[1;4m`basename "$MODULE" | tr '[:lower:]' '[:upper:]'`[0m";
     echo 
     git -C "$MODULE" "${@:1}";
+    if [ $? -ne 0 ]
+    then
+        ERRORS+=("`basename "$MODULE"`");
+        echo "[31mError in module `basename "$MODULE"`[0m";
+    fi
     echo 
 done
 
+if [ ${#ERRORS[@]} -ne 0 ]; then
+    echo "[31m🔴 Errors occurred in the following modules: ${ERRORS[*]}[0m"
+    exit 1;
+else
+    echo "[32m✅ All git commands executed successfully.[0m"
+    exit 0;
+fi
