@@ -82,6 +82,13 @@ class LogService implements ServiceInterface
      */
     public int $infoCount = 0;
 
+    /**
+     * Count of messages logged with severity TIP.
+     * 
+     * @var integer 
+     */
+    public int $tipCount = 0;
+
     public function __construct() {
         // Short string to uniquely identify the runtime logs from this run.
         $this->logId = substr(base_convert(strval(rand(1000000000, 9999999999)), 10, 36), 0, 4);
