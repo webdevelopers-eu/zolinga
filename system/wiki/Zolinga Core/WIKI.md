@@ -1,10 +1,10 @@
  # WIKI
 
- The inbuilt Zolinga WIKI system uses customizable URI path and password. Both can be modified in your configuration file.
+The inbuilt Zolinga WIKI system uses customizable URI path and password. Both can be modified in your configuration file.
 
- Example:
+Example:
 
- ```json
+```json
 {
     "wiki": {
       "# urlPrefix": "WIKI URL prefix. If not set then wiki is disabled completely.",
@@ -26,6 +26,17 @@
     }
 }
 ```
+
+# Writing Style
+
+The wiki is read by **users** - people who want to get something done with Zolinga, not by programmers reading source code. Write accordingly.
+
+- **Lead with the outcome.** The first line answers "What can I do with this?" not "What is this class called?"
+- **Structure around tasks.** Title articles "How to ...", "Configuring ...", "Using ...". Avoid titles that are class names or internal identifiers.
+- **Plain language.** Short sentences. Explain jargon in one line the first time it appears.
+- **Show what the user does.** A config block to copy, a CLI command to run, or numbered UI steps - not PHP class definitions or method bodies.
+- **Keep code user-facing.** Config snippets, CLI invocations, and front-end calls are welcome. Internal PHP wiring (`zolinga.json` listeners, class paths, event origins) belongs in a separate "Technical Details" section at the end, or in the `ref/` reference branch - never in the main flow.
+- **One article, one goal.** Split multi-task features into sub-pages.
 
 # Structure
 
