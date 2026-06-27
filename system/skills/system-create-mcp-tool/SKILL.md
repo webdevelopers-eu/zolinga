@@ -108,17 +108,18 @@ Rules:
 1. Bump the module's `version` in `zolinga.json` (any patch+).
 2. Add a CHANGELOG entry.
 3. Run `bin/zolinga` (no parameters) to apply changes and regenerate the merged manifest cache.
+4. When making requests, inspect also response HTTP headers, they may contain important information like 401 WWW-Authenticate challenges etc.
 
 ### 6. Smoke-test
 
 ```bash
 # Discover
-curl -X POST http://localhost:8080/mcp/ \
+curl -X POST http://localhost:8080/mcp/ -D /dev/stderr \
   -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq '.result.tools[].name'
 
 # Invoke
-curl -X POST http://localhost:8080/mcp/ \
+curl -X POST http://localhost:8080/mcp/ -D /dev/stderr \
   -H 'Content-Type: application/json' \
   -d '{
     "jsonrpc":"2.0","id":2,"method":"tools/call",
