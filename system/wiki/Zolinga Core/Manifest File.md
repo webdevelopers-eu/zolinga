@@ -21,7 +21,7 @@ Each module has a `zolinga.json` file in its root that contains following inform
 The `listen` section is an array of event subscriptions. Each subscription is an object with following properties:
 
 - `description` - Human readable description of the event subscription. Will be used by Zolinga WIKI.
-- `event` - Name of the event to listen to. This is a URI formatted string. E.g. `system:content:created`.
+- `event` - Name of the event to listen to. This is a URI formatted string. E.g. `system:content:html:created`.
 - `class` - Name of the PHP class that will handle the event. This class must implement the `\Zolinga\System\Events\ListenerInterface` interface.
 - `method` - Name of the method that will handle the event. This method must be public and accept a single argument of type `\Zolinga\System\Events\Event`.
 - `origin` - Subscribe only to events that originate from this source. The source is PHP Enumeration `\Zolinga\System\Types\OriginEnum`. Currently supported values are following.
@@ -43,7 +43,7 @@ Example of a `listen` section:
     "listen": [
         {
             "description": "This event is emitted when a new content is created.",
-            "event": "system:content:created",
+            "event": "system:content:html:created",
             "class": "\\Example\\System\\Events\\ContentCreatedListener",
             "method": "onContentCreated",
             "origin": ["internal", "remote"],
@@ -98,7 +98,7 @@ Example:
     "emit": [
         {
             "description": "This event is emitted when a new content is created.",
-            "event": "system:content:created",
+            "event": "system:content:html:created",
             "class": "\\Example\\System\\Events\\ContentCreatedEvent",
             "origin": ["internal"]
         }

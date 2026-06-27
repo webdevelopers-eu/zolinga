@@ -22,7 +22,11 @@ Event (base)
 │   └── RequestResponseEvent (+ $response)
 │       ├── CliRequestResponseEvent (stoppable)
 │       └── WebEvent (+ $broadcastBack)
-├── ContentEvent (stoppable, DOM-based page content)
+├── ContentEvent (abstract, stoppable — base for all content events)
+│   ├── HtmlContentEvent (system:content:html, DOM-based page content)
+│   ├── JsonContentEvent (system:content:json)
+│   ├── TextContentEvent (system:content:text)
+│   └── PreflightEvent (system:content:preflight — determines MIME type before content event)
 ├── AuthorizeEvent (stoppable, rights checking)
 ├── InstallScriptEvent (stoppable)
 ├── HealthCheckEvent (stoppable)
@@ -40,7 +44,7 @@ The **emitter** decides the event class, not the listener. Choose based on what 
 | Internal request+response | `RequestResponseEvent` | `internal` |
 | CLI command | `CliRequestResponseEvent` | `cli` |
 | AJAX/web gate | `WebEvent` | `remote` |
-| Page content rendering | `ContentEvent` | `remote` |
+| Page content rendering | `HtmlContentEvent` / `JsonContentEvent` / `TextContentEvent` (chosen by `PreflightEvent`) | `remote` |
 | Rights checking | `AuthorizeEvent` | `internal` |
 | Remote server call | `RemoteEvent` | `remote` |
 

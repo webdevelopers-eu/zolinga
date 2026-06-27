@@ -286,18 +286,17 @@ class McpServer
             'status' => $status,
             'size' => strlen($this->rawBody),
             'batch' => $isBatch,
+            'tool' => $toolName,
+            'method' => $method,
         ];
-        if ($method !== null) {
-            $context['method'] = $method;
-        }
-        if ($toolName !== null) {
-            $context['tool'] = $toolName;
-        }
-        try {
-            $api->log->info('system:mcp', McpHelper::truncateForEcho('access ' . $status . ' ' . ($method ?? '-')), $context);
-        } catch (\Throwable $e) {
-            // Logger not available — never let logging fail the request.
-        }
+
+        $statusName = StatusEnum::tryFrom($status)?->name ?? 'UNKNOWN';
+
+        $api->log->info(
+            'system:mcp', 
+            "MCP Request: " . McpHelper::truncateForEcho("status=$status $statusName, method=$method, tool=$toolName, batch=" . ($isBatch ? 'yes' : 'no') . ", size=" . strlen($this->rawBody) . "B"),
+            $context
+        );
     }
 
     /**
@@ -395,13 +394,21 @@ class McpServer
      */
     private function dispatchOne(mixed $req): ?array
     {
+        global $api;
+
         try {
             [$method, $id, $params] = McpRequestValidator::requireRequest($req);
         } catch (McpInvalidRequestException $e) {
+            $api->log->error('system:mcp', 'MCP request validation failed: ' . McpHelper::truncateForEcho($e->getMessage()), [
+                'requestPreview' => McpHelper::truncateForEcho(json_encode($req, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)),
+            ]);
             // Per JSON-RPC 2.0: a notification with an invalid envelope gets no reply.
             $reqIsArray = is_array($req);
             $hasId = $reqIsArray && array_key_exists('id', $req);
             if (!$hasId) {
+                if (!\Zolinga\System\IS_CLI && !headers_sent()) {
+                    header('X-MCP-Error: invalid-json-rpc-2.0-envelope');
+                }
                 return null;
             }
             $rawId = $reqIsArray ? ($req['id'] ?? null) : null;

@@ -47,7 +47,8 @@ Origin does not force event class by itself. Event class is decided by the emitt
 - `bin/zolinga EVENT ...` dispatches `\Zolinga\System\Events\CliRequestResponseEvent` (origin `cli`) with `request` and `response`.
 - `public/index.php` dispatches:
 - `system:request:<key>` as `\Zolinga\System\Events\RequestEvent` (origin `remote`).
-- `system:content` as `\Zolinga\System\Events\ContentEvent` (origin `remote`).
+- `system:content:preflight` as `\Zolinga\System\Events\Content\PreflightEvent` (origin `remote`) — determines MIME type and can rewrite path before content event.
+- `system:content:html` as `\Zolinga\System\Events\Content\HtmlContentEvent` (origin `remote`) — dispatched based on preflight MIME type. Also `system:content:json` (`JsonContentEvent`) and `system:content:text` (`TextContentEvent`).
 - `system/install/dist/gate/index.php` dispatches `\Zolinga\System\Events\WebEvent` (origin `remote`) for AJAX/gate calls.
 - CMS parser dispatches `cms:content:<tag>` as `\Zolinga\Cms\Events\ContentElementEvent` (origin `internal`).
 - Service discovery emits `system:service:<name>` as base `\Zolinga\System\Events\Event` (origin `internal`).

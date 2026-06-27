@@ -9,7 +9,7 @@ use Zolinga\System\Events\{CliRequestResponseEvent, ListenerInterface};
 /**
  * CLI listener for processing HTML/XML content through the CMS pipeline.
  *
- * Mimics the web request flow from public/index.php by creating a ContentEvent
+ * Mimics the web request flow from public/index.php by creating a HtmlContentEvent
  * and dispatching it, then outputting the resulting HTML.
  *
  * Usage:

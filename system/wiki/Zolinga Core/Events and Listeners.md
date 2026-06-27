@@ -4,7 +4,7 @@ Priority: 0.8
 
 The Zolinga Core is an event-driven system. The system is designed to be modular and extensible.
 
-Dispatching and processing events is how things get done in Zolinga for the most part. For example, when you visited this page, an `\Zolinga\System\Events\ContentEvent` named [system:content](:ref:event:system:content) marked as being from  `remote` origin was emitted by `index.php` which jumpstarted the process of rendering this page.
+Dispatching and processing events is how things get done in Zolinga for the most part. For example, when you visited this page, `index.php` first dispatched a `\Zolinga\System\Events\Content\PreflightEvent` (`system:content:preflight`) to determine the content type, and then dispatched a `\Zolinga\System\Events\Content\HtmlContentEvent` named [system:content:html](:ref:event:system:content:html) marked as being from `remote` origin which jumpstarted the process of rendering this page. See [Processing Page Content](:Zolinga Core:Running the System:Page Request:Processing Page Content) for the full two-phase flow.
 
 The Zolinga event model is losely modeled after the Javascript event model. The named event is dispatched and it is represented by Event object. The event object is passed to the listeners. When the event is dispatched, the listeners are called in the order of their priority.
 
@@ -18,8 +18,8 @@ This is the example of the `listen` section:
 {
     "listen": [
         {
-            "event": "system:content",
-            "description": "This listener listens to the system:content event.",
+            "event": "system:content:html",
+            "description": "This listener listens to the system:content:html event.",
             "class": "\\Example\\System\\Listeners\\ContentListener",
             "method": "onContent",
             "origin": [
@@ -32,7 +32,7 @@ This is the example of the `listen` section:
 }
 ```
 
-When the page is visited and `index.php` fires [system:content](:ref:event:system:content) event represented by `\Zolinga\System\Events\ContentEvent` object, the `onContent` method of `ContentListener` class is called. Since in the example the priority is pretty high (0.9), this listener will be probably called before other listeners that listen to the same event.
+When the page is visited and `index.php` fires [system:content:html](:ref:event:system:content:html) event represented by `\Zolinga\System\Events\Content\HtmlContentEvent` object (after a `system:content:preflight` event determined the content type), the `onContent` method of `ContentListener` class is called. Since in the example the priority is pretty high (0.9), this listener will be probably called before other listeners that listen to the same event.
 
 - `event`
 > The URI name of the event. It can be anything. Good practice is to prefix the event with the module name. Components are usualy separated by colon.
@@ -64,7 +64,7 @@ When the page is visited and `index.php` fires [system:content](:ref:event:syste
 
 Some events may implement the `\Zolinga\System\Events\StoppableInterface` interface. This interface will allow you to prevent other listeners to receive the event. The event will be stopped when the `stopPropagation` method is called on the event object.
 
-The [system:content](:ref:event:system:content) event is stoppable. If the `onContent` method of `ContentListener` class calls `$event->stopPropagation()` method, the other listeners that listen to the [system:content](:ref:event:system:content) event will not be called.
+The [system:content:html](:ref:event:system:content:html) event is stoppable. If the `onContent` method of `ContentListener` class calls `$event->stopPropagation()` method, the other listeners that listen to the [system:content:html](:ref:event:system:content:html) event will not be called.
 
 Example of stoppable event Class:
 

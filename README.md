@@ -154,7 +154,7 @@ Module manifest file example:
     "authors": ["John Doe <john@example.com>"],
     "listen": [
         {
-            "event": "system:content",
+            "event": "system:content:html",
             "class": "\\Example\\HelloWorld\\Server",
             "method": "outputPage",
             "priority": 0.8,
@@ -171,12 +171,12 @@ Module manifest file example:
     }
 }
 ``` 
-Yes, as you would guess, if you dispatch an event `system:content` from a remote origin, the `outputPage` method of the `Server` class in the `Example\HelloWorld` namespace will be called.
+Yes, as you would guess, if you dispatch an event `system:content:html` from a remote origin, the `outputPage` method of the `Server` class in the `Example\HelloWorld` namespace will be called. (In the web request flow, `index.php` first dispatches a `system:content:preflight` event to determine the content type, then dispatches the appropriate content event — `system:content:html`, `system:content:json`, or `system:content:text` — based on the MIME type set by preflight handlers.)
 
 ```php
 use Zolinga\System\Events\Event;
 
-(new Event('system:content', Event::ORIGIN_REMOTE))->dispatch();
+(new Event('system:content:html', Event::ORIGIN_REMOTE))->dispatch();
 ```
 
 This is all there is to it. Except for a few optional syntax sugars to make the module manifest easier to write and read, you don't need to know anything more than what is in this example. You're practically the Zolinga expert now!

@@ -1,6 +1,6 @@
 {
   "name": "Zolinga Framework",
-  "version": "1.6.5",
+  "version": "1.6.7",
   "description": "Zolinga PHP framework that makes sense.",
   "authors": [
     "Danny Sevcik <danny@zolinga.net>"
@@ -70,7 +70,7 @@
     },
     {
       "description": "Super low priority default page handler that displays a placeholder page if event has not status set/is not handled already.",
-      "event": "system:content",
+      "event": "system:content:html",
       "class": "\\Zolinga\\System\\Cms\\Page",
       "method": "onContent",
       "origin": [
@@ -128,7 +128,7 @@
     },
     {
       "description": "This listener hooks on WIKI URL and produces WIKI Documentation page.",
-      "event": "system:content",
+      "event": "system:content:html",
       "class": "\\Zolinga\\System\\Wiki\\WebServer",
       "method": "onContent",
       "origin": [
@@ -260,9 +260,33 @@
       ]
     },
     {
-      "event": "system:content",
-      "description": "Event that is fired by index.php when content is requested.",
-      "class": "\\Zolinga\\System\\Events\\ContentEvent",
+      "event": "system:content:preflight",
+      "description": "Preflight event dispatched by index.php before content generation. Handlers determine the MIME type (text/html, application/json, text/plain) and can rewrite the path or prevent content generation.",
+      "class": "\\Zolinga\\System\\Events\\Content\\PreflightEvent",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "event": "system:content:html",
+      "description": "Event that is fired by index.php when HTML content is requested.",
+      "class": "\\Zolinga\\System\\Events\\Content\\HtmlContentEvent",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "event": "system:content:json",
+      "description": "Event that is fired by index.php when JSON content is requested.",
+      "class": "\\Zolinga\\System\\Events\\Content\\JsonContentEvent",
+      "origin": [
+        "remote"
+      ]
+    },
+    {
+      "event": "system:content:text",
+      "description": "Event that is fired by index.php when plain text content is requested.",
+      "class": "\\Zolinga\\System\\Events\\Content\\TextContentEvent",
       "origin": [
         "remote"
       ]

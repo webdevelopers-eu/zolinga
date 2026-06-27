@@ -5,6 +5,16 @@ All notable changes to the Zolinga framework (system module) will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
 
+## [1.6.6] - 2026-06-25
+
+### Changed
+
+- **Content event refactoring**: `ContentEvent` is now an abstract base class with concrete subclasses for HTML, JSON, and plain text content.
+- **Two-phase content dispatch**: `PreflightEvent` determines MIME type before the content event, enabling non-HTML responses (JSON, text) from any URL.
+- **New `ContentMimeTypesEnum`** for mapping MIME types to content event classes.
+- MCP server logging improvements.
+- Updated all documentation and skills.
+
 ## [1.6.3] - 2026-06-03
 
 ### Added

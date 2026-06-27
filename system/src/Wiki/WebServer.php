@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Wiki;
 
-use Zolinga\System\Events\{ListenerInterface, ContentEvent};
+use Zolinga\System\Events\ListenerInterface;
+use Zolinga\System\Events\Content\HtmlContentEvent;
 
 /**
  * Serves the main wiki page.
@@ -38,11 +39,11 @@ class WebServer implements ListenerInterface
         }
     }
 
-    public function onContent(ContentEvent $event): void
+    public function onContent(HtmlContentEvent $event): void
     {
         global $api;
 
-        if (!$this->prefix || $event->status !== ContentEvent::STATUS_UNDETERMINED) {
+        if (!$this->prefix || $event->status !== HtmlContentEvent::STATUS_UNDETERMINED) {
             return;
         }
 
@@ -65,6 +66,6 @@ class WebServer implements ListenerInterface
             $base->setAttribute('href', $baseURL);
         }
         
-        $event->setStatus(ContentEvent::STATUS_OK, 'Wiki page loaded');
+        $event->setStatus(HtmlContentEvent::STATUS_OK, 'Wiki page loaded');
     }
 }

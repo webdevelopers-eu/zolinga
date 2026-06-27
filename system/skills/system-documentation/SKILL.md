@@ -6,6 +6,11 @@ argument-hint: "<module-name> [event-or-topic]"
 
 # Zolinga Documentation
 
+## Rules
+
+- Do not duplicate content - rather reference the existing content elsewhere. I don't want repeating the same thing over and over in many places.
+
+
 ## Use When
 
 - Adding or updating wiki docs for features, events, or content tags.

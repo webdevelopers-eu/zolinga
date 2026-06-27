@@ -4,7 +4,9 @@ namespace Zolinga\System\Events;
 
 use Zolinga\System\Events\Event;
 use Zolinga\System\Types\OriginEnum;
-use Stringable, Exception;
+use Stringable;
+use Exception;
+use Zolinga\System\Types\StatusEnum;
 
 /**
  * This event is used to check if the user has the rights to perform the action.
@@ -23,6 +25,7 @@ use Stringable, Exception;
  * 
  * @property-read array<string|Stringable> $authorized list of authorized rights
  * @property-read array<string|Stringable> $unauthorized list of unauthorized rights
+ * @property-read bool $requiresLogin whether a failed authorization should result in 401 Unauthorized (true) or 403 Forbidden (false)
  * 
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2024-03-26
@@ -30,6 +33,18 @@ use Stringable, Exception;
 class AuthorizeEvent extends Event implements StoppableInterface
 {
     use StoppableTrait;
+
+    public StatusEnum $status {
+        get {
+            if (!count($this->unauthorized)) {
+                return StatusEnum::OK;
+            }
+            return $this->requiresLogin ? StatusEnum::UNAUTHORIZED : StatusEnum::FORBIDDEN;
+        }
+        set {
+            throw new Exception("Status is read-only. Use the \$event->requireLogin() method to set the status.");
+        }
+    }
 
     /**
      * The right that needs to be satisfied for the event to be authorized to be processed
@@ -49,6 +64,15 @@ class AuthorizeEvent extends Event implements StoppableInterface
      * @var array<string|Stringable>
      */
     private array $authorized = [];
+
+    /**
+     * Whether a failed authorization should result in HTTP 401 Unauthorized
+     * (user needs to log in) or HTTP 403 Forbidden (user is authenticated but
+     * lacks the required rights).
+     *
+     * @var bool
+     */
+    public bool $requiresLogin = true;
 
     /**
      * Constructor expects the right URI to be passed.
@@ -76,6 +100,20 @@ class AuthorizeEvent extends Event implements StoppableInterface
     public function __set(string $name, mixed $value): void
     {
         throw new \Exception("Property $name is read-only. Use the \$event->authorize(\$right) method to authorize the right.");
+    }
+
+    /**
+     * Set whether a failed authorization should result in HTTP 401 Unauthorized
+     * instead of the default 403 Forbidden.
+     *
+     * Call this when the user is not authenticated and needs to log in first.
+     *
+     * @param bool $value true to throw 401, false to throw 403
+     * @return void
+     */
+    public function requireLogin(bool $value = true): void
+    {
+        $this->requiresLogin = $value;
     }
 
 

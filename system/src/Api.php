@@ -126,7 +126,7 @@ class Api
                 $authEvent->dispatch();
                 if (!$authEvent->isAuthorized($subscription['right'])) {
                     // TRANSLATORS: Error message shown when a caller is not authorized to perform the requested action. The event type is appended in parentheses.
-                    $event->setStatus(StatusEnum::UNAUTHORIZED, dgettext('system', "You are not authorized to perform this action.") . ' (' . $event->type . ')');
+                    $event->setStatus($authEvent->requiresLogin ? StatusEnum::UNAUTHORIZED : StatusEnum::FORBIDDEN, dgettext('system', "You are not authorized to perform this action.") . ' (' . $event->type . ')');
                     continue;
                 }
             }

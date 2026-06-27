@@ -21,7 +21,9 @@ namespace Zolinga\System\Gate\PublicGate;
 /** @var \Zolinga\System\Api $api */
 
 use Zolinga\System\Events\{ContentEvent, RequestEvent};
-use Exception, ArrayObject;
+use Exception;
+use ArrayObject;
+use Zolinga\System\Events\Content\PreflightEvent;
 
 // We serve only page requests for files without extensions (without dots) or with extensions
 // .html, .htm, .php, .asp, or directories due to performance concerns.
@@ -75,24 +77,37 @@ require(dirname(__DIR__) . '/system/loader.php');
         ));
     }
 
-    // Trigger an "system:content" event designed to awaken code within a CMS, 
+    $pathParam = $_SERVER['PATH_INFO'] ?? rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/');
+
+    // Preflight checks and detection of content type and possibly path rewrite
+    $preflightEvent = new PreflightEvent($pathParam);
+    $api->dispatchEvent($preflightEvent);
+
+    if (headers_sent($file, $line)) {
+        trigger_error("Headers already sent in $file on line $line . If you want to produce content on your own call \$event->preventDefault() on the content event object.", E_USER_WARNING);
+    } else {
+        header('Content-Type: ' . $preflightEvent->mimeType->value . '; charset=utf-8');
+    }
+
+    // Trigger an "system:content:*" event designed to awaken code within a CMS, 
     // allowing it to autonomously generate and output the HTTP server response 
     // to stdout as needed. 
     // $_SERVER['REQUEST_URI'] contains also query string so extract just the path
-    $contentEvent = new ContentEvent($_SERVER['PATH_INFO'] ?? rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/'));
+    if (in_array($preflightEvent->status, [ContentEvent::STATUS_OK, ContentEvent::STATUS_UNDETERMINED], true)) {
+        $class = $preflightEvent->mimeType->getContentEventClass();
+        $contentEvent = new $class($pathParam);
+        $contentEvent->path = $preflightEvent->path;
+        $contentEvent->canonicalPath = $preflightEvent->canonicalPath;
 
-    $api->dispatchEvent($contentEvent);
-    
-    if (!$contentEvent->isDefaultPrevented()) {
-        if (headers_sent($file, $line)) {
-            trigger_error("Headers already sent in $file on line $line . If you want to produce content on your own call \$event->preventDefault() on the $contentEvent", E_USER_WARNING);
-        } else {
-            header('Content-Type: text/html; charset=utf-8');
+        $api->dispatchEvent($contentEvent);
+        
+        if (!$contentEvent->isDefaultPrevented()) {
+            if (http_response_code() === 200) { // if we set other then 200 then we keep that
+                http_response_code($contentEvent->status->value);
+            }
+            echo $contentEvent->getOutput();
         }
-        if (http_response_code() === 200) { // if we set other then 200 then we keep that
-            http_response_code($contentEvent->status->value);
-        }
-        echo $contentEvent->getContentHTML();
+    } else {
+        echo $preflightEvent->getOutput();
     }
-
 })($api);

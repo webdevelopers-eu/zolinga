@@ -82,7 +82,7 @@ Notes:
 ## Special Cases and Customs
 
 - A service class can handle additional events by adding more `listen` entries pointing to the same class with explicit `method`.
-- Example pattern in repository: a service-like class also handles `system:content` and `cms:content:*` events.
+- Example pattern in repository: a service-like class also handles `cms:content:*` events.
 - Service properties are available via `$api->serviceName` after first access.
 - Service discovery contributes to generated `data/system/api.stub.php` for IDE hints.
 

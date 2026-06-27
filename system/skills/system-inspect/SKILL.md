@@ -51,7 +51,7 @@ Every entry in the `listen` array is normalized to the same 7 fields — no part
 
 ```json
 {
-  "event": "system:content",
+  "event": "system:content:html",
   "class": "\\Zolinga\\System\\Cms\\Page",
   "method": "onContent",
   "origin": ["remote"],

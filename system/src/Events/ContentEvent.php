@@ -10,12 +10,17 @@ use JsonSerializable;
 /**
  * Represents a request to generate a document for page content.
  *
+ * This is a generic parent class for content events of various types, such as HTML, JSON, plain text,
+ * and other content formats. Concrete subclasses define the specific content type (e.g. HtmlContentEvent,
+ * JsonContentEvent), while the behavior described here applies to all of them.
  * 
- * Handlers are expected to populate the $event->content property with HTML content to be sent to the browser.
+ * Handlers are expected to populate the $event->content property with the appropriate content for the
+ * given content type (e.g. HTML markup for browsers, a JSON payload for API responses, plain text, etc.)
+ * to be sent to the client.
  * 
  * If a handler produces its own output such as binary data or images, it should call $event->preventDefault()
- * to prevent the default HTML output. Optionally, $event->stopPropagation() can be called immediately after to prevent
- * further processing of the event if HTML output is not intended.
+ * to prevent the default output of the corresponding content type. Optionally, $event->stopPropagation() can be
+ * called immediately after to prevent further processing of the event if the default output is not intended.
  * 
  * It is recommended to avoid directly outputting anything from the handler, unless it is necessary. 
  * Instead, store the output in the `$event->content` property. This allows for further filters and 
@@ -33,11 +38,11 @@ use JsonSerializable;
  * 
  * The event is stoppable.
  */
-class ContentEvent extends Event implements StoppableInterface
+abstract class ContentEvent extends Event implements StoppableInterface
 {
     use StoppableTrait;
 
-    /**
+/**
      * The request URL path part without the query string and the trailing slash.
      * This path is writable, allowing handlers to rewrite it. Handlers should use this property 
      * instead of directly reading $_SERVER['REQUEST_URI'] to determine the content to generate, 
@@ -79,96 +84,20 @@ class ContentEvent extends Event implements StoppableInterface
      * @var string
      */
     public readonly string $originalPath;
-
+    
     /**
-     * The XPath object for the content.
+     * Constructs a new ContentEvent.
      *
-     * @var \DOMXPath $xpath
-     */
-    public readonly \DOMXPath $xpath;
-
-    public readonly \DOMDocument $content;
-
-    /**
-     * The URL path to the content.
-     * 
+     * @param string $name The name of the event.
+     * @param OriginEnum $origin The origin of the event (local or remote).
      * @param mixed $path The URL path to the content.
-     * @return void
      */
-    public function __construct(mixed $path) {
-        parent::__construct("system:content", self::ORIGIN_REMOTE);
-
-        $this->content = new \DOMDocument('1.0', 'UTF-8'); 
-        $this->content->formatOutput = false;
-        $this->content->substituteEntities = false;
-        $this->content->strictErrorChecking = false;
-        $this->content->recover = true;
-        $this->content->resolveExternals = false;
-        $this->content->validateOnParse = false;
-        $this->content->xmlStandalone = true;
-        $this->content->loadHTML('<!DOCTYPE html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET | LIBXML_NOWARNING | LIBXML_NOERROR);
+    public function __construct(string $name, OriginEnum $origin, string $path) {
+        parent::__construct($name, $origin);
 
         $this->path = rtrim($path ?: '', '/');
         $this->originalPath = $this->path;
         $this->canonicalPath = $this->path;
-
-        $this->xpath = new \DOMXPath($this->content);
-    }
-
-    
-    /**
-     * Set the XML content using string.
-     *
-     * @param string $content The content to set.
-     * @return void
-     */
-    public function setContent(string $content): void {
-        $this->content->loadXML($content, LIBXML_COMPACT | LIBXML_NOCDATA | LIBXML_NONET | LIBXML_NSCLEAN) or throw new \Exception("Invalid XML content");
-    }
-
-    /**
-     * Set the HTML content using string.
-     *
-     * @param string $content The HTML content to set.
-     * @return void
-     */
-    public function setContentHTML(string $content): void {
-        // LIBXML_NOERROR to suppress custom HTML tag warnings: Warning: DOMDocument::loadHTML(): Tag invalid wiki-search in Entity
-        $content = <<<HTML
-            <!DOCTYPE html>
-            <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-            $content
-            HTML; // Add meta tag to force UTF-8 encoding
-        $this->content->loadHTML($content, LIBXML_NOERROR | LIBXML_NONET | LIBXML_NOWARNING) or throw new \Exception("Invalid HTML content");
-    }
-
-    /**
-     * Get the content as the XML string.
-     *
-     * @return string|false The content in XML format.
-     */
-    public function getContent(): string|false {
-        return $this->content->saveXML(options: LIBXML_NOXMLDECL | LIBXML_NSCLEAN);
-    }
-
-    /**
-     * Get the content as the HTML string.
-     *
-     * @return string|false The content in HTML format.
-     */
-    public function getContentHTML(): string|false {
-        return $this->content->saveHTML();
-    }
-
-    /**
-     * Check if the content is not empty and there are tags in the <body> tag.
-     *
-     * @return bool True if the content is NOT empty, false otherwise.
-     */
-    public function hasContent(): bool {
-        // Check that it has child nodes and something is in <body> tag
-        return $this->content->documentElement->hasChildNodes()
-            && $this->content->getElementsByTagName('body')->item(0)?->hasChildNodes();
     }
 
     public function setStatus(StatusEnum $status, string $message): StatusEnum
@@ -193,6 +122,20 @@ class ContentEvent extends Event implements StoppableInterface
     }
 
     /**
+     * Get string representing the contents that will be sent to the browser or other client.
+     *
+     * @return string|false The content in the appropriate format for the content type (e.g. HTML, JSON, plain text).
+     */
+    abstract public function getOutput(): string | false;
+
+    /**
+     * Get the content in the serializable format for json or other purposes. 
+     *
+     * @return mixed The content in the appropriate format for the content type string for HTML, object for JSON...
+     */
+    abstract public function getContent(): mixed;
+
+    /**
      * Magic method to convert the object to JSON string.
      *
      * @return array<string, mixed>
@@ -204,5 +147,4 @@ class ContentEvent extends Event implements StoppableInterface
             'content' => $this->getContent(),
         ];
     }
-
 }

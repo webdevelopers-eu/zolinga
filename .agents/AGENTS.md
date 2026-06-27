@@ -38,6 +38,7 @@ Repository core skills:
 - `system-run-and-test`
 - `system-concurrency`
 - `system-web-root-overlay`
+- `system-serving-non-html-content`
 - `system-i18n-coding`
 - `system-changelog`
 - `system-debug-database`

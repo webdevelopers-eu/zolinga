@@ -59,7 +59,7 @@ Prefer a more specific event that matches what you actually need:
 | Provide a reusable service | `system:service:myService` (sugar: `"service": "myService"`) |
 | Handle a web/API request | `system:request:myAction` (sugar: `"request": "myAction"`) |
 | React to module installation | `system:install` |
-| Serve a CMS page | `system:content` / `cms:content:myTag` |
+| Serve a CMS page | `system:content:html` / `cms:content:myTag` |
 | Run a CLI command | your own `myModule:myCommand` with origin `cli` |
 
 Hooking on `system:start` runs your code on **every single request** — web, CLI, cron, API — whether your module is relevant or not. This wastes resources and makes boot time slower for everyone.

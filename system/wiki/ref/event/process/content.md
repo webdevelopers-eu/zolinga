@@ -51,7 +51,7 @@ bin/zolinga process:content --input=page.html
 
 ## Notes
 
-- Only the CMS content parser runs; page serving, wiki, and other `system:content` handlers are **not** invoked.
+- Only the CMS content parser runs; page serving, wiki, and other `system:content:html` handlers are **not** invoked.
 - Custom CMS content tags (elements with a dash in their name) are expanded during processing.
 - The `--url` value affects path-based routing and analytics tracking.
 - Use `Zolinga\System\IS_CLI` to detect CLI mode in your own handlers.
