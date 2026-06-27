@@ -5,26 +5,29 @@ declare(strict_types=1);
 namespace Zolinga\System\Mcp;
 
 use Zolinga\System\Events\McpEvent;
-use Zolinga\System\Mcp\Exceptions\{McpException, McpInvalidParamsException, McpInvalidRequestException, McpMethodNotFoundException, McpParseErrorException};
+use Zolinga\System\Mcp\Exceptions\{McpException, McpInvalidRequestException, McpMethodNotFoundException, McpParseErrorException};
 use Zolinga\System\Types\StatusEnum;
-
 
 /**
  * Stateful per-request MCP gateway.
+ * 
+ * Note: The JSON-RPC 2.0 allows batching but MCP standards do not. 
+ * Therefore we support only one request per HTTP request. 
  *
- * One instance is created per HTTP request, used to drive the entire request
- * lifecycle, and discarded. It reads the raw request body in the constructor,
- * exposes {@see McpServer::process()} as the main entry point, and tracks
- * the responses it has built up so {@see McpServer::send()} can emit them in
- * a single shot.
+ * One instance per HTTP request. Reads the raw body in the constructor,
+ * drives the full request lifecycle via {@see run()}, and is discarded.
  *
- * Typical usage from a thin `index.php`:
+ * The pipeline is simple: parse JSON -> create McpEvent -> dispatch ->
+ * serialize response. One message per request (MCP Streamable HTTP spec
+ * does not use JSON-RPC batches).
+ *
+ * Usage from `public/mcp/index.php`:
  *
  * ```php
  * try {
- *     (new McpServer())->process()->send();
+ *     (new McpServer())->run();
  * } catch (McpException $e) {
- *     (new McpServer())->sendException($e);
+ *     (new McpServer())->sendError($e);
  * }
  * ```
  *
@@ -39,39 +42,17 @@ class McpServer
     private readonly string $rawBody;
 
     /**
-     * Decoded request value: `null` (not yet parsed), an associative array
-     * (single request), or a list of associative arrays (batch).
+     * The single response payload built by dispatch, or null for
+     * notifications (no reply).
      *
-     * @var array<string, mixed>|list<array<string, mixed>>|null
+     * @var array<string, mixed>|null
      */
-    private array|null $decoded = null;
+    private ?array $response = null;
 
     /**
-     * Whether the request was a JSON-RPC batch.
+     * The dispatched event, kept for the access log.
      */
-    private bool $isBatch = false;
-
-    /**
-     * Collected JSON-RPC response payloads.
-     *
-     * @var list<array<string, mixed>>
-     */
-    private array $responses = [];
-
-    /**
-     * JSON-RPC method name of the first dispatched request, captured for
-     * the access log. Null when the envelope was invalid (parse error,
-     * missing method, etc.). Bounded by {@see McpHelper::METHOD_NAME_MAX_LENGTH}.
-     */
-    private ?string $firstMethod = null;
-
-    /**
-     * The `tools/call` `name` of the first dispatched request, captured
-     * for the access log. Null when the request was not a `tools/call`.
-     * Bounded by {@see McpHelper::TOOL_NAME_MAX_LENGTH} and already
-     * validated against the tool-name character class.
-     */
-    private ?string $firstToolName = null;
+    private ?McpEvent $event = null;
 
     /**
      * @param string|null $rawBody Raw request body. Defaults to `php://input`.
@@ -83,21 +64,8 @@ class McpServer
     }
 
     /**
-     * Full request lifecycle: handle the HTTP method, run body-size /
-     * parse / dispatch, and send the response. This is the entry point
-     * used by `public/mcp/index.php`.
-     *
-     * HTTP method handling (per the MCP Streamable HTTP spec):
-     *
-     * - **POST** — the only method that carries a JSON-RPC message. Body
-     *   is decoded and dispatched.
-     * - **GET** — per spec, MAY open an SSE stream or return 405. This
-     *   gateway is non-streaming, so it returns 405 with `Allow: GET,
-     *   POST, DELETE` so clients can tell the difference between "method
-     *   not allowed" and "endpoint down".
-     * - **DELETE** — per spec, used to terminate a session. Returns 405
-     *   for the same reason as GET.
-     * - **HEAD / OPTIONS / PUT / PATCH / anything else** — also 405.
+     * Full request lifecycle: HTTP method check, body parse, dispatch, send.
+     * Entry point used by `public/mcp/index.php`.
      *
      * @return void
      */
@@ -105,29 +73,201 @@ class McpServer
     {
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
-        if (!in_array($method, ['POST'])) { // only POST all other 405 which means non SSE stream
+        if ($method !== 'POST') {
             $this->sendMethodNotAllowed($method);
             return;
         }
 
-        $this->checkBodySize();
-        try {
-            $this->process();
-        } catch (McpException $e) {
-            $this->sendException($e);
-            return;
-        }
+        $data = $this->parseBody();
+        $this->response = $this->dispatch($data);
         $this->send();
     }
 
     /**
-     * Emit an HTTP 405 Method Not Allowed response for non-POST requests
-     * (GET, DELETE, HEAD, OPTIONS, etc.). Per the MCP Streamable HTTP
-     * spec, returning 405 to GET is allowed when the server does not
-     * offer an SSE stream; the `Allow` header tells the client which
-     * methods the endpoint does support.
+     * Read and decode the raw request body as a JSON object.
      *
-     * @param string $method The original request method (for the access log).
+     * @return array<string, mixed>
+     * @throws McpParseErrorException Invalid JSON or empty body.
+     * @throws McpInvalidRequestException Top-level value is not a JSON object.
+     */
+    private function parseBody(): array
+    {
+        global $api;
+
+        if (strlen($this->rawBody) > McpHelper::REQUEST_BODY_MAX_BYTES) {
+            throw new McpParseErrorException(
+                'Request body too large (' . strlen($this->rawBody) . ' bytes; limit is '
+                    . McpHelper::REQUEST_BODY_MAX_BYTES . ').'
+            );
+        }
+
+        if ($this->rawBody === '') {
+            throw new McpParseErrorException('Empty request body.');
+        }
+
+        $decoded = json_decode($this->rawBody, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $api->log->warning('system:mcp', McpHelper::truncateForEcho('MCP parse error'), [
+                'jsonError' => json_last_error_msg(),
+            ]);
+            throw new McpParseErrorException('Parse error: ' . json_last_error_msg());
+        }
+
+        if (!is_array($decoded) || array_is_list($decoded)) {
+            throw new McpInvalidRequestException(
+                'Top-level value must be a JSON object.'
+                . (is_array($decoded) && array_is_list($decoded) ? ' Batches are not supported.' : '')
+            );
+        }
+
+        return $decoded;
+    }
+
+    /**
+     * Dispatch a single JSON-RPC request and return the response payload,
+     * or null for notifications.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>|null
+     */
+    private function dispatch(array $data): ?array
+    {
+        global $api;
+
+        try {
+            $event = McpEvent::fromJsonRpc($data);
+        } catch (McpException $e) {
+            // Invalid envelope: notifications (no id) get no reply.
+            if (!array_key_exists('id', $data)) {
+                return null;
+            }
+            $payload = $e->toPayload();
+            $rawId = $data['id'];
+            $payload['id'] = is_string($rawId) || is_int($rawId) ? $rawId : null;
+            return $payload;
+        }
+
+        $this->event = $event;
+
+        try {
+            $event->dispatch();
+        } catch (\Throwable $e) {
+            $api->log->error('system:mcp', 'MCP dispatch failed: ' . McpHelper::truncateForEcho($e->getMessage()), [
+                'event' => McpHelper::truncateForEcho($event->type),
+                'exception' => $e::class,
+            ]);
+            $event->setStatus(StatusEnum::ERROR, 'Internal error: ' . McpHelper::truncateForEcho($e->getMessage()));
+        }
+
+        // tools:call:<name> with no listener -> friendly "Unknown tool".
+        if (str_starts_with($event->type, 'tools:call:') && $event->status === StatusEnum::UNDETERMINED) {
+            $name = substr($event->type, strlen('tools:call:'));
+            $event->setStatus(StatusEnum::NOT_FOUND, 'Unknown tool: ' . McpHelper::truncateForEcho($name));
+        }
+
+        // Notifications: dispatched for side effects, no reply.
+        if ($event->jsonrpcId === null) {
+            return null;
+        }
+
+        return $this->buildResponse($event);
+    }
+
+    /**
+     * Build the JSON-RPC 2.0 response payload from a dispatched event.
+     *
+     * @param McpEvent $event
+     * @return array<string, mixed>
+     */
+    private function buildResponse(McpEvent $event): array
+    {
+        if (str_starts_with($event->type, 'tools:call:')) {
+            return [
+                'jsonrpc' => '2.0',
+                'id' => $event->jsonrpcId,
+                'result' => McpHelper::envelope($event),
+            ];
+        }
+
+        if ($event->status === StatusEnum::UNDETERMINED) {
+            return (new McpMethodNotFoundException(
+                'Method not found: ' . McpHelper::truncateForEcho($event->type),
+                $event->jsonrpcId
+            ))->toPayload();
+        }
+
+        if ($event->isOk()) {
+            return [
+                'jsonrpc' => '2.0',
+                'id' => $event->jsonrpcId,
+                'result' => McpHelper::normalizeResponse($event->response),
+            ];
+        }
+
+        return [
+            'jsonrpc' => '2.0',
+            'id' => $event->jsonrpcId,
+            'error' => [
+                'code' => McpHelper::errorCodeFromStatus($event->status)->value,
+                'message' => McpHelper::truncateForEcho($event->message ?: $event->status->name),
+                'data' => McpHelper::statusData($event->status),
+            ],
+        ];
+    }
+
+    /**
+     * Emit the response. 204 for notifications, otherwise JSON with
+     * MCP protocol headers.
+     *
+     * @return void
+     */
+    private function send(): void
+    {
+        if ($this->response === null) {
+            if (!headers_sent()) {
+                $this->sendSessionHeader();
+                http_response_code(204);
+            }
+            $this->logAccess(204);
+            return;
+        }
+
+        // Derive HTTP status from the event (200 for OK, 401 for UNAUTHORIZED, etc.)
+        $httpStatus = $this->event?->status->value ?? 200;
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+            header('MCP-Protocol-Version: ' . McpInitializeHandler::PROTOCOL_VERSION);
+            $this->sendHeadersForStatus($this->event?->status);
+            $this->sendSessionHeader();
+            http_response_code($httpStatus);
+        }
+        echo json_encode($this->response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $this->logAccess($httpStatus);
+    }
+
+    /**
+     * Emit a top-level error response from an {@see McpException}.
+     *
+     * @param McpException $error
+     * @return void
+     */
+    public function sendError(McpException $error): void
+    {
+        $httpStatus = $error->getHttpStatus() ?? 400;
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+            $this->sendHeadersForStatus($error->getJsonrpcCode()->toStatus());
+            $this->sendSessionHeader();
+            http_response_code($httpStatus);
+        }
+        echo json_encode($error->toPayload(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $this->logAccess($httpStatus);
+    }
+
+    /**
+     * Emit HTTP 405 for non-POST requests.
+     *
+     * @param string $method
      * @return void
      */
     private function sendMethodNotAllowed(string $method): void
@@ -143,492 +283,60 @@ class McpServer
             'id' => null,
             'error' => [
                 'code' => -32600,
-                'message' => 'Method Not Allowed: ' . McpHelper::truncateForEcho($method) . ' is not supported by this non-streaming MCP gateway.',
+                'message' => 'Method Not Allowed: ' . McpHelper::truncateForEcho($method)
+                    . ' is not supported by this non-streaming MCP gateway.',
             ],
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $this->logAccess(405, null);
+        $this->logAccess(405);
     }
 
     /**
-     * Parse, validate and dispatch the request.
+     * Send status-specific HTTP headers. Currently handles UNAUTHORIZED
+     * (401) by emitting the WWW-Authenticate header pointing to the
+     * OAuth Protected Resource Metadata (RFC 9728). Easy to extend for
+     * other status-specific headers.
      *
-     * On success, returns `$this` for chaining. Throws {@see McpException}
-     * subclasses for top-level errors (parse error, invalid envelope,
-     * internal error) — catch them and call {@see McpServer::sendException()}.
-     *
-     * @return $this
-     * @throws McpException
-     */
-    public function process(): self
-    {
-        $this->checkBodySize();
-        $this->decodeBody();
-        $this->dispatchAll();
-        return $this;
-    }
-
-    /**
-     * Reject requests whose Content-Length exceeds {@see McpHelper::REQUEST_BODY_MAX_BYTES}
-     * (64 KiB by default) before allocating memory for the body. The check
-     * is advisory: when Content-Length is missing (chunked encoding) we
-     * fall back to a post-decode size check in {@see self::decodeBody()}.
-     *
-     * Sends HTTP 413 Payload Too Large and aborts so the rest of the
-     * bootstrap never runs for an oversized request.
-     *
+     * @param StatusEnum|null $status
      * @return void
      */
-    private function checkBodySize(): void
+    private function sendHeadersForStatus(?StatusEnum $status): void
     {
-        global $api;
-        $contentLength = isset($_SERVER['CONTENT_LENGTH']) ? (int) $_SERVER['CONTENT_LENGTH'] : 0;
-        if ($contentLength > McpHelper::REQUEST_BODY_MAX_BYTES) {
-            $api->log->warning('system:mcp', McpHelper::truncateForEcho('Suspicious MCP request: oversize body'), [
-                'contentLength' => $contentLength,
-                'limit' => McpHelper::REQUEST_BODY_MAX_BYTES,
-            ]);
-            $this->logAccess(413, null);
-            if (!headers_sent()) {
-                header('Content-Type: application/json; charset=utf-8');
-                http_response_code(413);
-            }
-            echo json_encode([
-                'jsonrpc' => '2.0',
-                'id' => null,
-                'error' => [
-                    'code' => McpStatusEnum::JSON_RPC_PARSE_ERROR->value,
-                    'message' => 'Request body too large (' . $contentLength . ' bytes; limit is ' . McpHelper::REQUEST_BODY_MAX_BYTES . ').',
-                ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            exit(0);
+        if ($status === StatusEnum::UNAUTHORIZED) {
+            global $api;
+            $base = rtrim($api->config['baseURL'] ?? $api->config['baseUrl'] ?? 'http://localhost', '/');
+            header('WWW-Authenticate: Bearer resource_metadata=' . $base . '/.well-known/oauth-protected-resource');
         }
     }
 
     /**
-     * Emit the collected response payload. Sets `Content-Type: application/json`
-     * and `MCP-Protocol-Version` headers. Returns HTTP 204 if the entire
-     * request was a notification (no replies to send).
-     *
-     * @return void
-     */
-    public function send(): void
-    {
-        if ($this->responses === []) {
-            $this->sendNoContent();
-            return;
-        }
-
-        $payload = $this->isBatch ? $this->responses : $this->responses[0];
-        $this->sendJson($payload);
-        $this->logAccess(200, $this->firstMethod, $this->isBatch, $this->firstToolName);
-    }
-
-    /**
-     * Emit a single error response from a top-level {@see McpException}.
-     *
-     * @param McpException $error
-     * @return void
-     */
-    public function sendException(McpException $error): void
-    {
-        $status = $error->getHttpStatus() ?? 400;
-        if ($error->getHttpStatus() !== null && !headers_sent()) {
-            http_response_code($error->getHttpStatus());
-        }
-        $this->sendJson($error->toPayload());
-        $this->logAccess($status);
-    }
-
-    /**
-     * Emit a one-line access log entry for every request that reaches
-     * the gateway. Called from every response path (200, 204, 4xx, 5xx,
-     * 405, 413, parse error, etc.) so operators always have a per-request
-     * record of what hit `/mcp/` and what happened.
-     *
-     * Intentionally short and bounded so a flood of attacker traffic
-     * cannot fill the disk. Logs the request contents (method, tool,
-     * size, batch flag, id hint) and the response status — IP and
-     * User-Agent are NOT included because Apache already records those
-     * in its access log. Only attacker-controlled fields are echoed,
-     * each pre-truncated via {@see McpHelper::truncateForEcho()}.
-     *
-     * @param int $status HTTP status code that was (or will be) sent.
-     * @param string|null $method JSON-RPC method name (or null if the envelope was invalid).
-     * @param bool $isBatch True for batch requests.
-     * @param string|null $toolName The `tools/call` `name` argument (or null).
-     * @return void
-     */
-    public function logAccess(int $status, ?string $method = null, bool $isBatch = false, ?string $toolName = null): void
-    {
-        global $api;
-        $context = [
-            'status' => $status,
-            'size' => strlen($this->rawBody),
-            'batch' => $isBatch,
-            'tool' => $toolName,
-            'method' => $method,
-        ];
-
-        $statusName = StatusEnum::tryFrom($status)?->name ?? 'UNKNOWN';
-
-        $api->log->info(
-            'system:mcp', 
-            "MCP Request: " . McpHelper::truncateForEcho("status=$status $statusName, method=$method, tool=$toolName, batch=" . ($isBatch ? 'yes' : 'no') . ", size=" . strlen($this->rawBody) . "B"),
-            $context
-        );
-    }
-
-    /**
-     * Read and decode the raw request body. Sets `$this->decoded` and
-     * `$this->isBatch`.
-     *
-     * @return void
-     * @throws McpParseErrorException
-     */
-    private function decodeBody(): void
-    {
-        global $api;
-        // Post-decode fallback for requests without a Content-Length
-        // header (e.g. chunked transfer encoding). Catches oversize
-        // bodies the {@see self::checkBodySize()} pre-check missed.
-        if (strlen($this->rawBody) > McpHelper::REQUEST_BODY_MAX_BYTES) {
-            $api->log->warning('system:mcp', McpHelper::truncateForEcho('Suspicious MCP request: oversize body (post-decode)'), [
-                'rawBytes' => strlen($this->rawBody),
-                'limit' => McpHelper::REQUEST_BODY_MAX_BYTES,
-            ]);
-            throw new McpParseErrorException(
-                'Request body too large (' . strlen($this->rawBody) . ' bytes; limit is ' . McpHelper::REQUEST_BODY_MAX_BYTES . ').'
-            );
-        }
-
-        if ($this->rawBody === '') {
-            throw new McpParseErrorException('Empty request body.');
-        }
-
-        $decoded = json_decode($this->rawBody, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $api->log->warning('system:mcp', McpHelper::truncateForEcho('Suspicious MCP request: parse error'), [
-                'jsonError' => json_last_error_msg(),
-                'bodyPreview' => McpHelper::truncateForEcho($this->rawBody),
-            ]);
-            throw new McpParseErrorException('Parse error: ' . json_last_error_msg());
-        }
-
-        // Per JSON-RPC 2.0 a top-level scalar / bool / null is a parse
-        // error (the spec requires the request to be an object or an
-        // array of objects). The previous code silently swallowed it and
-        // returned HTTP 204.
-        if (!is_array($decoded)) {
-            $api->log->warning('system:mcp', McpHelper::truncateForEcho('Suspicious MCP request: non-object top-level value'), [
-                'type' => get_debug_type($decoded),
-            ]);
-            throw new McpParseErrorException('Top-level value must be a JSON object or array of objects.');
-        }
-
-        if (array_is_list($decoded)) {
-            if ($decoded === []) {
-                $api->log->warning('system:mcp', McpHelper::truncateForEcho('Suspicious MCP request: empty batch'), []);
-                throw new McpInvalidRequestException('Empty batch.');
-            }
-            if (count($decoded) > McpHelper::BATCH_MAX_REQUESTS) {
-                $api->log->warning('system:mcp', McpHelper::truncateForEcho('Suspicious MCP request: oversize batch'), [
-                    'count' => count($decoded),
-                    'limit' => McpHelper::BATCH_MAX_REQUESTS,
-                ]);
-                throw new McpInvalidRequestException(
-                    'Batch too large (' . count($decoded) . ' requests; limit is ' . McpHelper::BATCH_MAX_REQUESTS . ').'
-                );
-            }
-            $this->isBatch = true;
-            $this->decoded = $decoded;
-            return;
-        }
-
-        $this->isBatch = false;
-        $this->decoded = [$decoded];
-    }
-
-    /**
-     * Dispatch every request in the (now single-list) `$this->decoded` and
-     * collect the replies.
-     *
-     * @return void
-     */
-    private function dispatchAll(): void
-    {
-        $decoded = $this->decoded ?? [];
-        foreach ($decoded as $req) {
-            $reply = $this->dispatchOne($req);
-            if ($reply !== null) {
-                $this->responses[] = $reply;
-            }
-        }
-    }
-
-    /**
-     * Dispatch a single JSON-RPC request, returning the reply payload or
-     * `null` for notifications.
-     *
-     * @param mixed $req
-     * @return array<string, mixed>|null
-     */
-    private function dispatchOne(mixed $req): ?array
-    {
-        global $api;
-
-        try {
-            [$method, $id, $params] = McpRequestValidator::requireRequest($req);
-        } catch (McpInvalidRequestException $e) {
-            $api->log->error('system:mcp', 'MCP request validation failed: ' . McpHelper::truncateForEcho($e->getMessage()), [
-                'requestPreview' => McpHelper::truncateForEcho(json_encode($req, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)),
-            ]);
-            return $this->handleInvalidRequest($e, $req);
-        }
-
-        // Capture the method (and tool name, if applicable) for the access log.
-        if ($this->firstMethod === null) {
-            $this->firstMethod = $method;
-        }
-
-        // Enforce a max length on `method` BEFORE we build an event type
-        // from it. Anything longer is treated as "method not found" without
-        // echoing the value back, to keep error responses bounded.
-        if (strlen($method) > McpHelper::METHOD_NAME_MAX_LENGTH) {
-            $api->log->warning('system:mcp', McpHelper::truncateForEcho('Suspicious MCP request: oversize method'), [
-                'methodLength' => strlen($method),
-                'limit' => McpHelper::METHOD_NAME_MAX_LENGTH,
-            ]);
-            return (new McpMethodNotFoundException(
-                'Method not found: <name too long, ' . strlen($method) . ' chars; limit is ' . McpHelper::METHOD_NAME_MAX_LENGTH . '>',
-                $id
-            ))->toPayload();
-        }
-
-        // The gateway is a thin translator: every JSON-RPC `method` becomes a
-        // Zolinga event `type` by replacing `/` with `:`. So `tools/list` →
-        // `tools:list`, `notifications/initialized` → `notifications:initialized`.
-        // The only special case is `tools/call`, which is expanded to the
-        // per-tool event `tools:call:<name>` with `params.arguments` as the
-        // request. A missing/non-string `name` is surfaced as method-not-found.
-        if ($method === 'tools/call') {
-            $name = $params['name'] ?? null;
-            if (!McpHelper::isValidToolName($name)) {
-                return (new McpInvalidParamsException(
-                    'tools/call "name" must be 1..' . McpHelper::TOOL_NAME_MAX_LENGTH
-                        . ' chars of [A-Za-z0-9_-].',
-                    $id
-                ))->toPayload();
-            }
-            if ($this->firstToolName === null) {
-                $this->firstToolName = $name;
-            }
-            $arguments = $params['arguments'] ?? [];
-            if (!is_array($arguments)) {
-                $arguments = [];
-            }
-            $eventType = 'tools:call:' . $name;
-            $eventRequest = $arguments;
-        } else {
-            $eventType = str_replace('/', ':', $method);
-            $eventRequest = $params;
-        }
-
-        $event = $this->dispatchEvent($eventType, $eventRequest, $id, $name ?? null);
-
-        // Notifications get dispatched for side effects only; no reply is sent.
-        if ($id === null) {
-            return null;
-        }
-
-        return $this->buildResponse($event, $method, $id);
-    }
-
-    /**
-     * Handle a JSON-RPC request whose envelope failed validation.
-     *
-     * Per JSON-RPC 2.0: a notification (no `id`) with an invalid envelope
-     * gets no reply. When the validator rejected the request because of the
-     * `id` (wrong type, too long, etc.) the offending value is NOT echoed
-     * back — `null` is returned instead so a multi-kilobyte id cannot be
-     * reflected.
-     *
-     * @param McpInvalidRequestException $e
-     * @param mixed $req The original raw request value.
-     * @return array<string, mixed>|null Error payload, or null for notifications.
-     */
-    private function handleInvalidRequest(McpInvalidRequestException $e, mixed $req): ?array
-    {
-        $reqIsArray = is_array($req);
-        $hasId = $reqIsArray && array_key_exists('id', $req);
-        if (!$hasId) {
-            if (!\Zolinga\System\IS_CLI && !headers_sent()) {
-                header('X-MCP-Error: invalid-json-rpc-2.0-envelope');
-            }
-            return null;
-        }
-
-        $rawId = $reqIsArray ? ($req['id'] ?? null) : null;
-        $validId = is_string($rawId) || is_int($rawId) ? $rawId : null;
-
-        if (!str_contains($e->getMessage(), '"id" field')) {
-            $validId = is_string($validId) && strlen($validId) > McpHelper::REQUEST_ID_MAX_LENGTH
-                ? substr($validId, 0, McpHelper::REQUEST_ID_MAX_LENGTH)
-                : $validId;
-        } else {
-            $validId = null;
-        }
-
-        return (new McpInvalidRequestException($e->getMessage(), $validId))->toPayload();
-    }
-
-    /**
-     * Dispatch a Zolinga event for the given resolved type. Any escaped
-     * `Throwable` is logged and recorded on the event as an internal error.
-     *
-     * All MCP events use {@see McpEvent}. For `tools:call:<name>` events the
-     * gateway wraps the response in the MCP `{ content, isError,
-     * structuredContent }` envelope (see {@see McpHelper::envelope()}); for
-     * all other events the raw `$event->response` is serialized as the
-     * JSON-RPC `result`.
-     *
-     * @param string $eventType
-     * @param array<string, mixed> $eventRequest
-     * @param string|int|null $id
-     * @param string|null $toolName For `tools/call`, the JSON-RPC `name` argument; used to label the "Unknown tool" message.
-     * @return McpEvent
-     */
-    private function dispatchEvent(string $eventType, array $eventRequest, string|int|null $id, ?string $toolName = null): McpEvent
-    {
-        global $api;
-
-        $isToolCall = str_starts_with($eventType, 'tools:call:');
-        $event = new McpEvent($eventType, $id, $eventRequest);
-
-        try {
-            $event->dispatch();
-        } catch (\Throwable $e) {
-            $api->log->error('system:mcp', 'MCP dispatch failed: ' . McpHelper::truncateForEcho($e->getMessage()), [
-                'event' => McpHelper::truncateForEcho($eventType),
-                'exception' => $e::class,
-            ]);
-            $event->setStatus(StatusEnum::ERROR, 'Internal error: ' . McpHelper::truncateForEcho($e->getMessage()));
-        }
-
-        // For `tools:call:<name>`, an undetermined status means no listener
-        // registered for that tool. Surface a friendly "Unknown tool" message
-        // so the envelope carries something useful. Truncated so a malicious
-        // long name can't bloat the response.
-        if ($isToolCall && $event->status === StatusEnum::UNDETERMINED) {
-            $name = $toolName ?? substr($eventType, strlen('tools:call:'));
-            $event->setStatus(
-                StatusEnum::NOT_FOUND,
-                'Unknown tool: ' . McpHelper::truncateForEcho($name)
-            );
-        }
-
-        return $event;
-    }
-
-    /**
-     * Build the JSON-RPC 2.0 response payload from a dispatched event.
-     *
-     * For `tools/call` invocations (event type starts with `tools:call:`)
-     * the result is always the MCP envelope `{ content, isError,
-     * structuredContent }`, including the error case (which becomes
-     * `isError: true` with the message in `content[0].text`). For all other
-     * events: OK status → raw `$event->response` as `result`; non-OK status
-     * → JSON-RPC `error` block; undetermined → method-not-found error.
-     *
-     * @param McpEvent $event
-     * @param string $method The raw JSON-RPC method (used in error messages).
-     * @param string|int $id
-     * @return array<string, mixed>
-     */
-    private function buildResponse(McpEvent $event, string $method, string|int $id): array
-    {
-        if (str_starts_with($event->type, 'tools:call:')) {
-            return [
-                'jsonrpc' => '2.0',
-                'id' => $id,
-                'result' => McpHelper::envelope($event),
-            ];
-        }
-
-        if ($event->status === StatusEnum::UNDETERMINED) {
-            return (new McpMethodNotFoundException(
-                'Method not found: ' . McpHelper::truncateForEcho($method),
-                $id
-            ))->toPayload();
-        }
-
-        if ($event->isOk()) {
-            return [
-                'jsonrpc' => '2.0',
-                'id' => $id,
-                'result' => McpHelper::normalizeResponse($event->response),
-            ];
-        }
-
-        return [
-            'jsonrpc' => '2.0',
-            'id' => $id,
-            'error' => [
-                'code' => McpHelper::errorCodeFromStatus($event->status)->value,
-                'message' => McpHelper::truncateForEcho($event->message ?: $event->status->name),
-                'data' => McpHelper::statusData($event->status),
-            ],
-        ];
-    }
-
-    /**
-     * Emit an HTTP 204 No Content response (used when the request is a
-     * notification or a batch of notifications).
-     *
-     * @return void
-     */
-    private function sendNoContent(): void
-    {
-        if (!headers_sent()) {
-            $this->sendSessionHeader();
-            http_response_code(204);
-        }
-        $this->logAccess(204);
-    }
-
-    /**
-     * Emit a JSON response with the MCP protocol headers.
-     *
-     * @param array<string, mixed>|list<array<string, mixed>> $payload
-     * @return void
-     */
-    private function sendJson(array $payload): void
-    {
-        if (!headers_sent()) {
-            header('Content-Type: application/json; charset=utf-8');
-            header('MCP-Protocol-Version: ' . McpInitializeHandler::PROTOCOL_VERSION);
-            $this->sendSessionHeader();
-        }
-        echo json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    }
-
-    /**
-     * Send the `Mcp-Session-Id` response header carrying the current PHP
-     * session id, so clients can resume the session on subsequent requests.
-     *
-     * No-op when the session is not active (e.g. CLI dispatch) or the id
-     * is empty.
+     * Send the Mcp-Session-Id header if a PHP session is active.
      *
      * @return void
      */
     private function sendSessionHeader(): void
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            return;
+        if (session_status() === PHP_SESSION_ACTIVE && session_id() !== '') {
+            header('Mcp-Session-Id: ' . session_id());
         }
-        $id = session_id();
-        if ($id === '') {
-            return;
-        }
-        header('Mcp-Session-Id: ' . $id);
+    }
+
+    /**
+     * Write a one-line access log entry.
+     *
+     * @param int $status HTTP status code sent.
+     * @return void
+     */
+    private function logAccess(int $status): void
+    {
+        global $api;
+        $event = $this->event;
+        $api->log->info('system:mcp', McpHelper::truncateForEcho(
+            "MCP Request: status=$status, method=" . ($event?->type ?? '-')
+            . ", size=" . strlen($this->rawBody) . "B"
+        ), [
+            'status' => $status,
+            'size' => strlen($this->rawBody),
+            'method' => $event?->type,
+        ]);
     }
 }

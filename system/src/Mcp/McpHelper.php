@@ -10,8 +10,8 @@ use Zolinga\System\Types\StatusEnum;
 /**
  * Uncategorised helpers for the MCP gateway.
  *
- * Use sparingly — prefer a dedicated class (`McpRequestValidator`,
- * `McpInitializeHandler`, etc.) when a helper carries real domain logic.
+ * Use sparingly — prefer a dedicated class (`McpInitializeHandler`,
+ * `McpTools`, etc.) when a helper carries real domain logic.
  *
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-06-03
@@ -44,13 +44,6 @@ final class McpHelper
      * read into memory, preventing OOM and bandwidth-amplification DoS.
      */
     public const REQUEST_BODY_MAX_BYTES = 10 * 1024 * 1024; // 10 MB
-
-    /**
-     * Maximum permitted number of requests in a single JSON-RPC batch. The
-     * gateway rejects batches larger than this with a parse error to
-     * prevent memory amplification.
-     */
-    public const BATCH_MAX_REQUESTS = 50;
 
     /**
      * Maximum length (in characters) of a string echoed back in an error

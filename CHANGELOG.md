@@ -9,13 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **MCP gateway rewritten from scratch**: `McpServer` reduced from ~640 to ~250 lines. Clean linear pipeline: parse JSON -> create `McpEvent` -> dispatch -> serialize response. Dropped batch support (MCP Streamable HTTP spec is one message per request). Dropped `firstMethod`/`firstToolName` state fields, `process()`, `isBatch`, and 5 separate send methods.
+- **`McpEvent::fromJsonRpc()`**: New static factory on `McpEvent` that validates the JSON-RPC 2.0 envelope and resolves the Zolinga event type (`tools/call` -> `tools:call:<name>`, otherwise `/` -> `:`). Moves input parsing into the event class where it belongs.
+- **`McpServer` API change**: `run()` is the single public entry point (replaces `process()->send()`). `sendException()` renamed to `sendError()`. HTTP response status now reflects the event status (401 for UNAUTHORIZED, 404 for NOT_FOUND, etc.) instead of always 200. UNAUTHORIZED responses include a `WWW-Authenticate: Bearer resource_metadata=...` header pointing to the OAuth Protected Resource Metadata endpoint (RFC 9728).
 - **MCP gateway refactoring**: `McpToolsCallEvent` merged into `McpEvent`. The gateway now uses `str_starts_with($event->type, 'tools:call:')` instead of `instanceof` to decide envelope wrapping. Tool handlers type-hint `McpEvent` instead of `McpToolsCallEvent`.
 - **Removed `McpToolsCallEvent`**: The `$content` property and `addTextContent()` method are gone. The gateway always auto-generates `content` from `json_encode($response)` (or `$event->message` on error). No tool in the codebase used them.
-- **`McpServer` slimmed down**: Extracted `handleInvalidRequest()` from `dispatchOne()` catch block. Inlined `logSuspicious()`, `coerceId()`, `firstDispatchedMethod()`, `firstDispatchedToolName()` — all one-line wrappers.
 - **`AuthorizeEvent`**: Added `requiresLogin` property (bool) and `requireLogin()` setter. When `true`, a failed authorization should result in HTTP 401 Unauthorized; when `false` (default), HTTP 403 Forbidden.
 
 ### Removed
 
+- `McpRequestValidator` class — logic moved into `McpEvent::fromJsonRpc()`.
+- `McpHelper::BATCH_MAX_REQUESTS` constant — batches no longer supported.
 - `McpToolsCallEvent` class — use `McpEvent` instead.
 - `McpEvent::$content` property and `addTextContent()` method — the gateway auto-generates content blocks.
 

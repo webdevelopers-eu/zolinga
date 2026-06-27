@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Events;
 
-use ArrayObject, ArrayAccess;
+use ArrayObject;
+use ArrayAccess;
+use Zolinga\System\Mcp\Exceptions\{McpInvalidParamsException, McpInvalidRequestException};
+use Zolinga\System\Mcp\McpHelper;
 use Zolinga\System\Types\OriginEnum;
 
 /**
@@ -105,5 +108,83 @@ class McpEvent extends RequestResponseEvent implements StoppableInterface
             $event->setStatus($data['status'], $data['message'] ?? '');
         }
         return $event;
+    }
+
+    /**
+     * Create a ready-to-dispatch event from a decoded JSON-RPC 2.0 request.
+     *
+     * Validates the envelope (`jsonrpc`, `method`, `id`, `params`), resolves
+     * the Zolinga event type (`tools/call` → `tools:call:<name>`, otherwise
+     * `/` → `:`), and returns a new event with the request set to `params`
+     * (or `params.arguments` for `tools/call`).
+     *
+     * @param array<string, mixed> $data Decoded JSON-RPC request object.
+     * @return static
+     * @throws McpInvalidRequestException Missing/invalid `jsonrpc`, `method`, `id`, or `params`.
+     * @throws McpInvalidParamsException  `tools/call` with missing/invalid `name`.
+     */
+    public static function fromJsonRpc(array $data): static
+    {
+        if (($data['jsonrpc'] ?? null) !== '2.0') {
+            throw new McpInvalidRequestException('Missing or invalid "jsonrpc" field; must be "2.0".');
+        }
+
+        $method = $data['method'] ?? null;
+        if (!is_string($method) || $method === '') {
+            throw new McpInvalidRequestException('Missing or invalid "method" field; must be a non-empty string.');
+        }
+
+        $id = self::extractId($data['id'] ?? null);
+
+        $params = $data['params'] ?? [];
+        if (!is_array($params)) {
+            throw new McpInvalidRequestException('Invalid "params" field; must be an object or array.');
+        }
+
+        if ($method === 'tools/call') {
+            $name = $params['name'] ?? null;
+            if (!McpHelper::isValidToolName($name)) {
+                throw new McpInvalidParamsException(
+                    'tools/call "name" must be 1..' . McpHelper::TOOL_NAME_MAX_LENGTH . ' chars of [A-Za-z0-9_-].',
+                    $id
+                );
+            }
+            $type = 'tools:call:' . $name;
+            $arguments = $params['arguments'] ?? [];
+            $request = is_array($arguments) ? $arguments : [];
+        } else {
+            $type = str_replace('/', ':', $method);
+            $request = $params;
+        }
+
+        return new static($type, $id, new ArrayObject($request));
+    }
+
+    /**
+     * Normalize and validate the JSON-RPC request id.
+     *
+     * Kept as a helper because its multi-branch validation logic would
+     * significantly decrease readability if inlined into fromJsonRpc.
+     *
+     * @param mixed $id Raw id from the request.
+     * @return string|int|null
+     * @throws McpInvalidRequestException Invalid id type or length.
+     */
+    private static function extractId(mixed $id): string|int|null
+    {
+        if ($id !== null && !is_string($id) && !is_int($id)) {
+            throw new McpInvalidRequestException('Invalid "id" field; must be a string, integer or null.');
+        }
+        if (is_string($id)) {
+            if ($id === '') {
+                return null;
+            }
+            if (strlen($id) > McpHelper::REQUEST_ID_MAX_LENGTH) {
+                throw new McpInvalidRequestException(
+                    'Invalid "id" field; string must be at most ' . McpHelper::REQUEST_ID_MAX_LENGTH . ' chars.'
+                );
+            }
+        }
+        return $id;
     }
 }

@@ -31,6 +31,9 @@ argument-hint: "<module-name> [class-or-file]"
 12. Services implement `Zolinga\System\Events\ServiceInterface`.
 13. Provide a complete class example and brief comments explaining each public or protected property and/or accessor.
 14. Use `$event::STATUS_*` constants (e.g. `$event::STATUS_OK`, `$event::STATUS_ERROR`, `$event::STATUS_BAD_REQUEST`) when calling `$event->setStatus()`. Never pass raw integers — `setStatus()` accepts `StatusEnum`. For dynamic HTTP codes use `StatusEnum::tryFrom($code) ?? $event::STATUS_ERROR`.
+15. Methods and functions must not be longer than 50 lines. If they are, break them into smaller private methods or separate class helpers.
+16. Do not do one-line method wrappers, inline them instead.
+17. If there is a method that is only used in one place, consider inlining it unless it increases the function's complexity, size or decreases significantly the readability of the code.
 
 ## Documentation Abstract
 

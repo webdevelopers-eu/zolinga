@@ -42,5 +42,5 @@ require($_SERVER['DOCUMENT_ROOT'] . '/../system/loader.php');
 try {
     (new McpServer())->run();
 } catch (McpException $e) {
-    (new McpServer())->sendException($e);
+    (new McpServer())->sendError($e);
 }
