@@ -15,7 +15,7 @@ use Zolinga\System\Types\OriginEnum;
  * @author Daniel Sevcik <sevcik@webdevelopers.eu>
  * @date 2025-10-14
  */
-class WebEvent extends RequestResponseEvent {
+class WebEvent extends RequestResponseEvent implements BroadcastBackInterface {
 
     /**
      * Client-side events to broadcast back to the client.
