@@ -13,22 +13,21 @@ use Zolinga\System\Types\OriginEnum;
  * The MCP gateway receives a JSON-RPC 2.0 request, extracts the `method` name and
  * the `params` payload and dispatches an `McpEvent` whose `type` is the
  * JSON-RPC `method` (with `/` replaced by `:`) and whose `request` is the
- * `params` (or an empty ArrayObject if `params` is null). The only special
- * case is `tools/call`, which is dispatched as
- * {@see McpToolsCallEvent} with `type = "tools:call:<name>"` and
- * `request = params.arguments` — the gateway wraps the handler's response
- * in the MCP `{ content, isError, structuredContent }` envelope for those.
+ * `params` (or an empty ArrayObject if `params` is null). For `tools/call`
+ * the gateway dispatches `tools:call:<name>` with `request = params.arguments`
+ * and wraps the handler's response in the MCP
+ * `{ content, isError, structuredContent }` envelope.
  *
  * The event origin is {@see OriginEnum::MCP}. Listener manifests opt in to MCP
  * delivery by listing "mcp" in the listener's `origin` array.
  *
  * Handlers populate `$event->response` with whatever should land under the
- * JSON-RPC `result` field. For plain `McpEvent` the gateway serializes it
- * verbatim. For `McpToolsCallEvent` the gateway uses it as the raw structured
- * payload (which must conform to the tool's `outputSchema`) and wraps it.
- * Errors are signaled via `$event->setStatus()` with a non-OK status; the
- * gateway maps that to a JSON-RPC `error` object for plain `McpEvent` and
- * to `result.isError = true` for `McpToolsCallEvent`.
+ * JSON-RPC `result` field. For plain events the gateway serializes it
+ * verbatim. For `tools:call:*` events the gateway uses it as the raw
+ * structured payload (which must conform to the tool's `outputSchema`) and
+ * wraps it in the MCP envelope. Errors are signaled via `$event->setStatus()`
+ * with a non-OK status; the gateway maps that to a JSON-RPC `error` object
+ * for plain events and to `result.isError = true` for `tools:call:*`.
  *
  * Example listener manifest:
  *

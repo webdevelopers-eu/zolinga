@@ -42,7 +42,7 @@ class AuthorizeEvent extends Event implements StoppableInterface
             return $this->requiresLogin ? StatusEnum::UNAUTHORIZED : StatusEnum::FORBIDDEN;
         }
         set {
-            throw new Exception("Status is read-only. Use the \$event->requireLogin() method to set the status.");
+            throw new Exception("Status is read-only. Use the \$event->requiresLogin property to set the 401 or 403 status in case of failed authorization.");
         }
     }
 
@@ -101,21 +101,6 @@ class AuthorizeEvent extends Event implements StoppableInterface
     {
         throw new \Exception("Property $name is read-only. Use the \$event->authorize(\$right) method to authorize the right.");
     }
-
-    /**
-     * Set whether a failed authorization should result in HTTP 401 Unauthorized
-     * instead of the default 403 Forbidden.
-     *
-     * Call this when the user is not authenticated and needs to log in first.
-     *
-     * @param bool $value true to throw 401, false to throw 403
-     * @return void
-     */
-    public function requireLogin(bool $value = true): void
-    {
-        $this->requiresLogin = $value;
-    }
-
 
     /**
      * Add right to a list of unauthorized rights.

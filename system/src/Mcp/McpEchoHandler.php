@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
-use Zolinga\System\Events\{ListenerInterface, McpToolsCallEvent};
+use Zolinga\System\Events\{ListenerInterface, McpEvent};
 use Zolinga\System\Types\StatusEnum;
 
 /**
@@ -24,20 +24,19 @@ class McpEchoHandler implements ListenerInterface
     /**
      * Handle the `tools:call:echo` event.
      *
-     * Receives a {@see McpToolsCallEvent} with `request = params.arguments`
+     * Receives an {@see McpEvent} with `request = params.arguments`
      * (the `arguments` object from the JSON-RPC `tools/call` request). Sets
      * the raw structured payload on `$event->response`; the gateway wraps
      * it in the MCP envelope and serializes it as the JSON-RPC `result`.
      *
-     * @param McpToolsCallEvent $event
+     * @param McpEvent $event
      * @return void
      */
-    public function onEcho(McpToolsCallEvent $event): void
+    public function onEcho(McpEvent $event): void
     {
         $message = $event->request['message'] ?? null;
         if (!is_string($message) || $message === '') {
             $event->setStatus(StatusEnum::BAD_REQUEST, 'Missing or empty "message" argument.');
-            $event->addTextContent('Missing or empty "message" argument.');
             return;
         }
         $event->response = [

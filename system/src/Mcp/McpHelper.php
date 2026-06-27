@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
-use Zolinga\System\Events\McpToolsCallEvent;
+use Zolinga\System\Events\McpEvent;
 use Zolinga\System\Types\StatusEnum;
 
 /**
@@ -195,38 +195,35 @@ final class McpHelper
     }
 
     /**
-     * Build the MCP `tools/call` result envelope for a {@see McpToolsCallEvent}.
+     * Build the MCP `tools/call` result envelope for an {@see McpEvent}.
      *
      * The shape is:
      *
      * - `isError` — `true` when the event status is non-OK
      *   (or `UNDETERMINED`, meaning no listener handled the event).
-     * - `content` — the event's `$content` blocks if any, otherwise a single
-     *   text block carrying `json_encode($event->response)` (the spec fallback
-     *   for clients that only read `content[0].text`).
+     * - `content` — a single text block carrying `json_encode($event->response)`
+     *   on success, or `$event->message` on error (the spec fallback for
+     *   clients that only read `content[0].text`).
      * - `structuredContent` — the event's raw `$response` payload, normalized
      *   through {@see McpHelper::normalizeResponse()}. Omitted when the
      *   normalized response is an empty array AND the call is in error
      *   (spec allows it to be optional).
      *
-     * @param McpToolsCallEvent $event
+     * @param McpEvent $event
      * @return array{content: list<array<string, mixed>>, isError: bool, structuredContent?: mixed}
      */
-    public static function envelope(McpToolsCallEvent $event): array
+    public static function envelope(McpEvent $event): array
     {
         $isError = !$event->isOk();
         $structured = self::normalizeResponse($event->response);
 
-        $content = $event->content;
-        if ($content === []) {
-            $text = $isError
-                ? ($event->message ?: 'Tool returned an error.')
-                : (is_string($structured) ? $structured : json_encode(
-                    $structured,
-                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-                ));
-            $content = [['type' => 'text', 'text' => $text]];
-        }
+        $text = $isError
+            ? ($event->message ?: 'Tool returned an error.')
+            : (is_string($structured) ? $structured : json_encode(
+                $structured,
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            ));
+        $content = [['type' => 'text', 'text' => $text]];
 
         $envelope = [
             'content' => $content,

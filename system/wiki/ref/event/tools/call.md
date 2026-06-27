@@ -1,6 +1,6 @@
 # `tools/call` Event
 
-The MCP `tools/call` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as a [`McpToolsCallEvent`](:Zolinga Core:Events and Listeners:MCP) with the `mcp` origin.
+The MCP `tools/call` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as an [`McpEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "tools:call:<name>"` and the `mcp` origin.
 
 The gateway translates `tools/call` `params.name` into the per-tool event `tools:call:<name>` and passes `params.arguments` as the event request. The tool's handler sets the raw structured payload on `$event->response`; the gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope and serializes it as the JSON-RPC `result`.
 
@@ -15,7 +15,7 @@ The gateway translates `tools/call` `params.name` into the per-tool event `tools
 
 | Field              | Type | Notes |
 |--------------------|------|-------|
-| `content`          | `list<{type, text}>` | Human-readable content blocks. When the handler calls `$event->addTextContent(...)`, the gateway uses those blocks. Otherwise the gateway falls back to a single `text` block carrying `json_encode($event->response)` (so legacy clients that only read `content[0].text` still get the structured data). |
+| `content`          | `list<{type, text}>` | Human-readable content blocks. The gateway auto-generates a single `text` block carrying `json_encode($event->response)` (or `$event->message` on error) so legacy clients that only read `content[0].text` still get the structured data. |
 | `isError`          | `bool` | `true` when the handler's `$event->status` is non-OK (or stays at `UNDETERMINED` because no listener handled the event). |
 | `structuredContent`| `object` | The handler's raw `$event->response` payload, normalized. Omitted on error when the response is an empty array. |
 
@@ -58,17 +58,16 @@ curl -X POST http://localhost:8080/mcp/ \
 ## Handler Example
 
 ```php
-use Zolinga\System\Events\{ListenerInterface, McpToolsCallEvent};
+use Zolinga\System\Events\{ListenerInterface, McpEvent};
 use Zolinga\System\Types\StatusEnum;
 
 class MyEchoHandler implements ListenerInterface
 {
-    public function onEcho(McpToolsCallEvent $event): void
+    public function onEcho(McpEvent $event): void
     {
         $message = $event->request['message'] ?? '';
         if (!is_string($message) || $message === '') {
             $event->setStatus(StatusEnum::BAD_REQUEST, 'Missing or empty "message" argument.');
-            $event->addTextContent('Missing or empty "message" argument.');
             return;
         }
 

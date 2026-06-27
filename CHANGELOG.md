@@ -5,6 +5,20 @@ All notable changes to the Zolinga framework (system module) will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
 
+## [1.6.8] - 2026-06-27
+
+### Changed
+
+- **MCP gateway refactoring**: `McpToolsCallEvent` merged into `McpEvent`. The gateway now uses `str_starts_with($event->type, 'tools:call:')` instead of `instanceof` to decide envelope wrapping. Tool handlers type-hint `McpEvent` instead of `McpToolsCallEvent`.
+- **Removed `McpToolsCallEvent`**: The `$content` property and `addTextContent()` method are gone. The gateway always auto-generates `content` from `json_encode($response)` (or `$event->message` on error). No tool in the codebase used them.
+- **`McpServer` slimmed down**: Extracted `handleInvalidRequest()` from `dispatchOne()` catch block. Inlined `logSuspicious()`, `coerceId()`, `firstDispatchedMethod()`, `firstDispatchedToolName()` — all one-line wrappers.
+- **`AuthorizeEvent`**: Added `requiresLogin` property (bool) and `requireLogin()` setter. When `true`, a failed authorization should result in HTTP 401 Unauthorized; when `false` (default), HTTP 403 Forbidden.
+
+### Removed
+
+- `McpToolsCallEvent` class — use `McpEvent` instead.
+- `McpEvent::$content` property and `addTextContent()` method — the gateway auto-generates content blocks.
+
 ## [1.6.6] - 2026-06-25
 
 ### Changed

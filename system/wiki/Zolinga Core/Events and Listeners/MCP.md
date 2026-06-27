@@ -1,17 +1,14 @@
 # MCP Events
 
-`\Zolinga\System\Events\McpEvent` is the base event class fired by the [MCP gateway](:Zolinga Core:Running the System:MCP) at `public/mcp/index.php`. The class extends [`RequestResponseEvent`](:Zolinga Core:Events and Listeners) and carries the JSON-RPC request id alongside the standard request/response pair.
+`\Zolinga\System\Events\McpEvent` is the event class fired by the [MCP gateway](:Zolinga Core:Running the System:MCP) at `public/mcp/index.php`. The class extends [`RequestResponseEvent`](:Zolinga Core:Events and Listeners) and carries the JSON-RPC request id alongside the standard request/response pair.
 
-The gateway dispatches one of two event classes depending on the JSON-RPC method:
-
-- [`McpEvent`](#base-mcpevent) — for everything (initialize, tools/list, notifications/*, and any other JSON-RPC method).
-- [`McpToolsCallEvent`](#mcptoolscallevent) — for `tools/call` invocations; the per-tool event `tools:call:<name>`. The gateway wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope.
+The gateway dispatches `McpEvent` for every JSON-RPC method. For `tools/call` the event type is `tools:call:<name>` and the gateway wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope. For all other methods the gateway serializes `$event->response` verbatim as the JSON-RPC `result`.
 
 ## Origin
 
 MCP events are always dispatched with the `mcp` [`OriginEnum`](:Zolinga Core:Events and Listeners) value. To opt in to MCP delivery, a listener must include `"mcp"` in its `origin` array (or the wildcard `"*"`).
 
-## Base `McpEvent`
+## `McpEvent`
 
 ### Construction
 
@@ -26,14 +23,14 @@ $event = new McpEvent(
 
 | Property     | Type                              | Notes |
 |--------------|-----------------------------------|-------|
-| `type`       | `string`                          | The colon-converted JSON-RPC `method` (e.g. `tools/list` → `tools:list`; `notifications/initialized` → `notifications:initialized`). |
+| `type`       | `string`                          | The colon-converted JSON-RPC `method` (e.g. `tools/list` → `tools:list`; `notifications/initialized` → `notifications:initialized`). For `tools/call` it is `tools:call:<name>`. |
 | `jsonrpcId`  | `string\|int\|null`               | The JSON-RPC `id`. `null` indicates a notification. |
-| `request`    | `ArrayAccess\|array`              | The JSON-RPC `params` payload. |
-| `response`   | `ArrayAccess\|array`              | Populate this with whatever the JSON-RPC `result` should be. The gateway serializes it under `result` as-is. |
+| `request`    | `ArrayAccess\|array`              | The JSON-RPC `params` payload. For `tools/call` it is `params.arguments`. |
+| `response`   | `ArrayAccess\|array`              | Populate this with whatever the JSON-RPC `result` should be. For plain events the gateway serializes it under `result` as-is. For `tools/call` it becomes `result.structuredContent`. |
 
 The event is `StoppableInterface` — calling `$event->stopPropagation()` skips remaining listeners, just like for other Zolinga events.
 
-### Status → JSON-RPC Error Code
+### Status → JSON-RPC Error Code (non-`tools/call`)
 
 For plain `McpEvent` (non-`tools/call`), the gateway maps `$event->status` to a JSON-RPC `error.code`:
 
@@ -46,9 +43,9 @@ For plain `McpEvent` (non-`tools/call`), the gateway maps `$event->status` to a 
 | `UNAUTHORIZED`, `FORBIDDEN`| -32600        | Invalid request. |
 | Anything >= 500            | -32603        | Internal error. |
 
-## `McpToolsCallEvent`
+## `tools/call` events
 
-`McpToolsCallEvent` extends `McpEvent` and is dispatched for every `tools/call` invocation as the per-tool event `tools:call:<name>` (where `<name>` is the JSON-RPC `params.name` argument). The gateway always wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope, never in a JSON-RPC `error` block.
+For `tools/call` invocations the gateway dispatches `McpEvent` with `type = "tools:call:<name>"` (where `<name>` is the JSON-RPC `params.name` argument). The gateway always wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope, never in a JSON-RPC `error` block.
 
 ### Tool name validation
 
@@ -62,32 +59,30 @@ Pick a name from `[A-Za-z0-9_-]{1,64}` (the convention used by Claude Desktop, C
 ### What handlers do and don't set
 
 - **Set `$event->response`** to the **raw structured payload** (the object that conforms to the tool's `outputSchema`). The gateway copies it verbatim into `result.structuredContent`.
-- **Optionally call `$event->addTextContent('...')`** to add a human-readable text block to `result.content`. When the handler adds no blocks, the gateway falls back to a single text block carrying `json_encode($response)` so legacy clients that only read `content[0].text` still receive the structured data.
 - **Call `$event->setStatus(...)`** to signal success or failure. Non-OK status (or `UNDETERMINED` when no listener handled the event) becomes `result.isError = true`; the message ends up in `result.content[0].text`.
-- **Do NOT** build the `{ content, isError, structuredContent }` envelope yourself — the gateway does that.
+- **Do NOT** build the `{ content, isError, structuredContent }` envelope yourself — the gateway does that. The gateway auto-generates `content` from `json_encode($response)` (or `$event->message` on error).
 
 ### Status handling
 
 | Status set by handler | Envelope result |
 |-----------------------|-----------------|
-| `OK` (or 2xx/3xx)     | `isError: false`, `structuredContent` populated, `content[0].text` = JSON of `response` (or handler's added text) |
-| `BAD_REQUEST` (400) or any 4xx/5xx | `isError: true`, `content[0].text` = handler's `addTextContent` text (or `event->message` if none), `structuredContent` omitted when empty |
+| `OK` (or 2xx/3xx)     | `isError: false`, `structuredContent` populated, `content[0].text` = JSON of `response` |
+| `BAD_REQUEST` (400) or any 4xx/5xx | `isError: true`, `content[0].text` = `event->message`, `structuredContent` omitted when empty |
 | `UNDETERMINED` (no listener) | Gateway promotes to `NOT_FOUND` with message `"Unknown tool: <name>"`, `isError: true` |
 
 ### Example: minimal echo tool
 
 ```php
-use Zolinga\System\Events\{ListenerInterface, McpToolsCallEvent};
+use Zolinga\System\Events\{ListenerInterface, McpEvent};
 use Zolinga\System\Types\StatusEnum;
 
 class MyEchoHandler implements ListenerInterface
 {
-    public function onEcho(McpToolsCallEvent $event): void
+    public function onEcho(McpEvent $event): void
     {
         $message = $event->request['message'] ?? '';
         if (!is_string($message) || $message === '') {
             $event->setStatus(StatusEnum::BAD_REQUEST, 'Missing or empty "message" argument.');
-            $event->addTextContent('Missing or empty "message" argument.');
             return;
         }
 
@@ -98,26 +93,6 @@ class MyEchoHandler implements ListenerInterface
         ];
         $event->setStatus(StatusEnum::OK, 'OK');
     }
-}
-```
-
-### Example: tool with both structured data and a human-readable text
-
-```php
-public function onSearch(McpToolsCallEvent $event): void
-{
-    $query = $event->request['query'] ?? '';
-    $results = $this->search($query);
-
-    // Structured payload (conforms to outputSchema).
-    $event->response = [
-        'hits' => $results,
-        'count' => count($results),
-    ];
-    // Human-readable rendering (optional but recommended).
-    $event->addTextContent(sprintf('Found %d result(s) for "%s".', count($results), $query));
-
-    $event->setStatus(StatusEnum::OK, 'OK');
 }
 ```
 

@@ -1,6 +1,6 @@
 ---
 name: system-create-mcp-tool
-description: Use when exposing a Zolinga event handler as an MCP (Model Context Protocol) tool — i.e. a method clients can invoke via JSON-RPC `tools/call`. Covers handler class, manifest binding, JSON Schemas, the `McpToolsCallEvent` contract, and the `schema.response` requirement enforced by `McpTools::collectTools()`.
+description: Use when exposing a Zolinga event handler as an MCP (Model Context Protocol) tool — i.e. a method clients can invoke via JSON-RPC `tools/call`. Covers handler class, manifest binding, JSON Schemas, the `McpEvent` contract, and the `schema.response` requirement enforced by `McpTools::collectTools()`.
 argument-hint: "<module-name> <tool-name> [goal]"
 ---
 
@@ -16,7 +16,7 @@ argument-hint: "<module-name> <tool-name> [goal]"
 
 A tool is the **combination** of:
 
-- A handler class implementing `ListenerInterface` with a method typed against `McpToolsCallEvent`.
+- A handler class implementing `ListenerInterface` with a method typed against `McpEvent`.
 - A manifest entry with `event: "tools:call:<name>"` and `origin: ["mcp"]`.
 - A `schema.response` JSON Schema (required) and an optional `schema.request`.
 - The tool name visible to clients is the part after `tools:call:` in the event name.
@@ -46,18 +46,17 @@ declare(strict_types=1);
 
 namespace MyModule\Mcp;
 
-use Zolinga\System\Events\{ListenerInterface, McpToolsCallEvent};
+use Zolinga\System\Events\{ListenerInterface, McpEvent};
 use Zolinga\System\Types\StatusEnum;
 
 final class MyToolHandler implements ListenerInterface
 {
-    public function onMyTool(McpToolsCallEvent $event): void
+    public function onMyTool(McpEvent $event): void
     {
         // 1. Validate $event->request (the JSON-RPC params.arguments).
         $arg = $event->request['arg'] ?? null;
         if (!is_string($arg) || $arg === '') {
             $event->setStatus(StatusEnum::BAD_REQUEST, 'Missing or empty "arg" argument.');
-            $event->addTextContent('Missing or empty "arg" argument.'); // optional human-readable text
             return;
         }
 
@@ -75,9 +74,8 @@ final class MyToolHandler implements ListenerInterface
 
 Rules:
 
-- Method parameter must be typed as `McpToolsCallEvent` (NOT `McpEvent`). The gateway dispatches per-tool events as this subclass; the gateway's envelope wrapping is conditional on it.
 - Set `$event->response` to the **raw structured payload** — never to the `{ content, isError, structuredContent }` envelope. The gateway builds the envelope.
-- For errors, set a non-OK status (e.g. `BAD_REQUEST`, `NOT_FOUND`) AND optionally call `$event->addTextContent(string)` to provide a human-readable text block. Do not throw — the gateway logs the throw and turns it into a generic 500.
+- For errors, set a non-OK status (e.g. `BAD_REQUEST`, `NOT_FOUND`) with a descriptive message. The message ends up in `result.content[0].text`. Do not throw — the gateway logs the throw and turns it into a generic 500.
 - If the handler is generic and you want to short-circuit, call `$event->stopPropagation()`. Other Zolinga listeners on the same event will be skipped.
 
 ### 4. Register the listener in `<module>/zolinga.json`
@@ -164,7 +162,7 @@ Expected error response (still in `result`, not a JSON-RPC `error` block):
 ## References
 
 - [MCP (Model Context Protocol)](:Zolinga Core:Running the System:MCP) — endpoint overview, request/response shape, headers.
-- [MCP Events](:Zolinga Core:Events and Listeners:MCP) — full `McpEvent` / `McpToolsCallEvent` reference, status → envelope mapping, handler examples.
+- [MCP Events](:Zolinga Core:Events and Listeners:MCP) — full `McpEvent` reference, status → envelope mapping, handler examples.
 - [`tools/call` event](:ref:event:tools/call) — per-event reference page.
 - [`tools/list` event](:ref:event:tools/list) — catalogue reference; documents the `schema.response` requirement.
 - [system-create-handler](system-skills:system-create-handler) — generic listener creation (origin filtering, event naming).
