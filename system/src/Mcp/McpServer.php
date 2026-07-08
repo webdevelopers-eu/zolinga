@@ -225,7 +225,6 @@ class McpServer
     {
         if ($this->response === null) {
             if (!headers_sent()) {
-                $this->sendSessionHeader();
                 http_response_code(204);
             }
             $this->logAccess(204);
@@ -238,7 +237,6 @@ class McpServer
             header('Content-Type: application/json; charset=utf-8');
             header('MCP-Protocol-Version: ' . McpInitializeHandler::PROTOCOL_VERSION);
             $this->sendHeadersForStatus($this->event?->status);
-            $this->sendSessionHeader();
             http_response_code($httpStatus);
         }
         echo json_encode($this->response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -257,7 +255,6 @@ class McpServer
         if (!headers_sent()) {
             header('Content-Type: application/json; charset=utf-8');
             $this->sendHeadersForStatus($error->getJsonrpcCode()->toStatus());
-            $this->sendSessionHeader();
             http_response_code($httpStatus);
         }
         echo json_encode($error->toPayload(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -275,7 +272,6 @@ class McpServer
         if (!headers_sent()) {
             header('Allow: GET, POST, DELETE');
             header('Content-Type: application/json; charset=utf-8');
-            $this->sendSessionHeader();
             http_response_code(405);
         }
         echo json_encode([
@@ -305,18 +301,6 @@ class McpServer
             global $api;
             $base = rtrim($api->config['baseURL'] ?? $api->config['baseUrl'] ?? 'http://localhost', '/');
             header('WWW-Authenticate: Bearer resource_metadata=' . $base . '/.well-known/oauth-protected-resource');
-        }
-    }
-
-    /**
-     * Send the Mcp-Session-Id header if a PHP session is active.
-     *
-     * @return void
-     */
-    private function sendSessionHeader(): void
-    {
-        if (session_status() === PHP_SESSION_ACTIVE && session_id() !== '') {
-            header('Mcp-Session-Id: ' . session_id());
         }
     }
 

@@ -28,19 +28,34 @@ use Zolinga\System\Mcp\Exceptions\McpException;
 // id for this request. Per the MCP spec, the id must be visible ASCII in the
 // 0x21-0x7E range. Anything else is dropped (PHP mints a fresh id). Bounded
 // to 64 chars to match the MCP spec.
-$headerSession = $_SERVER['HTTP_MCP_SESSION_ID'] ?? null;
-if (is_string($headerSession)) {
-    if (strlen($headerSession) > 64 || preg_match('/\A[\x21-\x7E]+\z/', $headerSession) !== 1) {
-        // Don't set $_COOKIE[session_name()] — drop the bad value.
-    } else {
-        $_COOKIE[session_name()] = $headerSession;
-    }
-}
+$hadSessionCookie = isset($_COOKIE[session_name()]);
+// $headerSession = $_SERVER['HTTP_MCP_SESSION_ID'] ?? null;
+// if (is_string($headerSession)) {
+//     if (strlen($headerSession) > 64 || preg_match('/\A[\x21-\x7E]+\z/', $headerSession) !== 1) {
+//         // Don't set $_COOKIE[session_name()] — drop the bad value.
+//     } else {
+//         $_COOKIE[session_name()] = $headerSession;
+//     }
+// }
 
+ini_set('session.use_cookies', 0); // disable session cookies
 require($_SERVER['DOCUMENT_ROOT'] . '/../system/loader.php');
+
+// if (session_status() === PHP_SESSION_ACTIVE && session_id() !== '') {
+//     header('Mcp-Session-Id: ' . session_id());
+// }
 
 try {
     (new McpServer())->run();
 } catch (McpException $e) {
     (new McpServer())->sendError($e);
+} finally {
+    if (!$hadSessionCookie) {
+        // If we created a session for this request, destroy it so we don't
+        // leave a session file on the server. The client will get the
+        // `Mcp-Session-Id` header in the response and can resume the session
+        // on the next request.
+        session_destroy();
+    }
+    header('MCP-Session-Reset: ' . (int)(session_status() === PHP_SESSION_NONE));
 }
