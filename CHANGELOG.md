@@ -5,6 +5,11 @@ All notable changes to the Zolinga framework (system module) will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
 
+## [1.6.12] - 2026-07-15
+
+### Fixed
+- `WWW-Authenticate` header now quotes the `resource_metadata` URL value per RFC 9728 Section 5.1 (e.g. `Bearer resource_metadata="https://..."`). Some clients failed to parse the unquoted form correctly.
+
 ## [1.6.10] - 2026-07-14
 
 ### Changed
