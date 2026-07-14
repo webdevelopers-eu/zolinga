@@ -205,7 +205,7 @@ class WellKnownListener implements ListenerInterface
         $baseURL = rtrim($api->config['baseURL'] ?? '', '/');
 
         $event->response = [
-            'resource' => $baseURL . '/mcp/',
+            'resource' => $baseURL . '/mcp',
             'authorization_servers' => [$baseURL . '/.well-known/oauth-authorization-server'],
             'scopes_supported' => ['mcp:tools'],
             'bearer_methods_supported' => ['header'],

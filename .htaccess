@@ -6,6 +6,10 @@
     RewriteCond %{REQUEST_URI} !^/.well-known
     RewriteRule "(^|/)\." - [F]
 
+    # Strip trailing slash from URLs (except root /)
+    RewriteCond %{REQUEST_URI} ^(.+)/$
+    RewriteRule ^(.+)/$ $1 [R=301,L]
+
     # If the file maps to /data/system/root then serve it directly
     RewriteCond %{DOCUMENT_ROOT}/data/system/root/%{REQUEST_URI} -f
     RewriteRule ^(.*)$ /data/system/root/%{REQUEST_URI} [L]

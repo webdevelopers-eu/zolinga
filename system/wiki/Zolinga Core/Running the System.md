@@ -9,7 +9,7 @@ Now you already know a lot about Zolinga [event system](:Zolinga Core:Events and
 - **Command Line**
     > The third way to run Zolinga is to run it from the command line. In fact the logic and processing is very similar to previous methods except that you specify the request in the command line and not in the browser or JavaScript code. You will be surprised that the same event model is used across the board with such a natural feel. If you wish to know more about command line requests and how they are processed, you may want to read the [Command Line](:Zolinga Core:Running the System:Command Line) article.
 - **MCP (Model Context Protocol)**
-    > The fourth way to run Zolinga is to expose its events as tools to an LLM-powered MCP client. The JSON-RPC 2.0 endpoint at `/mcp/` is a thin gateway that dispatches every method as a Zolinga `McpEvent` and serializes the response back as a JSON-RPC 2.0 message. See [MCP](:Zolinga Core:Running the System:MCP) for the full guide.
+    > The fourth way to run Zolinga is to expose its events as tools to an LLM-powered MCP client. The JSON-RPC 2.0 endpoint at `/mcp` is a thin gateway that dispatches every method as a Zolinga `McpEvent` and serializes the response back as a JSON-RPC 2.0 message. See [MCP](:Zolinga Core:Running the System:MCP) for the full guide.
 - **Custom Scripts**
     > This article covers the cases where you need for some reason to run Zolinga through a custom script either over HTTP or command line. It will cover how to easily include Zolinga into your other scripts and use the full power of this amazing framework. For details, please read the [Custom Scripts](:Zolinga Core:Running the System:Custom Scripts) article.
 

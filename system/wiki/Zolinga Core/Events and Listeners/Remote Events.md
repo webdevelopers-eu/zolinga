@@ -8,7 +8,7 @@ This is useful when you have multiple Zolinga installations (or environments) an
 
 ## Requirements
 
-- The remote server must expose the Zolinga gateway at `/dist/system/gate/`.
+- The remote server must expose the Zolinga gateway at `/dist/system/gate`.
 
 ## Example
 
@@ -43,7 +43,7 @@ if ($event->isOk()) {
 
 `RemoteEvent` sends a JSON POST request to:
 
-- `https://example.com/dist/system/gate/?example.org:api:myEvent/get:123`
+- `https://example.com/dist/system/gate?example.org:api:myEvent/get:123`
 
 with the same body format used by the JavaScript client gateway:
 

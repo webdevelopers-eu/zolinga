@@ -17,7 +17,7 @@ argument-hint: "<component-or-feature> [goal]"
 ## Architecture Overview
 
 ```
-JS Event.dispatch() → api.dispatchEvent() → JSON POST /dist/system/gate/
+JS Event.dispatch() → api.dispatchEvent() → JSON POST /dist/system/gate
     → PHP creates WebEvent(ORIGIN_REMOTE) → dispatches through $api->dispatchEvent()
     → PHP listeners process, call $event->broadcastBack()
     → JSON response back to JS → event.status, event.response, api.broadcast()
@@ -121,7 +121,7 @@ console.log(event.status, event.response);
 const result = await api.dispatchEvent('my-module:do-thing', { param: 'value' });
 
 // Method 3: Dispatch with URL path segments
-// URL format: /dist/system/gate/?{type}/{op}:{id}
+// URL format: /dist/system/gate?{type}/{op}:{id}
 // op and id are extracted from request.op and request.id
 ```
 
@@ -269,4 +269,4 @@ if (event.unauthorized) {
 5. **`client events` requires `origin: ["remote"]`** — PHP listener must declare remote origin in `zolinga.json`.
 6. **`setStatus()` priority rules apply** — Same as PHP: OK can only be overwritten by errors.
 7. **BroadcastChannel is cross-tab** — `global: true` reaches all tabs; `global: false` is same-tab only.
-8. **Gate URL format** — `/dist/system/gate/?{type}/{op}:{id}` where `op` and `id` come from `request.op` and `request.id`.
+8. **Gate URL format** — `/dist/system/gate?{type}/{op}:{id}` where `op` and `id` come from `request.op` and `request.id`.

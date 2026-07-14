@@ -44,7 +44,7 @@ ini_set('session.use_cookies', 0); // disable session cookies
 // this sends 204 and exits. For actual requests it sets the CORS headers and
 // continues. Must run before session_start() to avoid headers already sent.
 require($_SERVER['DOCUMENT_ROOT'] . '/../modules/zolinga-oauth/src/CorsHelper.php');
-\Zolinga\OAuth\CorsHelper::emitHeaders('/mcp/');
+\Zolinga\OAuth\CorsHelper::emitHeaders('/mcp');
 
 require($_SERVER['DOCUMENT_ROOT'] . '/../system/loader.php');
 

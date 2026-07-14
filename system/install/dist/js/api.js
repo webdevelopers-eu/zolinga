@@ -16,7 +16,7 @@ class Api {
     /**
     * The API_GATE constant is the URL of the API gateway.
     */
-    API_GATE = '/dist/system/gate/';
+    API_GATE = '/dist/system/gate';
 
     /**
     * The broadcast channel to send and receive messages.

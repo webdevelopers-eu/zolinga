@@ -114,12 +114,12 @@ Rules:
 
 ```bash
 # Discover
-curl -X POST http://localhost:8080/mcp/ -D /dev/stderr \
+curl -X POST http://localhost:8080/mcp -D /dev/stderr \
   -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq '.result.tools[].name'
 
 # Invoke
-curl -X POST http://localhost:8080/mcp/ -D /dev/stderr \
+curl -X POST http://localhost:8080/mcp -D /dev/stderr \
   -H 'Content-Type: application/json' \
   -d '{
     "jsonrpc":"2.0","id":2,"method":"tools/call",

@@ -95,11 +95,11 @@ Add a real handler class (back to [system-create-mcp-tool](system-skills:system-
 
 ```bash
 # Discover
-curl -X POST http://localhost:8080/mcp/ -D /dev/stderr -H 'Content-Type: application/json' \
+curl -X POST http://localhost:8080/mcp -D /dev/stderr -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq '.result.tools[].name'
 
 # Invoke (no args example)
-curl -X POST http://localhost:8080/mcp/ -D /dev/stderr -H 'Content-Type: application/json' \
+curl -X POST http://localhost:8080/mcp -D /dev/stderr -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"getPricingList","arguments":{}}}' | jq
 ```
 

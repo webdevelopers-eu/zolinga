@@ -28,7 +28,7 @@ The gateway translates `tools/call` `params.name` into the per-tool event `tools
 ## Example
 
 ```bash
-curl -X POST http://localhost:8080/mcp/ \
+curl -X POST http://localhost:8080/mcp \
   -H 'Content-Type: application/json' \
   -d '{
     "jsonrpc":"2.0",

@@ -9,7 +9,7 @@ This is a non-streaming implementation of MCP — every request returns a single
 Send an `initialize` request:
 
 ```bash
-curl -X POST http://localhost:8080/mcp/ \
+curl -X POST http://localhost:8080/mcp \
   -H 'Content-Type: application/json' \
   -d '{
     "jsonrpc": "2.0",
@@ -28,7 +28,7 @@ The response is the lifecycle initialization payload (protocolVersion, capabilit
 Discover available tools:
 
 ```bash
-curl -X POST http://localhost:8080/mcp/ \
+curl -X POST http://localhost:8080/mcp \
   -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
 ```
@@ -36,7 +36,7 @@ curl -X POST http://localhost:8080/mcp/ \
 Call a tool by name:
 
 ```bash
-curl -X POST http://localhost:8080/mcp/ \
+curl -X POST http://localhost:8080/mcp \
   -H 'Content-Type: application/json' \
   -d '{
     "jsonrpc":"2.0",
@@ -208,7 +208,7 @@ The endpoint accepts a JSON-RPC 2.0 batch (an array of requests). The response i
 
 # Security
 
-Configure your web server so that `/mcp/` is reachable only by trusted origins. The endpoint is unauthenticated by default; use the `right` field on a listener manifest entry and an [`AuthorizeEvent`](:Zolinga Core:Events and Listeners:Authorization) provider to gate access to specific tools.
+Configure your web server so that `/mcp` is reachable only by trusted origins. The endpoint is unauthenticated by default; use the `right` field on a listener manifest entry and an [`AuthorizeEvent`](:Zolinga Core:Events and Listeners:Authorization) provider to gate access to specific tools.
 
 # See Also
 

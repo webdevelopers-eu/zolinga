@@ -106,7 +106,7 @@ class RemoteEvent extends RequestResponseEvent
     {
         $base = rtrim($this->server, '/');
         $info = $this->buildInfoString();
-        return $base . '/dist/system/gate/' . ($info !== '' ? ('?' . $info) : '');
+        return $base . '/dist/system/gate' . ($info !== '' ? ('?' . $info) : '');
     }
 
     /**

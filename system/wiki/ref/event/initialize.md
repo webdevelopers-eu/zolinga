@@ -37,7 +37,7 @@ The handler does not validate or use the `params` payload — it always returns 
 Request:
 
 ```bash
-curl -X POST http://localhost:8080/mcp/ \
+curl -X POST http://localhost:8080/mcp \
   -H 'Content-Type: application/json' \
   -d '{
     "jsonrpc": "2.0",
