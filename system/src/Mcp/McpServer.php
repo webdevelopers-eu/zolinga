@@ -73,6 +73,11 @@ class McpServer
     {
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
+        if ($method === 'OPTIONS') {
+            $this->sendOptionsOk();
+            return;
+        }
+
         if ($method !== 'POST') {
             $this->sendMethodNotAllowed($method);
             return;
@@ -270,7 +275,7 @@ class McpServer
     private function sendMethodNotAllowed(string $method): void
     {
         if (!headers_sent()) {
-            header('Allow: GET, POST, DELETE');
+            header('Allow: GET, POST, DELETE, OPTIONS');
             header('Content-Type: application/json; charset=utf-8');
             http_response_code(405);
         }
@@ -287,6 +292,29 @@ class McpServer
     }
 
     /**
+     * Respond to an OPTIONS probe with 204 No Content.
+     *
+     * This is a safety net for CORS preflight requests that bypass
+     * {@see \Zolinga\OAuth\CorsHelper} (e.g. when the path doesn't
+     * match CORS_PATHS). It returns 204 with Allow and CORS headers
+     * so the client can proceed.
+     *
+     * @return void
+     */
+    private function sendOptionsOk(): void
+    {
+        if (!headers_sent()) {
+            header('Allow: GET, POST, DELETE, OPTIONS');
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
+            header('Access-Control-Allow-Headers: Content-Type, Authorization, MCP-Session-Id, MCP-Protocol-Version, Accept');
+            header('Access-Control-Max-Age: 86400');
+            http_response_code(204);
+        }
+        $this->logAccess(204);
+    }
+
+    /**
      * Send status-specific HTTP headers. Currently handles UNAUTHORIZED
      * (401) by emitting the WWW-Authenticate header pointing to the
      * OAuth Protected Resource Metadata (RFC 9728). Easy to extend for
@@ -299,8 +327,8 @@ class McpServer
     {
         if ($status === StatusEnum::UNAUTHORIZED) {
             global $api;
-            $base = rtrim($api->config['baseURL'] ?? $api->config['baseUrl'] ?? 'http://localhost', '/');
-            header('WWW-Authenticate: Bearer resource_metadata=' . $base . '/.well-known/oauth-protected-resource');
+            $prmUrl = $api->url->resolveUrl('/.well-known/oauth-protected-resource');
+            header('WWW-Authenticate: Bearer resource_metadata=' . $prmUrl);
         }
     }
 

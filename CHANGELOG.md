@@ -5,6 +5,11 @@ All notable changes to the Zolinga framework (system module) will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
 
+## [1.6.10] - 2026-07-14
+
+### Changed
+- `McpServer::sendHeadersForStatus()` now uses `$api->url->resolveUrl()` to build the `WWW-Authenticate` header URL instead of manually concatenating `baseURL` + path. This ensures the PRM URL is resolved consistently with the rest of the system.
+
 ## [1.6.8] - 2026-06-27
 
 ### Changed
