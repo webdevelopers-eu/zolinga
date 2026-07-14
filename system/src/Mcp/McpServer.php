@@ -306,7 +306,7 @@ class McpServer
         if (!headers_sent()) {
             header('Allow: POST, DELETE, OPTIONS');
             header('Access-Control-Allow-Origin: *');
-            header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
+            header('Access-Control-Allow-Methods: POST, DELETE, OPTIONS');
             header('Access-Control-Allow-Headers: Content-Type, Authorization, MCP-Session-Id, MCP-Protocol-Version, Accept');
             header('Access-Control-Max-Age: 86400');
             http_response_code(204);
