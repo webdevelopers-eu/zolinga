@@ -304,7 +304,7 @@ class McpServer
     private function sendOptionsOk(): void
     {
         if (!headers_sent()) {
-            header('Allow: GET, POST, DELETE, OPTIONS');
+            header('Allow: POST, DELETE, OPTIONS');
             header('Access-Control-Allow-Origin: *');
             header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
             header('Access-Control-Allow-Headers: Content-Type, Authorization, MCP-Session-Id, MCP-Protocol-Version, Accept');
