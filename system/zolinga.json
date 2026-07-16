@@ -230,7 +230,7 @@
     },
     {
       "event": "tools:call:echo",
-      "description": "Example MCP tool handler: echoes the `message` argument back to the client. Useful as a smoke test for the MCP gateway. Invoked via JSON-RPC `tools/call` with `params.name=\"echo\"`; receives `params.arguments` as the event request and sets the MCP `result.content` / `structuredContent` envelope directly on `$event->response`.",
+      "description": "MCP debug tool: echoes the `message` argument back to the client. Useful as a smoke test for the MCP gateway. Use only for MCP debugging. Do not use under normal circumstances.",
       "class": "\\Zolinga\\System\\Mcp\\McpEchoHandler",
       "method": "onEcho",
       "origin": [
