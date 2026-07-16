@@ -88,7 +88,7 @@ Add a real handler class (back to [system-create-mcp-tool](system-skills:system-
 
 - Different arguments than the `remote` event accepts.
 - Different response shape (e.g. strip a field, wrap in `{ data: ... }`).
-- Different auth (the `remote` event may have `"right": "member of users"`; the MCP version probably should not).
+- Different auth (the `remote` event may have `"right": "member of users"`; the MCP version should have preferably `"right": "oauth2:scope mcp:tools"` to distinguish that AI can run only events specifically authorized for it using allowed OAuth2 scope). If the API does not require login omit `right` entirely.
 - Per-tool caching, validation, or side-effects before/after the `remote` call.
 
 ## Smoke Test
