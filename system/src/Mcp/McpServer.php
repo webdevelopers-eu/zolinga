@@ -72,7 +72,6 @@ class McpServer
     public function run(): void
     {
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
-
         if ($method === 'OPTIONS') {
             $this->sendOptionsOk();
             return;
@@ -275,7 +274,6 @@ class McpServer
     private function sendMethodNotAllowed(string $method): void
     {
         if (!headers_sent()) {
-            header('Allow: GET, POST, DELETE, OPTIONS');
             header('Content-Type: application/json; charset=utf-8');
             http_response_code(405);
         }
@@ -294,21 +292,16 @@ class McpServer
     /**
      * Respond to an OPTIONS probe with 204 No Content.
      *
-     * This is a safety net for CORS preflight requests that bypass
-     * {@see \Zolinga\OAuth\CorsHelper} (e.g. when the path doesn't
-     * match CORS_PATHS). It returns 204 with Allow and CORS headers
-     * so the client can proceed.
+     * Safety net: normally OPTIONS is handled by public/mcp/index.php which
+     * exits before the system loads. This is reached only if McpServer is
+     * invoked directly. CORS headers are not emitted here — that is the
+     * entry point's responsibility.
      *
      * @return void
      */
     private function sendOptionsOk(): void
     {
         if (!headers_sent()) {
-            header('Allow: POST, DELETE, OPTIONS');
-            header('Access-Control-Allow-Origin: *');
-            header('Access-Control-Allow-Methods: POST, DELETE, OPTIONS');
-            header('Access-Control-Allow-Headers: Content-Type, Authorization, MCP-Session-Id, MCP-Protocol-Version, Accept');
-            header('Access-Control-Max-Age: 86400');
             http_response_code(204);
         }
         $this->logAccess(204);

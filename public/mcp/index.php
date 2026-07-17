@@ -40,11 +40,18 @@ $hadSessionCookie = isset($_COOKIE[session_name()]);
 
 ini_set('session.use_cookies', 0); // disable session cookies
 
-// CORS: emit headers early (before session or output). For preflight (OPTIONS)
-// this sends 204 and exits. For actual requests it sets the CORS headers and
-// continues. Must run before session_start() to avoid headers already sent.
-require($_SERVER['DOCUMENT_ROOT'] . '/../modules/zolinga-oauth/src/CorsHelper.php');
-\Zolinga\OAuth\CorsHelper::emitHeaders('/mcp');
+// CORS headers. AI agents ignore these; they're for browser-based MCP clients.
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, MCP-Protocol-Version, Accept');
+header('Access-Control-Max-Age: 86400');
+header('Allow: POST, OPTIONS');
+
+// OPTIONS preflight: respond 204, no body.
+if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? '')) === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
 
 require($_SERVER['DOCUMENT_ROOT'] . '/../system/loader.php');
 
