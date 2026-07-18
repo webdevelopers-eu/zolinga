@@ -4,7 +4,15 @@ All notable changes to the Zolinga framework (system module) will be documented 
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
+## [1.6.14] - 2026-07-20
 
+### Changed
+- **MCP protocol events are now prefixed with `mcp:`.** All non-`tools/call` JSON-RPC methods dispatched by the MCP gateway are prefixed with `mcp:` and keep their original method path verbatim (e.g. `initialize` → `mcp:initialize`, `tools/list` → `mcp:tools/list`, `notifications/initialized` → `mcp:notifications/initialized`). `tools/call` still uses the bare tool name as the event type. Since MCP tool names are `[A-Za-z0-9_-]` (no colons), they can never collide with the `mcp:` prefix. `McpTools::isReservedEvent()` now excludes protocol events with a single `str_starts_with($eventName, 'mcp:')` check instead of a hardcoded list — new protocol methods are automatically excluded.
+
+## [1.6.13] - 2026-07-20
+
+### Changed
+- **MCP tools no longer use the `tools:call:` event-name prefix.** MCP tool events are now distinguished from other MCP events solely by the `mcp` origin and the presence of a `schema.response`, not by an event-name prefix. The gateway dispatches `tools/call` using the bare tool name (`params.name`) as the event type (e.g. `echo` instead of `tools:call:echo`). `McpEvent` gained an `isToolCall` flag (set by `fromJsonRpc()`) that the gateway uses to decide envelope wrapping and `isError` mapping, replacing the previous `str_starts_with($event->type, 'tools:call:')` check. `McpTools::collectTools()` now uses the listener's event name verbatim as the tool name and excludes reserved MCP protocol events (`initialize`, `tools:list`, `notifications:*`) instead of matching the `tools:call:` prefix. The `tools:call:*` emit entry was removed from the system manifest.
 ## [1.6.12] - 2026-07-15
 
 ### Fixed

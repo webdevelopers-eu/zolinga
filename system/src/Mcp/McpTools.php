@@ -9,15 +9,19 @@ use Zolinga\System\Types\{OriginEnum, StatusEnum};
 use Zolinga\System\Config\Atom\ListenAtom;
 
 /**
- * Implements the MCP `tools:list` event handler.
+ * Implements the MCP `tools/list` event handler.
  *
  * Walks the merged manifest, collects every listener that opts in to the
- * `mcp` origin AND whose event name matches `tools:call:*`, and returns
- * the JSON-RPC `tools/list` response `{ tools: [...] }`. Every exposed
- * tool MUST declare a `schema.response` (the gateway wraps
- * `$event->response` in the MCP `{ content, isError, structuredContent }`
- * envelope and the structured payload must conform to the declared
- * schema); tools without one are skipped and an error is logged.
+ * `mcp` origin AND declares a `schema.response` (and is not a reserved MCP
+ * protocol event), and returns the JSON-RPC `tools/list` response
+ * `{ tools: [...] }`. The listener's event name is used verbatim as the
+ * tool name — MCP tools are distinguished from other MCP events solely by
+ * the `mcp` origin and the presence of a `schema.response`, not by an
+ * event-name prefix. Every exposed tool MUST declare a `schema.response`
+ * (the gateway wraps `$event->response` in the MCP
+ * `{ content, isError, structuredContent }` envelope and the structured
+ * payload must conform to the declared schema); tools without one are
+ * skipped and an error is logged.
  *
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-06-03
@@ -25,7 +29,7 @@ use Zolinga\System\Config\Atom\ListenAtom;
 class McpTools implements ListenerInterface
 {
     /**
-     * Handle `tools:list`. Returns a `{ tools: [...] }` payload describing all
+     * Handle `tools/list`. Returns a `{ tools: [...] }` payload describing all
      * listeners that opt in to the `mcp` origin and have a `schema.response`.
      *
      * @param McpEvent $event
@@ -46,13 +50,17 @@ class McpTools implements ListenerInterface
      * `tools/list` MCP request. Each candidate must:
      *
      * 1. opt in to the `mcp` origin,
-     * 2. have an event name starting with `tools:call:` (the per-tool
-     *    event dispatched by the gateway), and
-     * 3. declare a `schema.response` (the gateway wraps `$event->response`
+     * 2. declare a `schema.response` (the gateway wraps `$event->response`
      *    in the MCP `{ content, isError, structuredContent }` envelope, and
-     *    the structured payload must conform to the declared schema).
+     *    the structured payload must conform to the declared schema), and
+     * 3. not be a reserved MCP protocol event (`mcp:initialize`,
+     *    `mcp:tools/list`, `mcp:notifications/*`).
      *
-     * Tools failing condition 3 are skipped and an error is logged via
+     * The listener's event name is used verbatim as the tool name. MCP tools
+     * and other MCP events are uniform; the only distinction is that a tool
+     * declares a `schema.response` and is callable via `tools/call`.
+     *
+     * Tools failing condition 2 are skipped and an error is logged via
      * `$api->log->error()`. Deduplicates by event name (highest priority
      * wins).
      *
@@ -72,11 +80,16 @@ class McpTools implements ListenerInterface
             }
 
             $eventName = (string) $atom['event'];
-            $toolName = preg_replace('/^tools:call:/', '', $eventName);
 
-            if ($toolName === $eventName) { // not tools:call:*
+            // Exclude reserved MCP protocol events. These are MCP JSON-RPC
+            // methods handled by dedicated listeners (mcp:initialize,
+            // mcp:tools/list) or the mcp:notifications/* namespace, not
+            // user-callable tools.
+            if ($this->isReservedEvent($eventName)) {
                 continue;
             }
+
+            $toolName = $eventName;
 
             // Every exposed tool MUST declare a `schema.response` so the
             // gateway knows the shape of `$event->response` and clients can
@@ -94,11 +107,11 @@ class McpTools implements ListenerInterface
 
             // Reject tool names that don't conform to the MCP client-side
             // character set (`[A-Za-z0-9_-]{1,64}`). Without this check the
-            // gateway would happily dispatch e.g. `tools:call:foo bar`, but
-            // real-world MCP clients would reject or mangle such a name and
-            // the tool would be effectively uncallable. Skipping here keeps
-            // the manifest and the wire contract in sync: a bad name is
-            // neither advertised nor callable.
+            // gateway would happily dispatch e.g. `foo bar`, but real-world
+            // MCP clients would reject or mangle such a name and the tool
+            // would be effectively uncallable. Skipping here keeps the
+            // manifest and the wire contract in sync: a bad name is neither
+            // advertised nor callable.
             if (!McpHelper::isValidToolName($toolName)) {
                 $api->log->error('system:mcp', "MCP tool \"$toolName\" (event \"$eventName\") has an invalid name; tool names must be 1.." . McpHelper::TOOL_NAME_MAX_LENGTH . " chars of [A-Za-z0-9_-]. The listener will be skipped.", [
                     'event' => $eventName,
@@ -131,6 +144,26 @@ class McpTools implements ListenerInterface
         usort($tools, fn (array $a, array $b): int => strcmp($a['name'], $b['name']));
 
         return $tools;
+    }
+
+    /**
+     * Whether an event name is a reserved MCP protocol event that must not be
+     * exposed as a callable tool in `tools/list`.
+     *
+     * All non-`tools/call` MCP events are prefixed with `mcp:` by the gateway
+     * (e.g. `mcp:initialize`, `mcp:tools/list`,
+     * `mcp:notifications/initialized`).
+     * User tool names are `[A-Za-z0-9_-]` (no colons), so they can never
+     * collide with the `mcp:` prefix. This lets us exclude protocol events
+     * with a single prefix check instead of a hardcoded list — new protocol
+     * methods are automatically excluded.
+     *
+     * @param string $eventName
+     * @return bool
+     */
+    private function isReservedEvent(string $eventName): bool
+    {
+        return str_starts_with($eventName, 'mcp:');
     }
 
     /**

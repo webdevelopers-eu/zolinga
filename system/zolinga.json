@@ -1,6 +1,6 @@
 {
   "name": "Zolinga Framework",
-  "version": "1.6.12",
+  "version": "1.6.14",
   "description": "Zolinga PHP framework that makes sense.",
   "authors": [
     "Danny Sevcik <danny@zolinga.net>"
@@ -211,7 +211,7 @@
       ]
     },
     {
-      "event": "initialize",
+      "event": "mcp:initialize",
       "description": "MCP (Model Context Protocol) `initialize` request handler. Returns the lifecycle initialization payload: protocolVersion, capabilities, serverInfo, and instructions.",
       "class": "\\Zolinga\\System\\Mcp\\McpInitializeHandler",
       "method": "onInitialize",
@@ -220,7 +220,7 @@
       ]
     },
     {
-      "event": "tools:list",
+      "event": "mcp:tools/list",
       "description": "MCP `tools/list` request handler. Walks the merged manifest and returns every listener that opts in to the `mcp` origin as an MCP tool, including descriptions and JSON Schema files referenced by `schema.request` / `schema.response`.",
       "class": "\\Zolinga\\System\\Mcp\\McpTools",
       "method": "onList",
@@ -229,7 +229,7 @@
       ]
     },
     {
-      "event": "tools:call:echo",
+      "event": "echo",
       "description": "MCP debug tool: echoes the `message` argument back to the client. Useful as a smoke test for the MCP gateway. Use only for MCP debugging. Do not use under normal circumstances.",
       "class": "\\Zolinga\\System\\Mcp\\McpEchoHandler",
       "method": "onEcho",
@@ -372,7 +372,7 @@
       ]
     },
     {
-      "event": "initialize",
+      "event": "mcp:initialize",
       "description": "MCP `initialize` request, dispatched by the MCP gateway. Returns the lifecycle initialization payload (protocolVersion, capabilities, serverInfo, instructions).",
       "class": "\\Zolinga\\System\\Events\\McpEvent",
       "origin": [
@@ -380,16 +380,8 @@
       ]
     },
     {
-      "event": "tools:list",
-      "description": "MCP `tools/list` request, dispatched by the MCP gateway. Returns the list of available MCP tools (every listener registered with `origin: [\"mcp\"]`).",
-      "class": "\\Zolinga\\System\\Events\\McpEvent",
-      "origin": [
-        "mcp"
-      ]
-    },
-    {
-      "event": "tools:call:*",
-      "description": "Per-tool events dispatched by the MCP gateway. The gateway expands JSON-RPC `tools/call` into the per-tool event `tools:call:<name>` (where `<name>` is `params.name`) with `params.arguments` as the event request. The wildcard `tools:call:*` covers every such sub-event. Individual tool handlers are listed separately in the `listen` section (e.g. `tools:call:echo`).",
+      "event": "mcp:tools/list",
+      "description": "MCP `tools/list` request, dispatched by the MCP gateway. Returns the list of available MCP tools (every listener registered with `origin: [\"mcp\"]` that declares a `schema.response`).",
       "class": "\\Zolinga\\System\\Events\\McpEvent",
       "origin": [
         "mcp"

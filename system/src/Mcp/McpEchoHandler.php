@@ -22,7 +22,7 @@ use Zolinga\System\Types\StatusEnum;
 class McpEchoHandler implements ListenerInterface
 {
     /**
-     * Handle the `tools:call:echo` event.
+     * Handle the `echo` event (MCP `tools/call` with `params.name = "echo"`).
      *
      * Receives an {@see McpEvent} with `request = params.arguments`
      * (the `arguments` object from the JSON-RPC `tools/call` request). Sets

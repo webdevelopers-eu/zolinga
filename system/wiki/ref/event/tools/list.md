@@ -2,9 +2,9 @@
 
 The MCP `tools/list` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) with the [MCP event class](:Zolinga Core:Events and Listeners:MCP) and the `mcp` origin.
 
-The system-provided [`\Zolinga\System\Mcp\McpTools::onList()`](:ref:class:Zolinga\System\Mcp\McpTools) handles this event, walks the merged manifest and returns every listener that opts in to the `mcp` origin AND has an event name starting with `tools:call:` (and a `schema.response` declared) as an MCP tool. The `tools:call:` prefix is stripped from the listener event name before it is exposed as the JSON-RPC tool `name`.
+The system-provided [`\Zolinga\System\Mcp\McpTools::onList()`](:ref:class:Zolinga\\System\\Mcp\\McpTools) handles this event, walks the merged manifest and returns every listener that opts in to the `mcp` origin AND declares a `schema.response` (and is not a reserved MCP protocol event) as an MCP tool. The listener's event name is used verbatim as the JSON-RPC tool `name`.
 
-Reserved MCP protocol methods (`initialize`, `tools:list`, `tools:call:*`, `notifications/*`) are excluded from the tool list. Listeners without a `schema.response` declaration are also excluded and an error is logged.
+Reserved MCP protocol methods (`mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`) are excluded from the tool list. Listeners without a `schema.response` declaration are also excluded and an error is logged.
 
 ## Request
 
@@ -16,7 +16,7 @@ The response is a `{ tools: [...] }` payload, where each entry has at least:
 
 | Field         | Type   | Notes |
 |---------------|--------|-------|
-| `name`        | `string` | The bare tool name (the part after `tools:call:` in the listener event name); passed as `params.name` to `tools/call`. |
+| `name`        | `string` | The tool name (the listener's event name used verbatim); passed as `params.name` to `tools/call`. |
 | `description` | `string` | From the listener's `description` in `zolinga.json`. |
 | `inputSchema` | `object` | The JSON Schema from `schema.request` (or `{ type: "object", additionalProperties: true }`). |
 | `outputSchema`| `object` | The JSON Schema from `schema.response`. **Required** — tools without one are skipped. |

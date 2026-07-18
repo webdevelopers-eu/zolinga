@@ -46,7 +46,7 @@ curl -X POST http://localhost:8080/mcp \
   }'
 ```
 
-The gateway translates the JSON-RPC method to a Zolinga event by replacing `/` with `:`. For `tools/call` specifically, it expands the method into the per-tool event `tools:call:<name>` (where `<name>` is `params.name`) and passes `params.arguments` as the event request. So this request dispatches an `McpEvent` with `type = "tools:call:echo"` and `request = {"message": "Hello MCP"}`. The tool handler sets the **raw structured payload** on `$event->response` (it must conform to the tool's `outputSchema`); the gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope.
+The gateway translates the JSON-RPC method to a Zolinga event by replacing `/` with `:`. For `tools/call` specifically, it uses the bare tool name (`params.name`) as the event type and passes `params.arguments` as the event request. So this request dispatches an `McpEvent` with `type = "echo"` and `request = {"message": "Hello MCP"}`. The tool handler sets the **raw structured payload** on `$event->response` (it must conform to the tool's `outputSchema`); the gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope.
 
 Response (per the [MCP `tools/call` spec](https://modelcontextprotocol.io/specification/2025-06-18/server/tools)):
 
@@ -70,12 +70,12 @@ Response (per the [MCP `tools/call` spec](https://modelcontextprotocol.io/specif
 # Exposing a Listener as an MCP Tool
 
 Add `mcp` to the listener's `origin` array in your module's `zolinga.json`. The
-event name must follow the `tools:call:<tool-name>` convention; that name
-becomes the JSON-RPC `tools/call` `params.name` value:
+listener's event name is the tool name; clients invoke it via `tools/call`
+with `params.name` set to that event name:
 
 ```json
 {
-  "event": "tools:call:ipdefender-search",
+  "event": "ipdefender-search",
   "class": "\\Ipdefender\\Mcp\\SearchHandler",
   "method": "onSearch",
   "origin": ["mcp"],
@@ -88,10 +88,10 @@ becomes the JSON-RPC `tools/call` `params.name` value:
 ```
 
 - `origin: ["mcp"]` — opt in to MCP delivery.
-- `event: "tools:call:<name>"` — the `<name>` part is the JSON-RPC tool name. Clients invoke it via `tools/call` with `params.name = "<name>"`.
+- `event: "<name>"` — the event name is the JSON-RPC tool name. Clients invoke it via `tools/call` with `params.name = "<name>"`.
 - `schema.request` / `schema.response` — each value is a [Zolinga URI](:Zolinga Core:Paths and Zolinga URI) that resolves to a JSON Schema file. The MCP `tools/list` response embeds the parsed schema as `inputSchema` / `outputSchema`. **`schema.response` is required** for the tool to be exposed by `tools/list` — `McpTools` logs an error and skips the tool when it is missing.
 
-The handler class implements [`ListenerInterface`](:Zolinga Core:Events and Listeners) and receives an [`McpEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "tools:call:<name>"`. It sets the raw structured payload on `$event->response`; the gateway builds the MCP envelope:
+The handler class implements [`ListenerInterface`](:Zolinga Core:Events and Listeners) and receives an [`McpEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` and `isToolCall = true`. It sets the raw structured payload on `$event->response`; the gateway builds the MCP envelope:
 
 ```php
 namespace Ipdefender\Mcp;
@@ -124,12 +124,7 @@ class SearchHandler implements ListenerInterface
 
 # Reserved MCP Events
 
-The `McpTools` collector excludes these reserved event names from the tool list — they are MCP protocol events, not user-callable tools:
-
-- `initialize`
-- `tools:list`
-- `tools:call:*` (any per-tool sub-event)
-- `notifications:*`
+All non-`tools/call` MCP events are prefixed with `mcp:` by the gateway (e.g. `mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`). The `McpTools` collector excludes any event whose name starts with `mcp:` from the tool list — they are MCP protocol events, not user-callable tools. Since MCP tool names are `[A-Za-z0-9_-]` (no colons), user tools can never collide with the `mcp:` prefix.
 
 # Method-to-Event Mapping
 
@@ -137,10 +132,10 @@ The gateway rewrites every JSON-RPC `method` into a Zolinga event `type`. For mo
 
 | JSON-RPC `method`           | Zolinga event `type`         | `request` source        |
 |-----------------------------|------------------------------|-------------------------|
-| `initialize`                | `initialize`                 | full `params`           |
-| `tools/list`                | `tools:list`                 | full `params`           |
-| `tools/call` (name=foo)     | `tools:call:foo`             | `params.arguments`      |
-| `notifications/initialized` | `notifications:initialized`  | full `params`           |
+| `initialize`                | `mcp:initialize`             | full `params`           |
+| `tools/list`                | `mcp:tools/list`             | full `params`           |
+| `tools/call` (name=foo)     | `foo`                        | `params.arguments`      |
+| `notifications/initialized` | `mcp:notifications/initialized`  | full `params`           |
 
 # JSON-RPC Mapping
 
@@ -155,12 +150,12 @@ For non-`tools/call` methods (initialize, tools/list, notifications/*, etc.):
 | response `error.code`      | derived from `$event->status` (see Error Mapping) |
 | `notifications/*` (no id)  | dispatched, no reply sent |
 
-For `tools/call` invocations, the gateway dispatches an [`McpEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "tools:call:<name>"`:
+For `tools/call` invocations, the gateway dispatches an [`McpEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` (the bare tool name) and `isToolCall = true`:
 
 | JSON-RPC 2.0                | Zolinga |
 |----------------------------|---------|
 | `method`                   | `tools/call` (always) |
-| `params.name`              | appended to event `type` as `tools:call:<name>` |
+| `params.name`              | used verbatim as event `type` |
 | `params.arguments`         | `$event->request` |
 | response `result`          | gateway-built envelope `{ content, isError, structuredContent }` (see [MCP Events](:Zolinga Core:Events and Listeners:MCP)) |
 | `isError: true`            | gateway sets when handler's `$event->status` is non-OK (or `UNDETERMINED`); message lands in `result.content[0].text` |
@@ -178,7 +173,7 @@ For non-`tools/call` events:
 | anything else (>= 500)    | -32603               | Internal error |
 | `OK` (or 2xx/3xx)         | — (no `error` block) | success |
 
-For `tools:call:*` events, the gateway never emits a JSON-RPC `error` block. A non-OK status (or `UNDETERMINED` because no listener handled the event) becomes `result.isError = true` with the handler's message in `result.content[0].text` (per the MCP `tools/call` spec). An undetermined event is promoted to `NOT_FOUND` with the text `"Unknown tool: <name>"`.
+For `tools/call` events, the gateway never emits a JSON-RPC `error` block. A non-OK status (or `UNDETERMINED` because no listener handled the event) becomes `result.isError = true` with the handler's message in `result.content[0].text` (per the MCP `tools/call` spec). An undetermined event is promoted to `NOT_FOUND` with the text `"Unknown tool: <name>"`.
 
 # Protocol Headers
 
@@ -199,10 +194,10 @@ The endpoint accepts a JSON-RPC 2.0 batch (an array of requests). The response i
 
 | Class | Purpose |
 |-------|---------|
-| [`McpServer`](:ref:class:Zolinga\System\Mcp\McpServer) | Stateful per-request orchestrator: parses the body, dispatches, sends the reply. Thin JSON-RPC-to-Zolinga translator: each JSON-RPC `method` becomes an event `type` by replacing `/` with `:`. `tools/call` is expanded into the per-tool event `tools:call:<name>` (where `<name>` is `params.name`) with `params.arguments` as the event request; the gateway wraps the response in the MCP envelope. |
+| [`McpServer`](:ref:class:Zolinga\\System\\Mcp\\McpServer) | Stateful per-request orchestrator: parses the body, dispatches, sends the reply. Thin JSON-RPC-to-Zolinga translator: each JSON-RPC `method` becomes an event `type` by replacing `/` with `:`. `tools/call` uses the bare tool name (`params.name`) as the event `type` with `params.arguments` as the event request; the gateway wraps the response in the MCP envelope. |
 | [`McpRequestValidator`](:ref:class:Zolinga\System\Mcp\McpRequestValidator) | Validates JSON-RPC 2.0 envelopes. |
 | [`McpInitializeHandler`](:ref:class:Zolinga\System\Mcp\McpInitializeHandler) | Listens to the `initialize` event; returns the lifecycle payload. |
-| [`McpTools`](:ref:class:Zolinga\System\Mcp\McpTools) | `onList` for `tools:list`; returns the tool catalogue. Excludes any tool without a `schema.response` declaration. |
+| [`McpTools`](:ref:class:Zolinga\\System\\Mcp\\McpTools) | `onList` for `mcp:tools/list`; returns the tool catalogue. Excludes any tool without a `schema.response` declaration. |
 | [`McpHelper`](:ref:class:Zolinga\System\Mcp\McpHelper) | Misc helpers (status → error code, response normalization, `envelope()` for `tools/call` results). |
 | `Exceptions\McpException` + subclasses | Top-level errors (`McpParseErrorException`, `McpInvalidRequestException`, `McpMethodNotFoundException`, `McpInvalidParamsException`, `McpInternalErrorException`). |
 

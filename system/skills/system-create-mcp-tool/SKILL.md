@@ -17,17 +17,17 @@ argument-hint: "<module-name> <tool-name> [goal]"
 A tool is the **combination** of:
 
 - A handler class implementing `ListenerInterface` with a method typed against `McpEvent`.
-- A manifest entry with `event: "tools:call:<name>"` and `origin: ["mcp"]`.
+- A manifest entry with `event: "<name>"` and `origin: ["mcp"]`.
 - A `schema.response` JSON Schema (required) and an optional `schema.request`.
-- The tool name visible to clients is the part after `tools:call:` in the event name.
+- The tool name visible to clients is the listener's event name used verbatim.
 
-The gateway (`McpServer`) expands JSON-RPC `tools/call` `params.name` into the event `tools:call:<name>`, dispatches it with `params.arguments` as the event request, and wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope. Handlers **never** build the envelope themselves.
+The gateway (`McpServer`) uses the JSON-RPC `tools/call` `params.name` verbatim as the event type, dispatches it with `params.arguments` as the event request, and wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope. Handlers **never** build the envelope themselves. MCP tools and other MCP events are uniform: the only distinction is that a `tools/call` invocation sets the `isToolCall` flag on the event and declares a `schema.response`.
 
 ## Workflow
 
 ### 1. Pick the tool name
 
-The tool name is the string clients pass as `params.name`. It must be unique across the catalogue. Convention: lower-case, kebab-friendly, no leading namespace (`echo`, `search`, `ipd-checkout`, etc. — the `tools:call:` prefix is added by the gateway and stripped in `tools/list`).
+The tool name is the string clients pass as `params.name`. It must be unique across the catalogue. Convention: lower-case, kebab-friendly, no leading namespace (`echo`, `search`, `ipd-checkout`, etc.). The event name in the manifest is the tool name — there is no prefix to add or strip.
 
 ### 2. Author the JSON Schemas
 
@@ -84,7 +84,7 @@ Rules:
 {
   "listen": [
     {
-      "event": "tools:call:my-tool",
+      "event": "my-tool",
       "class": "\\MyModule\\Mcp\\MyToolHandler",
       "method": "onMyTool",
       "origin": ["mcp"],
@@ -98,10 +98,9 @@ Rules:
 }
 ```
 
-- `event` MUST start with `tools:call:` — that's the routing convention. Anything else is ignored by `tools/list`.
+- `event` is the tool name — clients invoke it via `tools/call` with `params.name` set to this value. Reserved MCP protocol events (prefixed with `mcp:`, e.g. `mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`) are excluded from the tool list.
 - `origin: ["mcp"]` is required (or use `"*"` if you also want the listener to fire for non-MCP origins).
 - `schema.response` is **required**; tools without it are skipped by `tools/list` and `$api->log->error()` is called. `schema.request` is optional.
-- Add the event to the `emit` block too: `{"event": "tools:call:*", "class": "\\Zolinga\\System\\Events\\McpEvent", "origin": ["mcp"]}`. The wildcard covers every `tools:call:<name>` your module might dispatch.
 
 ### 5. Bump version and reload
 

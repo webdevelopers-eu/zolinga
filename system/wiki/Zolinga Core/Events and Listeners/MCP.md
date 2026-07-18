@@ -2,7 +2,7 @@
 
 `\Zolinga\System\Events\McpEvent` is the event class fired by the [MCP gateway](:Zolinga Core:Running the System:MCP) at `public/mcp/index.php`. The class extends [`RequestResponseEvent`](:Zolinga Core:Events and Listeners) and carries the JSON-RPC request id alongside the standard request/response pair.
 
-The gateway dispatches `McpEvent` for every JSON-RPC method. For `tools/call` the event type is `tools:call:<name>` and the gateway wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope. For all other methods the gateway serializes `$event->response` verbatim as the JSON-RPC `result`.
+The gateway dispatches `McpEvent` for every JSON-RPC method. For `tools/call` the event type is the bare tool name (`params.name`) and the gateway wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope. For all other methods the gateway serializes `$event->response` verbatim as the JSON-RPC `result`. MCP tools and other MCP events are uniform: the only distinction is that a `tools/call` invocation sets the `isToolCall` flag on the event and is wrapped in the MCP envelope.
 
 ## Origin
 
@@ -14,7 +14,7 @@ MCP events are always dispatched with the `mcp` [`OriginEnum`](:Zolinga Core:Eve
 
 ```php
 $event = new McpEvent(
-    type: 'tools:list',
+    type: 'mcp:tools/list',
     jsonrpcId: 1,
     request: [],
     response: ['tools' => [...]]
@@ -23,8 +23,9 @@ $event = new McpEvent(
 
 | Property     | Type                              | Notes |
 |--------------|-----------------------------------|-------|
-| `type`       | `string`                          | The colon-converted JSON-RPC `method` (e.g. `tools/list` → `tools:list`; `notifications/initialized` → `notifications:initialized`). For `tools/call` it is `tools:call:<name>`. |
+| `type`       | `string`                          | The JSON-RPC `method` prefixed with `mcp:` (e.g. `tools/list` → `mcp:tools/list`; `notifications/initialized` → `mcp:notifications/initialized`). For `tools/call` it is the bare tool name (`params.name`). |
 | `jsonrpcId`  | `string\|int\|null`               | The JSON-RPC `id`. `null` indicates a notification. |
+| `isToolCall` | `bool`                            | `true` when the JSON-RPC `method` is `tools/call`. The gateway uses this to decide envelope wrapping and `isError` mapping. |
 | `request`    | `ArrayAccess\|array`              | The JSON-RPC `params` payload. For `tools/call` it is `params.arguments`. |
 | `response`   | `ArrayAccess\|array`              | Populate this with whatever the JSON-RPC `result` should be. For plain events the gateway serializes it under `result` as-is. For `tools/call` it becomes `result.structuredContent`. |
 
@@ -45,14 +46,14 @@ For plain `McpEvent` (non-`tools/call`), the gateway maps `$event->status` to a 
 
 ## `tools/call` events
 
-For `tools/call` invocations the gateway dispatches `McpEvent` with `type = "tools:call:<name>"` (where `<name>` is the JSON-RPC `params.name` argument). The gateway always wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope, never in a JSON-RPC `error` block.
+For `tools/call` invocations the gateway dispatches `McpEvent` with `type = "<name>"` (where `<name>` is the JSON-RPC `params.name` argument) and `isToolCall = true`. The gateway always wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope, never in a JSON-RPC `error` block.
 
 ### Tool name validation
 
 `<name>` must match `[A-Za-z0-9_-]{1,64}` (enforced by `McpHelper::isValidToolName()`). The same rule applies in two places so the manifest and the wire contract stay in sync:
 
 - A `tools/call` request with a `name` that fails the check is rejected with a JSON-RPC `-32602 Invalid params` error before the event is dispatched.
-- A listener whose declared `event` is `tools:call:<name>` with a non-conforming `<name>` is skipped by `tools/list` (and logged via `$api->log->error('system:mcp', ...)`) so it is neither advertised nor callable.
+- A listener whose declared `event` name (used as the tool name) is non-conforming is skipped by `tools/list` (and logged via `$api->log->error('system:mcp', ...)`) so it is neither advertised nor callable.
 
 Pick a name from `[A-Za-z0-9_-]{1,64}` (the convention used by Claude Desktop, Cursor, and other major MCP clients) and stick to it.
 
@@ -100,7 +101,7 @@ class MyEchoHandler implements ListenerInterface
 
 ```json
 {
-  "event": "tools:call:echo",
+  "event": "echo",
   "class": "\\MyModule\\MyEchoHandler",
   "method": "onEcho",
   "origin": ["mcp"],

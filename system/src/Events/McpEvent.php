@@ -17,20 +17,24 @@ use Zolinga\System\Types\OriginEnum;
  * the `params` payload and dispatches an `McpEvent` whose `type` is the
  * JSON-RPC `method` (with `/` replaced by `:`) and whose `request` is the
  * `params` (or an empty ArrayObject if `params` is null). For `tools/call`
- * the gateway dispatches `tools:call:<name>` with `request = params.arguments`
- * and wraps the handler's response in the MCP
- * `{ content, isError, structuredContent }` envelope.
+ * the gateway dispatches an event whose `type` is the bare tool name
+ * (`params.name`) with `request = params.arguments` and wraps the handler's
+ * response in the MCP `{ content, isError, structuredContent }` envelope.
+ * The {@see $isToolCall} flag distinguishes `tools/call` invocations from
+ * plain JSON-RPC methods so the gateway knows when to apply envelope wrapping.
  *
  * The event origin is {@see OriginEnum::MCP}. Listener manifests opt in to MCP
- * delivery by listing "mcp" in the listener's `origin` array.
+ * delivery by listing "mcp" in the listener's `origin` array. MCP tools and
+ * other MCP events are uniform: the only distinction is that a `tools/call`
+ * invocation sets {@see $isToolCall} and is wrapped in the MCP envelope.
  *
  * Handlers populate `$event->response` with whatever should land under the
  * JSON-RPC `result` field. For plain events the gateway serializes it
- * verbatim. For `tools:call:*` events the gateway uses it as the raw
+ * verbatim. For `tools/call` events the gateway uses it as the raw
  * structured payload (which must conform to the tool's `outputSchema`) and
  * wraps it in the MCP envelope. Errors are signaled via `$event->setStatus()`
  * with a non-OK status; the gateway maps that to a JSON-RPC `error` object
- * for plain events and to `result.isError = true` for `tools:call:*`.
+ * for plain events and to `result.isError = true` for `tools/call`.
  *
  * Example listener manifest:
  *
@@ -60,21 +64,37 @@ class McpEvent extends RequestResponseEvent implements StoppableInterface
     public string|int|null $jsonrpcId = null;
 
     /**
+     * Whether this event is a `tools/call` invocation (as opposed to a plain
+     * JSON-RPC method like `initialize` or `tools/list`). Set by
+     * {@see fromJsonRpc()} when the JSON-RPC `method` is `tools/call`. The
+     * gateway uses this flag to decide whether to wrap the handler's
+     * response in the MCP `{ content, isError, structuredContent }`
+     * envelope and to map a non-OK status to `result.isError` instead of a
+     * JSON-RPC `error` block.
+     *
+     * @var bool
+     */
+    public bool $isToolCall = false;
+
+    /**
      * Constructor.
      *
      * @param string $type The JSON-RPC `method` name, used as the event type.
      * @param string|int|null $jsonrpcId The JSON-RPC request id, or null for notifications.
      * @param ArrayAccess<string, mixed>|array<string, mixed> $request The JSON-RPC `params` payload.
      * @param ArrayAccess<string, mixed>|array<string, mixed> $response The JSON-RPC `result` to return.
+     * @param bool $isToolCall Whether this is a `tools/call` invocation.
      */
     public function __construct(
         string $type,
         string|int|null $jsonrpcId = null,
         ArrayAccess|array $request = new ArrayObject,
-        ArrayAccess|array $response = new ArrayObject
+        ArrayAccess|array $response = new ArrayObject,
+        bool $isToolCall = false
     ) {
         parent::__construct($type, OriginEnum::MCP, $request, $response);
         $this->jsonrpcId = $jsonrpcId;
+        $this->isToolCall = $isToolCall;
     }
 
     /**
@@ -86,6 +106,7 @@ class McpEvent extends RequestResponseEvent implements StoppableInterface
     {
         $ret = parent::jsonSerialize();
         $ret['jsonrpcId'] = $this->jsonrpcId;
+        $ret['isToolCall'] = $this->isToolCall;
         return $ret;
     }
 
@@ -101,7 +122,8 @@ class McpEvent extends RequestResponseEvent implements StoppableInterface
             $data['type'],
             $data['jsonrpcId'] ?? null,
             new ArrayObject($data['request'] ?? []),
-            new ArrayObject($data['response'] ?? [])
+            new ArrayObject($data['response'] ?? []),
+            (bool) ($data['isToolCall'] ?? false)
         );
         $event->uuid = $data['uuid'] ?? null;
         if (!empty($data['status'])) {
@@ -114,9 +136,11 @@ class McpEvent extends RequestResponseEvent implements StoppableInterface
      * Create a ready-to-dispatch event from a decoded JSON-RPC 2.0 request.
      *
      * Validates the envelope (`jsonrpc`, `method`, `id`, `params`), resolves
-     * the Zolinga event type (`tools/call` → `tools:call:<name>`, otherwise
-     * `/` → `:`), and returns a new event with the request set to `params`
-     * (or `params.arguments` for `tools/call`).
+     * the Zolinga event type (`tools/call` → the bare tool name from
+     * `params.name`, otherwise `mcp:` + the original JSON-RPC `method`), and
+     * returns a new event with the request set to `params` (or
+     * `params.arguments` for `tools/call`). For `tools/call` the
+     * {@see $isToolCall} flag is set to `true`.
      *
      * @param array<string, mixed> $data Decoded JSON-RPC request object.
      * @return static
@@ -149,15 +173,21 @@ class McpEvent extends RequestResponseEvent implements StoppableInterface
                     $id
                 );
             }
-            $type = 'tools:call:' . $name;
+            // The bare tool name is the event type. MCP tools are distinguished
+            // from protocol events by the absence of the `mcp:` prefix (tool
+            // names are [A-Za-z0-9_-], so they can never collide).
+            $type = $name;
             $arguments = $params['arguments'] ?? [];
             $request = is_array($arguments) ? $arguments : [];
-        } else {
-            $type = str_replace('/', ':', $method);
-            $request = $params;
+            return new static($type, $id, new ArrayObject($request), new ArrayObject, true);
         }
 
-        return new static($type, $id, new ArrayObject($request));
+        // Protocol/management events are prefixed with `mcp:` so they are
+        // distinguishable from user tools by name alone. The original JSON-RPC
+        // method path is kept verbatim (e.g. `tools/list` → `mcp:tools/list`);
+        // no slash-to-colon conversion is applied.
+        $type = 'mcp:' . $method;
+        return new static($type, $id, new ArrayObject($params));
     }
 
     /**

@@ -17,7 +17,7 @@ If the response shape, auth, or origin needs to change, use [system-create-mcp-t
 
 ### 1. Manifest
 
-Add a second `listen` entry that points at the **same** class+method as the `remote` one, with `origin: ["mcp"]` and a `tools:call:<name>` event:
+Add a second `listen` entry that points at the **same** class+method as the `remote` one, with `origin: ["mcp"]` and the tool name as the event:
 
 ```json
 {
@@ -27,7 +27,7 @@ Add a second `listen` entry that points at the **same** class+method as the `rem
   "origin": ["remote"]
 },
 {
-  "event": "tools:call:getPricingList",
+  "event": "getPricingList",
   "description": "<human-readable description for the tools/list catalogue>",
   "class": "Example\\App\\Api\\AlertApi",
   "method": "onCountries",
@@ -39,7 +39,7 @@ Add a second `listen` entry that points at the **same** class+method as the `rem
 }
 ```
 
-The gateway expands `tools/call` `params.name` into `tools:call:<name>` and runs the listener with `params.arguments` as the event `request`. The handler runs unchanged.
+The gateway uses `tools/call` `params.name` verbatim as the event type and runs the listener with `params.arguments` as the event `request`. The handler runs unchanged.
 
 ### 2. Schemas (place in `<module>/schemas/` — NOT `schema/mcp/`)
 

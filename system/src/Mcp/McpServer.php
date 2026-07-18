@@ -163,10 +163,9 @@ class McpServer
             $event->setStatus(StatusEnum::ERROR, 'Internal error: ' . McpHelper::truncateForEcho($e->getMessage()));
         }
 
-        // tools:call:<name> with no listener -> friendly "Unknown tool".
-        if (str_starts_with($event->type, 'tools:call:') && $event->status === StatusEnum::UNDETERMINED) {
-            $name = substr($event->type, strlen('tools:call:'));
-            $event->setStatus(StatusEnum::NOT_FOUND, 'Unknown tool: ' . McpHelper::truncateForEcho($name));
+        // tools/call with no listener -> friendly "Unknown tool".
+        if ($event->isToolCall && $event->status === StatusEnum::UNDETERMINED) {
+            $event->setStatus(StatusEnum::NOT_FOUND, 'Unknown tool: ' . McpHelper::truncateForEcho($event->type));
         }
 
         // Notifications: dispatched for side effects, no reply.
@@ -185,7 +184,7 @@ class McpServer
      */
     private function buildResponse(McpEvent $event): array
     {
-        if (str_starts_with($event->type, 'tools:call:')) {
+        if ($event->isToolCall) {
             return [
                 'jsonrpc' => '2.0',
                 'id' => $event->jsonrpcId,
