@@ -334,8 +334,13 @@ class McpServer
     {
         global $api;
         $event = $this->event;
+
+        $token = (isset($_SERVER['HTTP_AUTHORIZATION']) ? array_map('trim', explode(' ', $_SERVER['HTTP_AUTHORIZATION'], 2)) : [null, null])
+            + [null, null];
+        $authInfo = trim(($token[0] ?? '') . ' ' . ($token[1] ? 'crc32=' . dechex(crc32($token[1])) : ''));
+        
         $api->log->info('system:mcp', McpHelper::truncateForEcho(
-            "MCP Request: status=$status, method=" . ($event?->type ?? '-')
+            "MCP Request[$authInfo]: status=$status, method=" . ($event?->type ?? '-')
             . ", size=" . strlen($this->rawBody) . "B"
         ), [
             'status' => $status,
@@ -344,3 +349,4 @@ class McpServer
         ]);
     }
 }
+ 
