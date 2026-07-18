@@ -4,10 +4,15 @@ All notable changes to the Zolinga framework (system module) will be documented 
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
+## [1.6.15] - 2026-07-20
+
+### Changed
+- **MCP tool names now allow `:` in the character set.** `McpHelper::TOOL_NAME_CHAR_CLASS` changed from `[A-Za-z0-9_-]` to `[A-Za-z0-9_:-]` so that Zolinga event names with colons (e.g. `my-module:search`) can be exposed as MCP tools verbatim. `McpHelper::isValidToolName()` now explicitly rejects names starting with `mcp:` to prevent collision with protocol events, replacing the previous implicit guarantee that relied on `:` being absent from the allowed charset.
+
 ## [1.6.14] - 2026-07-20
 
 ### Changed
-- **MCP protocol events are now prefixed with `mcp:`.** All non-`tools/call` JSON-RPC methods dispatched by the MCP gateway are prefixed with `mcp:` and keep their original method path verbatim (e.g. `initialize` → `mcp:initialize`, `tools/list` → `mcp:tools/list`, `notifications/initialized` → `mcp:notifications/initialized`). `tools/call` still uses the bare tool name as the event type. Since MCP tool names are `[A-Za-z0-9_-]` (no colons), they can never collide with the `mcp:` prefix. `McpTools::isReservedEvent()` now excludes protocol events with a single `str_starts_with($eventName, 'mcp:')` check instead of a hardcoded list — new protocol methods are automatically excluded.
+- **MCP protocol events are now prefixed with `mcp:`.** All non-`tools/call` JSON-RPC methods dispatched by the MCP gateway are prefixed with `mcp:` and keep their original method path verbatim (e.g. `initialize` → `mcp:initialize`, `tools/list` → `mcp:tools/list`, `notifications/initialized` → `mcp:notifications/initialized`). `tools/call` still uses the bare tool name as the event type. `McpTools::isReservedEvent()` excludes protocol events with a single `str_starts_with($eventName, 'mcp:')` check instead of a hardcoded list — new protocol methods are automatically excluded.
 
 ## [1.6.13] - 2026-07-20
 

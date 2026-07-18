@@ -75,14 +75,14 @@ with `params.name` set to that event name:
 
 ```json
 {
-  "event": "ipdefender-search",
-  "class": "\\Ipdefender\\Mcp\\SearchHandler",
+  "event": "my-module-search",
+  "class": "\\MyModule\\Mcp\\SearchHandler",
   "method": "onSearch",
   "origin": ["mcp"],
-  "description": "Search the trademark database.",
+  "description": "Search the database.",
   "schema": {
-    "request":  "module://ipdefender/schema/mcp/search-request.json",
-    "response": "module://ipdefender/schema/mcp/search-response.json"
+    "request":  "module://my-module/schema/mcp/search-request.json",
+    "response": "module://my-module/schema/mcp/search-response.json"
   }
 }
 ```
@@ -94,7 +94,7 @@ with `params.name` set to that event name:
 The handler class implements [`ListenerInterface`](:Zolinga Core:Events and Listeners) and receives an [`McpEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` and `isToolCall = true`. It sets the raw structured payload on `$event->response`; the gateway builds the MCP envelope:
 
 ```php
-namespace Ipdefender\Mcp;
+namespace MyModule\\Mcp;
 
 use Zolinga\System\Events\{ListenerInterface, McpEvent};
 use Zolinga\System\Types\StatusEnum;
@@ -124,7 +124,7 @@ class SearchHandler implements ListenerInterface
 
 # Reserved MCP Events
 
-All non-`tools/call` MCP events are prefixed with `mcp:` by the gateway (e.g. `mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`). The `McpTools` collector excludes any event whose name starts with `mcp:` from the tool list — they are MCP protocol events, not user-callable tools. Since MCP tool names are `[A-Za-z0-9_-]` (no colons), user tools can never collide with the `mcp:` prefix.
+All non-`tools/call` MCP events are prefixed with `mcp:` by the gateway (e.g. `mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`). The `McpTools` collector excludes any event whose name starts with `mcp:` from the tool list — they are MCP protocol events, not user-callable tools. `McpHelper::isValidToolName()` also explicitly rejects names starting with `mcp:` so user tools can never collide with the protocol prefix, even though `:` is now an allowed character in tool names.
 
 # Method-to-Event Mapping
 
@@ -184,7 +184,7 @@ Every response carries:
 
 # Schema Locations
 
-JSON Schema files referenced from MCP listener manifests are loaded with the plain `module://{module}/schema/{path}` URI. They live in the conventional `schema/` subfolder of a module (e.g. `module://ipdefender/schema/mcp/search-request.json` resolves to `modules/ipdefender/schema/mcp/search-request.json`).
+JSON Schema files referenced from MCP listener manifests are loaded with the plain `module://{module}/schema/{path}` URI. They live in the conventional `schema/` subfolder of a module (e.g. `module://my-module/schema/mcp/search-request.json` resolves to `modules/my-module/schema/mcp/search-request.json`).
 
 # Batching
 

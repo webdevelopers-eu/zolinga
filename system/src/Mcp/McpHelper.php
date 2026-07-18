@@ -19,8 +19,7 @@ use Zolinga\System\Types\StatusEnum;
 final class McpHelper
 {
     /**
-     * Maximum permitted length of an MCP tool name, per the MCP client
-     * guidance (`[A-Za-z0-9_-]{1,64}`).
+     * Maximum permitted length of an MCP tool name.
      */
     public const TOOL_NAME_MAX_LENGTH = 64;
 
@@ -55,9 +54,13 @@ final class McpHelper
 
     /**
      * Regex fragment for a single allowed character in an MCP tool name.
+     * Includes ':' so that Zolinga event names (e.g. `my-module:search`)
+     * can be used verbatim as MCP tool names. The `mcp:` prefix is
+     * reserved for protocol events and rejected separately by
+     * {@see self::isValidToolName()}.
      * Exposed so callers can build derived patterns if needed.
      */
-    public const TOOL_NAME_CHAR_CLASS = '[A-Za-z0-9_-]';
+    public const TOOL_NAME_CHAR_CLASS = '[A-Za-z0-9_:-]';
 
     private function __construct()
     {
@@ -106,10 +109,13 @@ final class McpHelper
      * Check whether a string is a valid MCP tool name.
      *
      * Tool names must be 1..{@see self::TOOL_NAME_MAX_LENGTH} characters long
-     * and contain only ASCII letters, digits, underscore and hyphen. This
-     * mirrors the constraint that the major MCP clients (Claude Desktop,
-     * Cursor, etc.) apply, so names that fail this check would be rejected
-     * or mangled by the client even though the gateway would dispatch them.
+     * and contain only ASCII letters, digits, underscore, hyphen and colon.
+     * The colon is allowed so that Zolinga event names (e.g.
+     * `my-module:search`) can be used verbatim as MCP tool names.
+     *
+     * Names starting with the `mcp:` prefix are rejected to prevent
+     * collision with protocol events dispatched by the gateway
+     * (e.g. `mcp:tools/list`).
      *
      * The same check is applied in two places:
      *
@@ -128,6 +134,9 @@ final class McpHelper
             return false;
         }
         if (strlen($name) > self::TOOL_NAME_MAX_LENGTH) {
+            return false;
+        }
+        if (str_starts_with($name, 'mcp:')) {
             return false;
         }
         return (bool) preg_match(

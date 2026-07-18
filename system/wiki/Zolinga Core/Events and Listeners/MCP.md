@@ -50,12 +50,10 @@ For `tools/call` invocations the gateway dispatches `McpEvent` with `type = "<na
 
 ### Tool name validation
 
-`<name>` must match `[A-Za-z0-9_-]{1,64}` (enforced by `McpHelper::isValidToolName()`). The same rule applies in two places so the manifest and the wire contract stay in sync:
+`<name>` must match `[A-Za-z0-9_:-]{1,64}` and must not start with `mcp:` (enforced by `McpHelper::isValidToolName()`). The colon is allowed so that Zolinga event names (e.g. `my-module:search`) can be used verbatim as MCP tool names. The `mcp:` prefix is reserved for protocol events. The same rule applies in two places so the manifest and the wire contract stay in sync:
 
 - A `tools/call` request with a `name` that fails the check is rejected with a JSON-RPC `-32602 Invalid params` error before the event is dispatched.
 - A listener whose declared `event` name (used as the tool name) is non-conforming is skipped by `tools/list` (and logged via `$api->log->error('system:mcp', ...)`) so it is neither advertised nor callable.
-
-Pick a name from `[A-Za-z0-9_-]{1,64}` (the convention used by Claude Desktop, Cursor, and other major MCP clients) and stick to it.
 
 ### What handlers do and don't set
 

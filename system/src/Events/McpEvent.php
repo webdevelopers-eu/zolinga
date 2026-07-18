@@ -40,12 +40,12 @@ use Zolinga\System\Types\OriginEnum;
  *
  * ```json
  * {
- *     "event": "ipdefender:search",
- *     "class": "\\Ipdefender\\Mcp\\SearchHandler",
+ *     "event": "my-module:search",
+ *     "class": "\\MyModule\\Mcp\\SearchHandler",
  *     "method": "onSearch",
  *     "origin": ["mcp"],
- *     "description": "Search the trademark database.",
- *     "schema": { "request": "module://ipdefender/schema/mcp/search-request.json" }
+ *     "description": "Search the database.",
+ *     "schema": { "request": "module://my-module/schema/mcp/search-request.json" }
  * }
  * ```
  *
@@ -169,13 +169,13 @@ class McpEvent extends RequestResponseEvent implements StoppableInterface
             $name = $params['name'] ?? null;
             if (!McpHelper::isValidToolName($name)) {
                 throw new McpInvalidParamsException(
-                    'tools/call "name" must be 1..' . McpHelper::TOOL_NAME_MAX_LENGTH . ' chars of [A-Za-z0-9_-].',
+                    'tools/call "name" must be 1..' . McpHelper::TOOL_NAME_MAX_LENGTH . ' chars of ' . McpHelper::TOOL_NAME_CHAR_CLASS . ' and must not start with "mcp:".',
                     $id
                 );
             }
             // The bare tool name is the event type. MCP tools are distinguished
-            // from protocol events by the absence of the `mcp:` prefix (tool
-            // names are [A-Za-z0-9_-], so they can never collide).
+            // from protocol events by the absence of the `mcp:` prefix, which
+            // isValidToolName() explicitly rejects.
             $type = $name;
             $arguments = $params['arguments'] ?? [];
             $request = is_array($arguments) ? $arguments : [];

@@ -105,15 +105,14 @@ class McpTools implements ListenerInterface
                 continue;
             }
 
-            // Reject tool names that don't conform to the MCP client-side
-            // character set (`[A-Za-z0-9_-]{1,64}`). Without this check the
-            // gateway would happily dispatch e.g. `foo bar`, but real-world
-            // MCP clients would reject or mangle such a name and the tool
-            // would be effectively uncallable. Skipping here keeps the
-            // manifest and the wire contract in sync: a bad name is neither
-            // advertised nor callable.
+            // Reject tool names that don't conform to the allowed character
+            // set (`[A-Za-z0-9_:-]{1,64}`, no `mcp:` prefix). Without this check
+            // the gateway would happily dispatch e.g. `foo bar`, but the name
+            // would be invalid and the tool effectively uncallable. Skipping
+            // here keeps the manifest and the wire contract in sync: a bad
+            // name is neither advertised nor callable.
             if (!McpHelper::isValidToolName($toolName)) {
-                $api->log->error('system:mcp', "MCP tool \"$toolName\" (event \"$eventName\") has an invalid name; tool names must be 1.." . McpHelper::TOOL_NAME_MAX_LENGTH . " chars of [A-Za-z0-9_-]. The listener will be skipped.", [
+                $api->log->error('system:mcp', "MCP tool \"$toolName\" (event \"$eventName\") has an invalid name; tool names must be 1.." . McpHelper::TOOL_NAME_MAX_LENGTH . " chars of " . McpHelper::TOOL_NAME_CHAR_CLASS . " and must not start with \"mcp:\". The listener will be skipped.", [
                     'event' => $eventName,
                     'tool' => $toolName,
                     'class' => (string) $atom['class'],
@@ -153,10 +152,11 @@ class McpTools implements ListenerInterface
      * All non-`tools/call` MCP events are prefixed with `mcp:` by the gateway
      * (e.g. `mcp:initialize`, `mcp:tools/list`,
      * `mcp:notifications/initialized`).
-     * User tool names are `[A-Za-z0-9_-]` (no colons), so they can never
-     * collide with the `mcp:` prefix. This lets us exclude protocol events
-     * with a single prefix check instead of a hardcoded list — new protocol
-     * methods are automatically excluded.
+     * `McpHelper::isValidToolName()` explicitly rejects names starting with
+     * `mcp:`, so user tools can never collide with the protocol prefix even
+     * though `:` is an allowed character. This lets us exclude protocol
+     * events with a single prefix check instead of a hardcoded list — new
+     * protocol methods are automatically excluded.
      *
      * @param string $eventName
      * @return bool
