@@ -4,6 +4,14 @@ All notable changes to the Zolinga framework (system module) will be documented 
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
+## [1.6.17] - 2026-07-21
+
+### Added
+- **`Mcp\Tools\ListEvent::addTool()`** — appends a tool to the `tools/list` response with validation. Checks the tool name against the MCP character class (`[A-Za-z0-9_:-]{1,64}`, no `mcp:` prefix) via `McpHelper::isValidToolName()` and rejects schemas that are not JSON objects (associative arrays), throwing `InvalidArgumentException` on any violation. Lets custom `tools/list` handlers build the catalogue programmatically without bypassing the wire contract.
+
+### Changed
+- **`McpTools::collectTools()`** now populates the response via `ListEvent::addTool()` instead of building the tool array directly. The name-format and schema-shape validation that `addTool()` provides now guards every tool the manifest walk emits; a tool that fails validation is logged and skipped rather than poisoning the response. Behavior (tool set, ordering, schemas) is unchanged.
+
 ## [1.6.16] - 2026-07-21
 
 ### Changed

@@ -38,9 +38,7 @@ class McpTools implements ListenerInterface
      */
     public function onList(ListEvent $event): void
     {
-        $event->response = [
-            'tools' => $this->collectTools(),
-        ];
+        $this->collectTools($event);
         $event->setStatus(StatusEnum::OK, 'OK');
     }
 
@@ -62,16 +60,17 @@ class McpTools implements ListenerInterface
      * declares a `schema.response` and is callable via `tools/call`.
      *
      * Tools failing condition 2 are skipped and an error is logged via
-     * `$api->log->error()`. Deduplicates by event name (highest priority
-     * wins).
+     * `$api->log->error()`. Each accepted tool is appended via
+     * {@see ListEvent::addTool()}, which validates the name format and the
+     * schema shapes. Deduplicates by event name (highest priority wins).
      *
-     * @return array<int, array<string, mixed>>
+     * @param ListEvent $event The event whose `response['tools']` is populated.
+     * @return void
      */
-    private function collectTools(): array
+    private function collectTools(ListEvent $event): void
     {
         global $api;
 
-        $tools = [];
         $seen = [];
 
         /** @var ListenAtom $atom */
@@ -127,23 +126,34 @@ class McpTools implements ListenerInterface
             }
             $seen[$eventName] = true;
 
-            $tool = [
-                'name' => $toolName,
-                'description' => (string) ($atom['description'] ?? ''),
-            ];
-
             $requestSchema = $this->loadSchema($atom['schema']['request'] ?? null);
-            $tool['inputSchema'] = $requestSchema ?? ['type' => 'object', 'additionalProperties' => true];
+            $inputSchema = $requestSchema ?? ['type' => 'object', 'additionalProperties' => true];
 
-            $tool['outputSchema'] = $responseSchema;
-
-            $tools[] = $tool;
+            try {
+                $event->addTool(
+                    $toolName,
+                    (string) ($atom['description'] ?? ''),
+                    $inputSchema,
+                    $responseSchema
+                );
+            } catch (\InvalidArgumentException $e) {
+                // addTool re-validates name and schema shape; a failure here
+                // means the manifest data is inconsistent with the wire
+                // contract. Log and skip rather than poisoning the response.
+                $api->log->error('system:mcp', 'Skipping MCP tool "' . $toolName . '": ' . $e->getMessage(), [
+                    'event' => $eventName,
+                    'tool' => $toolName,
+                    'class' => (string) $atom['class'],
+                ]);
+            }
         }
 
         // Stable order so clients get deterministic output.
-        usort($tools, fn (array $a, array $b): int => strcmp($a['name'], $b['name']));
-
-        return $tools;
+        $tools = $event->response['tools'] ?? [];
+        if (is_array($tools)) {
+            usort($tools, fn (array $a, array $b): int => strcmp($a['name'], $b['name']));
+            $event->response['tools'] = $tools;
+        }
     }
 
     /**

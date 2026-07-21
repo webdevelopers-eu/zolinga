@@ -51,3 +51,27 @@ curl -X POST http://localhost:8080/mcp \
 - [MCP (Model Context Protocol)](:Zolinga Core:Running the System:MCP)
 - [`initialize` event](:ref:event:initialize)
 - [`tools/call` event](:ref:event:tools/call)
+
+## Adding Tools Programmatically
+
+The `ListEvent` exposes `addTool()` for handlers that build the tool list themselves (instead of relying on the manifest walk in `McpTools`). It validates the tool name against the MCP character class (`[A-Za-z0-9_:-]{1,64}`, no `mcp:` prefix) and checks that both schemas are JSON objects (associative arrays), throwing `InvalidArgumentException` on any violation:
+
+```php
+use Zolinga\System\Events\{ListenerInterface};
+use Zolinga\System\Events\Mcp\Tools\ListEvent;
+use Zolinga\System\Types\StatusEnum;
+
+class MyToolsListHandler implements ListenerInterface
+{
+    public function onList(ListEvent $event): void
+    {
+        $event->addTool(
+            name: 'my-tool',
+            description: 'Does something useful.',
+            inputSchema: ['type' => 'object', 'properties' => ['q' => ['type' => 'string']]],
+            outputSchema: ['type' => 'object', 'properties' => ['hits' => ['type' => 'array']]],
+        );
+        $event->setStatus(StatusEnum::OK, 'OK');
+    }
+}
+```
