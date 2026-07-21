@@ -48,7 +48,7 @@ class McpInitializeHandler implements ListenerInterface
             'protocolVersion' => self::PROTOCOL_VERSION,
             'capabilities' => [
                 'tools' => ['listChanged' => false],
-                'resources' => [],
+                'resources' => new \stdClass(),
             ],
             'serverInfo' => $this->serverInfo,
             'instructions' => 'Use `tools/list` to discover available tools and `tools/call` to invoke them. '
