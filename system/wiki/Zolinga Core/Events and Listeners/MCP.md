@@ -12,7 +12,9 @@ The gateway dispatches one concrete subclass per JSON-RPC method. `McpEvent::fro
 | `prompts/list`        | `Mcp\Prompts\ListEvent`                      | `mcp:prompts/list`                   |
 | `prompts/get`         | `Mcp\Prompts\GetEvent`                       | `mcp:prompts/get`                    |
 | `resources/list`      | `Mcp\Resources\ListEvent`                    | `mcp:resources/list`                 |
-| `resources/read`      | `Mcp\Resources\ReadEvent`                    | `mcp:resources/read`                 |
+| `resources/read`      | `Mcp\Resources\ReadEvent`                    | `mcp:resources/read:<scheme>`        |
+
+The `resources/read` event type includes the URI scheme as a suffix (e.g. `mcp:resources/read:mcp-system`), allowing handlers to register for specific URI schemes. See [MCP Resources](:Zolinga Core:MCP:Resources) for details.
 | anything else         | —                                            | `McpMethodNotFoundException` thrown  |
 
 `Tools\CallEvent` is the only subclass whose `type` is not derived from the method name — it is the bare tool name (`params.name`) so the event dispatches to the tool's own listener. The other subclasses hard-code their `mcp:`-prefixed `type` in their constructor.

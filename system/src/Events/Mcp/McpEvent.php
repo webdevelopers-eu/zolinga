@@ -67,6 +67,23 @@ abstract class McpEvent extends RequestResponseEvent implements StoppableInterfa
     }
 
     /**
+     * Validate the response before it is sent to the client.
+     *
+     * Called by the MCP gateway before producing any output. If the response
+     * is invalid, this method should throw an exception that prevents the
+     * output from being produced. The base implementation does nothing;
+     * descendant event classes may override it to enforce response-level
+     * constraints (e.g. URI scheme whitelisting for resources).
+     *
+     * @return void
+     * @throws \Throwable If the response is invalid and must not be sent.
+     */
+    public function validateResponse(): void
+    {
+        // Base implementation: no validation. Override in descendants as needed.
+    }
+
+    /**
      * Specify data which should be serialized to JSON.
      *
      * @return array<string, mixed>
@@ -125,13 +142,13 @@ abstract class McpEvent extends RequestResponseEvent implements StoppableInterfa
     private static function buildEvent(string $method, string|int|null $id, array $params): McpEvent
     {
         return match ($method) {
-            'initialize' => new InitializeEvent($id, new ArrayObject($params)),
-            'tools/list' => new Tools\ListEvent($id, new ArrayObject($params)),
+            'initialize' => new InitializeEvent($id, $params),
+            'tools/list' => new Tools\ListEvent($id, $params),
             'tools/call' => new Tools\CallEvent($id, $params),
-            'prompts/list' => new Prompts\ListEvent($id, new ArrayObject($params)),
-            'prompts/get' => new Prompts\GetEvent($id, new ArrayObject($params)),
-            'resources/list' => new Resources\ListEvent($id, new ArrayObject($params)),
-            'resources/read' => new Resources\ReadEvent($id, new ArrayObject($params)),
+            'prompts/list' => new Prompts\ListEvent($id, $params),
+            'prompts/get' => new Prompts\GetEvent($id, $params),
+            'resources/list' => new Resources\ListEvent($id, $params),
+            'resources/read' => new Resources\ReadEvent($id, $params),
             default => throw new McpMethodNotFoundException(
                 'Method not found: ' . $method,
                 $id

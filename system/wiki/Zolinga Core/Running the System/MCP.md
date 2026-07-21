@@ -1,6 +1,11 @@
 # MCP (Model Context Protocol)
 
-Expose any Zolinga event as an [MCP](https://modelcontextprotocol.io/) tool. The endpoint at `public/mcp/index.php` accepts JSON-RPC 2.0 requests from MCP clients, dispatches them as [`\Zolinga\System\Events\Mcp\McpEvent`](:Zolinga Core:Events and Listeners:MCP) objects (one concrete subclass per JSON-RPC method) with the `mcp` origin, and serializes the response back as a JSON-RPC 2.0 message.
+Expose Zolinga events as [MCP](https://modelcontextprotocol.io/) tools and module files as MCP resources. The endpoint at `public/mcp/index.php` accepts JSON-RPC 2.0 requests from MCP clients, dispatches them as [`\Zolinga\System\Events\Mcp\McpEvent`](:Zolinga Core:Events and Listeners:MCP) objects (one concrete subclass per JSON-RPC method) with the `mcp` origin, and serializes the response back as a JSON-RPC 2.0 message.
+
+The gateway supports two MCP capability areas:
+
+- **Tools** — expose any Zolinga event as a callable tool. See [MCP Tools](:Zolinga Core:MCP:Tools).
+- **Resources** — expose module files (docs, images, etc.) as discoverable resources. See [MCP Resources](:Zolinga Core:MCP:Resources).
 
 This is a non-streaming implementation of MCP — every request returns a single JSON-RPC response. The endpoint is HTTP `POST` only.
 

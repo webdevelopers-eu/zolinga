@@ -174,11 +174,27 @@ class McpServer
     /**
      * Build the JSON-RPC 2.0 response payload from a dispatched event.
      *
+     * Calls {@see McpEvent::validateResponse()} before producing any output
+     * to the client. If validation throws, the event status is set to ERROR
+     * and an error response is returned instead.
+     *
      * @param McpEvent $event
      * @return array<string, mixed>
      */
     private function buildResponse(McpEvent $event): array
     {
+        // Validate the response before producing any output to the client.
+        try {
+            $event->validateResponse();
+        } catch (\Throwable $e) {
+            global $api;
+            $api->log->error('system:mcp', 'MCP response validation failed: ' . McpHelper::truncateForEcho($e->getMessage()), [
+                'event' => McpHelper::truncateForEcho($event->type),
+                'exception' => $e::class,
+            ]);
+            $event->setStatus(StatusEnum::ERROR, 'Response validation failed: ' . McpHelper::truncateForEcho($e->getMessage()));
+        }
+
         if ($event instanceof CallEvent) {
             return [
                 'jsonrpc' => '2.0',
@@ -260,9 +276,9 @@ class McpServer
     }
 
     /**
-     * Emit HTTP 405 for non-POST requests.
+     * Send a 405 Method Not Allowed response for non-POST requests.
      *
-     * @param string $method
+     * @param string $method The HTTP method that was used.
      * @return void
      */
     private function sendMethodNotAllowed(string $method): void
@@ -284,12 +300,7 @@ class McpServer
     }
 
     /**
-     * Respond to an OPTIONS probe with 204 No Content.
-     *
-     * Safety net: normally OPTIONS is handled by public/mcp/index.php which
-     * exits before the system loads. This is reached only if McpServer is
-     * invoked directly. CORS headers are not emitted here — that is the
-     * entry point's responsibility.
+     * Send a 204 No Content for CORS preflight (OPTIONS) requests.
      *
      * @return void
      */
@@ -302,12 +313,11 @@ class McpServer
     }
 
     /**
-     * Send status-specific HTTP headers. Currently handles UNAUTHORIZED
-     * (401) by emitting the WWW-Authenticate header pointing to the
-     * OAuth Protected Resource Metadata (RFC 9728). Easy to extend for
-     * other status-specific headers.
+     * Send additional HTTP headers based on the event status.
      *
-     * @param StatusEnum|null $status
+     * Currently only emits the WWW-Authenticate header for 401 Unauthorized.
+     *
+     * @param ?StatusEnum $status The event status.
      * @return void
      */
     private function sendHeadersForStatus(?StatusEnum $status): void
@@ -320,9 +330,9 @@ class McpServer
     }
 
     /**
-     * Write a one-line access log entry.
+     * Log the MCP access request.
      *
-     * @param int $status HTTP status code sent.
+     * @param int $status The HTTP status code.
      * @return void
      */
     private function logAccess(int $status): void
@@ -344,4 +354,3 @@ class McpServer
         ]);
     }
 }
- 

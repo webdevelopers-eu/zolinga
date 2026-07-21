@@ -4,6 +4,21 @@ All notable changes to the Zolinga framework (system module) will be documented 
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
+## [1.6.19] - 2026-07-22
+
+### Added
+- **MCP `resources/list` and `resources/read` support.** The MCP gateway now implements the MCP Resources protocol. Module authors can drop `.meta.json` descriptor files (alongside content files) into `modules/<module>/mcp/resources/` to expose them as discoverable, readable resources. The `McpResourcesListHandler` auto-discovers them and rewrites internal `module://` URIs to the external `mcp-system:static:<module>:<basename>` scheme so internal paths are never leaked. The `McpResourcesReadHandler` serves text resources as `{ text }` and binary resources as `{ blob }` (base64-encoded) based on the `mimeType` in the `.meta.json`.
+- **`McpEvent::validateResponse()`** — new hook method called by the gateway before producing any output to clients. The base implementation is a no-op; descendant event classes can override it to enforce response-level constraints (e.g. URI scheme whitelisting). `Resources\ListEvent` and `Resources\ReadEvent` override it to validate that all resource URIs use allowed schemes (`mcp-system`, `http`, `https`).
+- **`Resources\ListEvent::addResourceJson()` and `addResource()`** — append resource descriptors to the `resources/list` response with validation (non-empty `uri` with allowed scheme, non-empty `name`).
+- **`Resources\ListEvent::validateResponse()`** — validates all resource URIs in the response against the allowed scheme whitelist.
+- **`Resources\ReadEvent::validateResponse()`** — validates the response content URIs against the allowed scheme whitelist.
+- **`ResourcesEvent::ALLOWED_URI_SCHEMES`** constant and `isAllowedScheme()` method — defines the whitelist of URI schemes allowed in resource responses (`mcp-system`, `http`, `https`).
+- **`resources` capability** added to the `initialize` response. The `instructions` text now mentions `resources/list` and `resources/read`.
+
+### Changed
+- **`Resources\ReadEvent` constructor** now extracts the URI scheme from the `uri` request parameter and appends it to the event type (e.g. `mcp:resources/read:mcp-system`), enabling per-scheme handler registration.
+- **`McpServer::buildResponse()`** now calls `$event->validateResponse()` before producing output. If validation throws, the event status is set to `ERROR` and an error response is returned.
+
 ## [1.6.18] - 2026-07-21
 
 ### Changed

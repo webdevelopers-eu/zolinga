@@ -1,6 +1,6 @@
 {
   "name": "Zolinga Framework",
-  "version": "1.6.18",
+  "version": "1.6.19",
   "description": "Zolinga PHP framework that makes sense.",
   "authors": [
     "Danny Sevcik <danny@zolinga.net>"
@@ -240,6 +240,24 @@
         "request": "module://system/schema/mcp/echo-request.json",
         "response": "module://system/schema/mcp/echo-response.json"
       }
+    },
+    {
+      "event": "mcp:resources/list",
+      "description": "MCP `resources/list` request handler. Discovers module-provided resources from `mcp/resources/*.meta.json` files and returns them with rewritten `mcp-system:static:<module>:<basename>` URIs.",
+      "class": "\\Zolinga\\System\\Mcp\\McpResourcesListHandler",
+      "method": "onList",
+      "origin": [
+        "mcp"
+      ]
+    },
+    {
+      "event": "mcp:resources/read:mcp-system",
+      "description": "MCP `resources/read` request handler for the `mcp-system` URI scheme. Reads a resource file by its `mcp-system:static:<module>:<basename>` URI and returns the contents as text or blob.",
+      "class": "\\Zolinga\\System\\Mcp\\McpResourcesReadHandler",
+      "method": "onRead",
+      "origin": [
+        "mcp"
+      ]
     }
   ],
   "emit": [
@@ -383,6 +401,22 @@
       "event": "mcp:tools/list",
       "description": "MCP `tools/list` request, dispatched by the MCP gateway. Returns the list of available MCP tools (every listener registered with `origin: [\"mcp\"]` that declares a `schema.response`).",
       "class": "\\Zolinga\\System\\Events\\Mcp\\Tools\\ListEvent",
+      "origin": [
+        "mcp"
+      ]
+    },
+    {
+      "event": "mcp:resources/list",
+      "description": "MCP `resources/list` request, dispatched by the MCP gateway. Returns the list of available resources discovered from module `mcp/resources/*.meta.json` files.",
+      "class": "\\Zolinga\\System\\Events\\Mcp\\Resources\\ListEvent",
+      "origin": [
+        "mcp"
+      ]
+    },
+    {
+      "event": "mcp:resources/read:*",
+      "description": "MCP `resources/read` request, dispatched by the MCP gateway. The suffix is the URI scheme of the requested resource (e.g. `mcp-system`).",
+      "class": "\\Zolinga\\System\\Events\\Mcp\\Resources\\ReadEvent",
       "origin": [
         "mcp"
       ]

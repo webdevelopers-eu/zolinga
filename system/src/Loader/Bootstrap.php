@@ -120,12 +120,16 @@ class Bootstrap
     {
         global $api;
 
-        // Make sure SESSION cookie is secure, uses HTTPOnly and SameSite=Strict
-        session_set_cookie_params([
-            'secure' => IS_HTTPS, // set to true when HTTPS is available
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
+        // Check if session.use_cookies is not disabled
+        if (ini_get('session.use_cookies')) {
+            // Make sure SESSION cookie is secure, uses HTTPOnly and SameSite=Strict
+            session_set_cookie_params([
+                'secure' => IS_HTTPS, // set to true when HTTPS is available
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ]);
+        } // else consider not starting session? will it break anything?
+
 
         if (session_status() === PHP_SESSION_NONE) {
             if (!session_start()) {
