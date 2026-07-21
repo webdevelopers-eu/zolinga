@@ -1,6 +1,6 @@
 # `tools/list` Event
 
-The MCP `tools/list` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) with the [MCP event class](:Zolinga Core:Events and Listeners:MCP) and the `mcp` origin.
+The MCP `tools/list` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as a [`Tools\ListEvent`](:Zolinga Core:Events and Listeners:MCP) with the `mcp` origin.
 
 The system-provided [`\Zolinga\System\Mcp\McpTools::onList()`](:ref:class:Zolinga\\System\\Mcp\\McpTools) handles this event, walks the merged manifest and returns every listener that opts in to the `mcp` origin AND declares a `schema.response` (and is not a reserved MCP protocol event) as an MCP tool. The listener's event name is used verbatim as the JSON-RPC tool `name`.
 

@@ -4,6 +4,16 @@ All notable changes to the Zolinga framework (system module) will be documented 
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
+## [1.6.16] - 2026-07-21
+
+### Changed
+- **MCP event class hierarchy introduced.** The single `\Zolinga\System\Events\McpEvent` class is now an abstract base under the new `\Zolinga\System\Events\Mcp` namespace, with one concrete subclass per JSON-RPC method: `InitializeEvent` (`initialize`), `Tools\ListEvent` (`tools/list`), `Tools\CallEvent` (`tools/call`), `Prompts\ListEvent`/`Prompts\GetEvent` (`prompts/*`), and `Resources\ListEvent`/`Resources\ReadEvent` (`resources/*`). `McpEvent::fromJsonRpc()` resolves the correct subclass via a `match` on the JSON-RPC `method`. The system manifest now type-hints `mcp:initialize` and `mcp:tools/list` listeners with their concrete event classes (`InitializeEvent`, `Tools\ListEvent`) instead of the generic `McpEvent`.
+
+### Removed
+- **Legacy `\Zolinga\System\Events\McpEvent`** (the old flat class at `src/Events/McpEvent.php`) — replaced by the `Mcp` namespace hierarchy. Tool handlers now type-hint `Tools\CallEvent` instead of `McpEvent`.
+- **`McpEvent::$isToolCall` flag.** The gateway now distinguishes `tools/call` invocations by `instanceof CallEvent` (and wraps the response in the MCP envelope accordingly) instead of a boolean flag set by `fromJsonRpc()`.
+- **`McpRequestValidator`** class — its validation logic was already moved into `McpEvent::fromJsonRpc()` in 1.6.8; the leftover dead file (`src/Mcp/McpRequestValidator.php`) is now deleted.
+
 ## [1.6.15] - 2026-07-20
 
 ### Changed

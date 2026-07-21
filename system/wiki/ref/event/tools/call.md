@@ -1,6 +1,6 @@
 # `tools/call` Event
 
-The MCP `tools/call` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as an [`McpEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` (the bare tool name), `isToolCall = true`, and the `mcp` origin.
+The MCP `tools/call` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as a [`Tools\CallEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` (the bare tool name) and the `mcp` origin.
 
 The gateway uses `params.name` verbatim as the event type and passes `params.arguments` as the event request. The tool's handler sets the raw structured payload on `$event->response`; the gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope and serializes it as the JSON-RPC `result`.
 
@@ -58,12 +58,13 @@ curl -X POST http://localhost:8080/mcp \
 ## Handler Example
 
 ```php
-use Zolinga\System\Events\{ListenerInterface, McpEvent};
+use Zolinga\System\Events\{ListenerInterface};
+use Zolinga\System\Events\Mcp\Tools\CallEvent;
 use Zolinga\System\Types\StatusEnum;
 
 class MyEchoHandler implements ListenerInterface
 {
-    public function onEcho(McpEvent $event): void
+    public function onEcho(CallEvent $event): void
     {
         $message = $event->request['message'] ?? '';
         if (!is_string($message) || $message === '') {

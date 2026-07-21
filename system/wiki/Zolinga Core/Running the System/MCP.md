@@ -1,6 +1,6 @@
 # MCP (Model Context Protocol)
 
-Expose any Zolinga event as an [MCP](https://modelcontextprotocol.io/) tool. The endpoint at `public/mcp/index.php` accepts JSON-RPC 2.0 requests from MCP clients, dispatches them as [`\Zolinga\System\Events\McpEvent`](:Zolinga Core:Events and Listeners:MCP) objects with the `mcp` origin, and serializes the response back as a JSON-RPC 2.0 message.
+Expose any Zolinga event as an [MCP](https://modelcontextprotocol.io/) tool. The endpoint at `public/mcp/index.php` accepts JSON-RPC 2.0 requests from MCP clients, dispatches them as [`\Zolinga\System\Events\Mcp\McpEvent`](:Zolinga Core:Events and Listeners:MCP) objects (one concrete subclass per JSON-RPC method) with the `mcp` origin, and serializes the response back as a JSON-RPC 2.0 message.
 
 This is a non-streaming implementation of MCP — every request returns a single JSON-RPC response. The endpoint is HTTP `POST` only.
 
@@ -46,7 +46,7 @@ curl -X POST http://localhost:8080/mcp \
   }'
 ```
 
-The gateway translates the JSON-RPC method to a Zolinga event by replacing `/` with `:`. For `tools/call` specifically, it uses the bare tool name (`params.name`) as the event type and passes `params.arguments` as the event request. So this request dispatches an `McpEvent` with `type = "echo"` and `request = {"message": "Hello MCP"}`. The tool handler sets the **raw structured payload** on `$event->response` (it must conform to the tool's `outputSchema`); the gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope.
+The gateway translates the JSON-RPC method to a Zolinga event by replacing `/` with `:`. For `tools/call` specifically, it uses the bare tool name (`params.name`) as the event type and passes `params.arguments` as the event request. So this request dispatches a `Tools\CallEvent` with `type = "echo"` and `request = {"message": "Hello MCP"}`. The tool handler sets the **raw structured payload** on `$event->response` (it must conform to the tool's `outputSchema`); the gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope.
 
 Response (per the [MCP `tools/call` spec](https://modelcontextprotocol.io/specification/2025-06-18/server/tools)):
 
@@ -91,17 +91,18 @@ with `params.name` set to that event name:
 - `event: "<name>"` — the event name is the JSON-RPC tool name. Clients invoke it via `tools/call` with `params.name = "<name>"`.
 - `schema.request` / `schema.response` — each value is a [Zolinga URI](:Zolinga Core:Paths and Zolinga URI) that resolves to a JSON Schema file. The MCP `tools/list` response embeds the parsed schema as `inputSchema` / `outputSchema`. **`schema.response` is required** for the tool to be exposed by `tools/list` — `McpTools` logs an error and skips the tool when it is missing.
 
-The handler class implements [`ListenerInterface`](:Zolinga Core:Events and Listeners) and receives an [`McpEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` and `isToolCall = true`. It sets the raw structured payload on `$event->response`; the gateway builds the MCP envelope:
+The handler class implements [`ListenerInterface`](:Zolinga Core:Events and Listeners) and receives a [`Tools\CallEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"`. It sets the raw structured payload on `$event->response`; the gateway builds the MCP envelope:
 
 ```php
 namespace MyModule\\Mcp;
 
-use Zolinga\System\Events\{ListenerInterface, McpEvent};
+use Zolinga\System\Events\{ListenerInterface};
+use Zolinga\System\Events\Mcp\Tools\CallEvent;
 use Zolinga\System\Types\StatusEnum;
 
 class SearchHandler implements ListenerInterface
 {
-    public function onSearch(McpEvent $event): void
+    public function onSearch(CallEvent $event): void
     {
         $query = $event->request['query'] ?? null;
         if (!is_string($query) || $query === '') {
@@ -150,7 +151,7 @@ For non-`tools/call` methods (initialize, tools/list, notifications/*, etc.):
 | response `error.code`      | derived from `$event->status` (see Error Mapping) |
 | `notifications/*` (no id)  | dispatched, no reply sent |
 
-For `tools/call` invocations, the gateway dispatches an [`McpEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` (the bare tool name) and `isToolCall = true`:
+For `tools/call` invocations, the gateway dispatches a [`Tools\CallEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` (the bare tool name):
 
 | JSON-RPC 2.0                | Zolinga |
 |----------------------------|---------|
@@ -188,14 +189,14 @@ JSON Schema files referenced from MCP listener manifests are loaded with the pla
 
 # Batching
 
-The endpoint accepts a JSON-RPC 2.0 batch (an array of requests). The response is an array of responses; if the entire batch consists of notifications, the response is HTTP 204 No Content.
+Not supported. This is a non-streaming implementation of the MCP Streamable HTTP spec, which uses one JSON-RPC message per HTTP request. A top-level JSON array is rejected with a `-32600 Invalid request` error ("Batches are not supported").
 
 # Architecture
 
 | Class | Purpose |
 |-------|---------|
 | [`McpServer`](:ref:class:Zolinga\\System\\Mcp\\McpServer) | Stateful per-request orchestrator: parses the body, dispatches, sends the reply. Thin JSON-RPC-to-Zolinga translator: each JSON-RPC `method` becomes an event `type` by replacing `/` with `:`. `tools/call` uses the bare tool name (`params.name`) as the event `type` with `params.arguments` as the event request; the gateway wraps the response in the MCP envelope. |
-| [`McpRequestValidator`](:ref:class:Zolinga\System\Mcp\McpRequestValidator) | Validates JSON-RPC 2.0 envelopes. |
+| [`Mcp\McpEvent`](:ref:class:Zolinga\\System\\Events\\Mcp\\McpEvent) | Abstract base event for all MCP JSON-RPC requests. `McpEvent::fromJsonRpc()` validates the envelope and resolves the concrete subclass (`InitializeEvent`, `Tools\ListEvent`, `Tools\CallEvent`, `Prompts\*`, `Resources\*`). |
 | [`McpInitializeHandler`](:ref:class:Zolinga\System\Mcp\McpInitializeHandler) | Listens to the `initialize` event; returns the lifecycle payload. |
 | [`McpTools`](:ref:class:Zolinga\\System\\Mcp\\McpTools) | `onList` for `mcp:tools/list`; returns the tool catalogue. Excludes any tool without a `schema.response` declaration. |
 | [`McpHelper`](:ref:class:Zolinga\System\Mcp\McpHelper) | Misc helpers (status → error code, response normalization, `envelope()` for `tools/call` results). |
@@ -207,6 +208,6 @@ Configure your web server so that `/mcp` is reachable only by trusted origins. T
 
 # See Also
 
-- [`\Zolinga\System\Events\McpEvent`](:Zolinga Core:Events and Listeners:MCP)
+- [`\Zolinga\System\Events\Mcp\McpEvent`](:Zolinga Core:Events and Listeners:MCP)
 - [Paths and Zolinga URI](:Zolinga Core:Paths and Zolinga URI)
 - [MCP specification](https://modelcontextprotocol.io/specification/2025-06-18)

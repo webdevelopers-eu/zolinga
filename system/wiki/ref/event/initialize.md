@@ -1,6 +1,6 @@
 # `initialize` Event
 
-The MCP `initialize` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) at `public/mcp/index.php` with the [MCP event class](:Zolinga Core:Events and Listeners:MCP) and the `mcp` origin.
+The MCP `initialize` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) at `public/mcp/index.php` as an [`InitializeEvent`](:Zolinga Core:Events and Listeners:MCP) with the `mcp` origin.
 
 The system-provided [`\Zolinga\System\Mcp\McpInitializeHandler`](:ref:class:Zolinga\System\Mcp\McpInitializeHandler) handles this event and returns the lifecycle initialization payload:
 
