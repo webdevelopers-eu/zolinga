@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
-use Zolinga\System\Events\{ListenerInterface, McpEvent};
+use Zolinga\System\Events\{ListenerInterface};
+use Zolinga\System\Events\Mcp\InitializeEvent;
 use Zolinga\System\Types\StatusEnum;
 
 /**
@@ -61,11 +62,11 @@ class McpInitializeHandler implements ListenerInterface
     /**
      * Handle the MCP `initialize` request.
      *
-     * @param McpEvent $event The event whose `type` is `initialize` and whose
+     * @param InitializeEvent $event The event whose `type` is `initialize` and whose
      *                        `request` carries the JSON-RPC `params` payload.
      * @return void
      */
-    public function onInitialize(McpEvent $event): void
+    public function onInitialize(InitializeEvent $event): void
     {
         $event->response = [
             'protocolVersion' => self::PROTOCOL_VERSION,

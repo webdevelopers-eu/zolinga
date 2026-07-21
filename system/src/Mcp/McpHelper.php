@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
-use Zolinga\System\Events\McpEvent;
+use Zolinga\System\Events\Mcp\McpEvent;
 use Zolinga\System\Types\StatusEnum;
 
 /**

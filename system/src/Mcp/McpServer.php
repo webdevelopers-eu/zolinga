@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
-use Zolinga\System\Events\McpEvent;
+use Zolinga\System\Events\Mcp\{McpEvent, Tools\CallEvent};
 use Zolinga\System\Mcp\Exceptions\{McpException, McpInvalidRequestException, McpMethodNotFoundException, McpParseErrorException};
 use Zolinga\System\Types\StatusEnum;
 
@@ -163,11 +163,6 @@ class McpServer
             $event->setStatus(StatusEnum::ERROR, 'Internal error: ' . McpHelper::truncateForEcho($e->getMessage()));
         }
 
-        // tools/call with no listener -> friendly "Unknown tool".
-        if ($event->isToolCall && $event->status === StatusEnum::UNDETERMINED) {
-            $event->setStatus(StatusEnum::NOT_FOUND, 'Unknown tool: ' . McpHelper::truncateForEcho($event->type));
-        }
-
         // Notifications: dispatched for side effects, no reply.
         if ($event->jsonrpcId === null) {
             return null;
@@ -184,7 +179,7 @@ class McpServer
      */
     private function buildResponse(McpEvent $event): array
     {
-        if ($event->isToolCall) {
+        if ($event instanceof CallEvent) {
             return [
                 'jsonrpc' => '2.0',
                 'id' => $event->jsonrpcId,

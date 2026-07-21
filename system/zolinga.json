@@ -374,7 +374,7 @@
     {
       "event": "mcp:initialize",
       "description": "MCP `initialize` request, dispatched by the MCP gateway. Returns the lifecycle initialization payload (protocolVersion, capabilities, serverInfo, instructions).",
-      "class": "\\Zolinga\\System\\Events\\McpEvent",
+      "class": "\\Zolinga\\System\\Events\\Mcp\\InitializeEvent",
       "origin": [
         "mcp"
       ]
@@ -382,7 +382,7 @@
     {
       "event": "mcp:tools/list",
       "description": "MCP `tools/list` request, dispatched by the MCP gateway. Returns the list of available MCP tools (every listener registered with `origin: [\"mcp\"]` that declares a `schema.response`).",
-      "class": "\\Zolinga\\System\\Events\\McpEvent",
+      "class": "\\Zolinga\\System\\Events\\Mcp\\Tools\\ListEvent",
       "origin": [
         "mcp"
       ]

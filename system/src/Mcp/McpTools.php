@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
-use Zolinga\System\Events\{ListenerInterface, McpEvent};
+use Zolinga\System\Events\{ListenerInterface};
+use Zolinga\System\Events\Mcp\Tools\ListEvent;
 use Zolinga\System\Types\{OriginEnum, StatusEnum};
 use Zolinga\System\Config\Atom\ListenAtom;
 
@@ -32,10 +33,10 @@ class McpTools implements ListenerInterface
      * Handle `tools/list`. Returns a `{ tools: [...] }` payload describing all
      * listeners that opt in to the `mcp` origin and have a `schema.response`.
      *
-     * @param McpEvent $event
+     * @param ListEvent $event
      * @return void
      */
-    public function onList(McpEvent $event): void
+    public function onList(ListEvent $event): void
     {
         $event->response = [
             'tools' => $this->collectTools(),
