@@ -2,7 +2,7 @@
 
 The MCP `tools/list` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as a [`Tools\ListEvent`](:Zolinga Core:Events and Listeners:MCP) with the `mcp` origin.
 
-The system-provided [`\Zolinga\System\Mcp\McpTools::onList()`](:ref:class:Zolinga\\System\\Mcp\\McpTools) handles this event, walks the merged manifest and returns every listener that opts in to the `mcp` origin AND declares a `schema.response` (and is not a reserved MCP protocol event) as an MCP tool. The listener's event name is used verbatim as the JSON-RPC tool `name`.
+The system-provided [`\Zolinga\System\Mcp\McpToolsListHandler::onList()`](:ref:class:Zolinga\\System\\Mcp\\McpToolsListHandler) handles this event, walks the merged manifest and returns every listener that opts in to the `mcp` origin AND declares a `schema.response` (and is not a reserved MCP protocol event) as an MCP tool. The listener's event name is used verbatim as the JSON-RPC tool `name`.
 
 Reserved MCP protocol methods (`mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`) are excluded from the tool list. Listeners without a `schema.response` declaration are also excluded and an error is logged.
 
@@ -54,7 +54,7 @@ curl -X POST http://localhost:8080/mcp \
 
 ## Adding Tools Programmatically
 
-The `ListEvent` exposes `addTool()` for handlers that build the tool list themselves (instead of relying on the manifest walk in `McpTools`). It validates the tool name against the MCP character class (`[A-Za-z0-9_:-]{1,64}`, no `mcp:` prefix) and checks that both schemas are JSON objects (associative arrays), throwing `InvalidArgumentException` on any violation:
+The `ListEvent` exposes `addTool()` for handlers that build the tool list themselves (instead of relying on the manifest walk in `McpToolsListHandler`). It validates the tool name against the MCP character class (`[A-Za-z0-9_:-]{1,64}`, no `mcp:` prefix) and checks that both schemas are JSON objects (associative arrays), throwing `InvalidArgumentException` on any violation:
 
 ```php
 use Zolinga\System\Events\{ListenerInterface};

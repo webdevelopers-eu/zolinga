@@ -1,6 +1,6 @@
 ---
 name: system-convert-remote-event-to-mcp-tool
-description: Use when exposing an existing `origin: ["remote"]` listener as an MCP tool without rewriting the handler. Covers the one-line manifest pattern that re-uses the same class+method, plus the minimal schema work needed to satisfy `McpTools::collectTools()`. Complements system-create-mcp-tool (which covers the greenfield case).
+description: Use when exposing an existing `origin: ["remote"]` listener as an MCP tool without rewriting the handler. Covers the one-line manifest pattern that re-uses the same class+method, plus the minimal schema work needed to satisfy `McpToolsListHandler::collectTools()`. Complements system-create-mcp-tool (which covers the greenfield case).
 ---
 
 # Convert a `remote` Event into an MCP Tool
@@ -55,7 +55,7 @@ Bump the module `version` and run `bin/zolinga` (no parameters). The manifest ca
 
 ### Empty `properties` becomes `[]` on the wire
 
-`McpTools::loadSchema()` does `json_decode($contents, true)`. An empty JSON `{}` becomes an empty PHP array, which `json_encode` re-serialises as `[]`. Strict MCP clients then reject the tool with *"Incorrect type. Expected 'object'"*.
+`McpToolsListHandler::loadSchema()` does `json_decode($contents, true)`. An empty JSON `{}` becomes an empty PHP array, which `json_encode` re-serialises as `[]`. Strict MCP clients then reject the tool with *"Incorrect type. Expected 'object'"*.
 
 **Fix** — always give `properties` at least one entry, even if no-op:
 

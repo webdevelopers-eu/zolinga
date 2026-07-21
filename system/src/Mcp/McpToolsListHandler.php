@@ -27,7 +27,7 @@ use Zolinga\System\Config\Atom\ListenAtom;
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-06-03
  */
-class McpTools implements ListenerInterface
+class McpToolsListHandler implements ListenerInterface
 {
     /**
      * Handle `tools/list`. Returns a `{ tools: [...] }` payload describing all

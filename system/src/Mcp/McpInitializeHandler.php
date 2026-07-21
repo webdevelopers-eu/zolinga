@@ -18,7 +18,7 @@ use Zolinga\System\Types\StatusEnum;
  * - `serverInfo`      — `{ name, title, version }` from the system manifest.
  * - `instructions`    — human-readable description of the server.
  *
- * Tool discovery lives in {@see McpTools::onList()} (the `tools/list` method).
+ * Tool discovery lives in {@see McpToolsListHandler::onList()} (the `tools/list` method).
  *
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-06-03

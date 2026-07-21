@@ -130,7 +130,7 @@ class MyEchoHandler implements ListenerInterface
 }
 ```
 
-The `schema.response` declaration is **required** for the tool to be exposed in `tools/list` — `McpTools::collectTools()` skips any tool without one and logs an error.
+The `schema.response` declaration is **required** for the tool to be exposed in `tools/list` — `McpToolsListHandler::collectTools()` skips any tool without one and logs an error.
 
 ## See Also
 

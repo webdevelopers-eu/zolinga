@@ -11,7 +11,7 @@ use Zolinga\System\Types\StatusEnum;
  * Uncategorised helpers for the MCP gateway.
  *
  * Use sparingly — prefer a dedicated class (`McpInitializeHandler`,
- * `McpTools`, etc.) when a helper carries real domain logic.
+ * `McpToolsListHandler`, etc.) when a helper carries real domain logic.
  *
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-06-03
@@ -121,7 +121,7 @@ final class McpHelper
      *
      * - {@see McpServer::dispatchOne()} rejects `tools/call` requests with
      *   an invalid `name` argument with a JSON-RPC `Invalid params` error.
-     * - {@see McpTools::collectTools()} skips listeners whose declared tool
+     * - {@see McpToolsListHandler::collectTools()} skips listeners whose declared tool
      *   name fails this check (logging an error) so the bad tool is never
      *   advertised in `tools/list` and never callable in practice.
      *

@@ -89,7 +89,7 @@ with `params.name` set to that event name:
 
 - `origin: ["mcp"]` — opt in to MCP delivery.
 - `event: "<name>"` — the event name is the JSON-RPC tool name. Clients invoke it via `tools/call` with `params.name = "<name>"`.
-- `schema.request` / `schema.response` — each value is a [Zolinga URI](:Zolinga Core:Paths and Zolinga URI) that resolves to a JSON Schema file. The MCP `tools/list` response embeds the parsed schema as `inputSchema` / `outputSchema`. **`schema.response` is required** for the tool to be exposed by `tools/list` — `McpTools` logs an error and skips the tool when it is missing.
+- `schema.request` / `schema.response` — each value is a [Zolinga URI](:Zolinga Core:Paths and Zolinga URI) that resolves to a JSON Schema file. The MCP `tools/list` response embeds the parsed schema as `inputSchema` / `outputSchema`. **`schema.response` is required** for the tool to be exposed by `tools/list` — `McpToolsListHandler` logs an error and skips the tool when it is missing.
 
 The handler class implements [`ListenerInterface`](:Zolinga Core:Events and Listeners) and receives a [`Tools\CallEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"`. It sets the raw structured payload on `$event->response`; the gateway builds the MCP envelope:
 
@@ -125,7 +125,7 @@ class SearchHandler implements ListenerInterface
 
 # Reserved MCP Events
 
-All non-`tools/call` MCP events are prefixed with `mcp:` by the gateway (e.g. `mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`). The `McpTools` collector excludes any event whose name starts with `mcp:` from the tool list — they are MCP protocol events, not user-callable tools. `McpHelper::isValidToolName()` also explicitly rejects names starting with `mcp:` so user tools can never collide with the protocol prefix, even though `:` is now an allowed character in tool names.
+All non-`tools/call` MCP events are prefixed with `mcp:` by the gateway (e.g. `mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`). The `McpToolsListHandler` collector excludes any event whose name starts with `mcp:` from the tool list — they are MCP protocol events, not user-callable tools. `McpHelper::isValidToolName()` also explicitly rejects names starting with `mcp:` so user tools can never collide with the protocol prefix, even though `:` is now an allowed character in tool names.
 
 # Method-to-Event Mapping
 
@@ -198,7 +198,7 @@ Not supported. This is a non-streaming implementation of the MCP Streamable HTTP
 | [`McpServer`](:ref:class:Zolinga\\System\\Mcp\\McpServer) | Stateful per-request orchestrator: parses the body, dispatches, sends the reply. Thin JSON-RPC-to-Zolinga translator: each JSON-RPC `method` becomes an event `type` by replacing `/` with `:`. `tools/call` uses the bare tool name (`params.name`) as the event `type` with `params.arguments` as the event request; the gateway wraps the response in the MCP envelope. |
 | [`Mcp\McpEvent`](:ref:class:Zolinga\\System\\Events\\Mcp\\McpEvent) | Abstract base event for all MCP JSON-RPC requests. `McpEvent::fromJsonRpc()` validates the envelope and resolves the concrete subclass (`InitializeEvent`, `Tools\ListEvent`, `Tools\CallEvent`, `Prompts\*`, `Resources\*`). |
 | [`McpInitializeHandler`](:ref:class:Zolinga\System\Mcp\McpInitializeHandler) | Listens to the `initialize` event; returns the lifecycle payload. |
-| [`McpTools`](:ref:class:Zolinga\\System\\Mcp\\McpTools) | `onList` for `mcp:tools/list`; returns the tool catalogue. Excludes any tool without a `schema.response` declaration. |
+| [`McpToolsListHandler`](:ref:class:Zolinga\\System\\Mcp\\McpToolsListHandler) | `onList` for `mcp:tools/list`; returns the tool catalogue. Excludes any tool without a `schema.response` declaration. |
 | [`McpHelper`](:ref:class:Zolinga\System\Mcp\McpHelper) | Misc helpers (status → error code, response normalization, `envelope()` for `tools/call` results). |
 | `Exceptions\McpException` + subclasses | Top-level errors (`McpParseErrorException`, `McpInvalidRequestException`, `McpMethodNotFoundException`, `McpInvalidParamsException`, `McpInternalErrorException`). |
 

@@ -4,6 +4,11 @@ All notable changes to the Zolinga framework (system module) will be documented 
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
+## [1.6.18] - 2026-07-21
+
+### Changed
+- **`McpTools` renamed to `McpToolsListHandler`.** The `tools/list` handler class is now `Zolinga\System\Mcp\McpToolsListHandler` (file `src/Mcp/mcp-tools-list-handler.php`), matching the `*Handler` suffix convention used by `McpInitializeHandler` and `McpEchoHandler`. The system manifest `mcp:tools/list` listener class reference was updated. All wiki and skill documentation references updated.
+
 ## [1.6.17] - 2026-07-21
 
 ### Added

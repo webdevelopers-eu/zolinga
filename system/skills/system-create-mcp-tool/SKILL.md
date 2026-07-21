@@ -1,6 +1,6 @@
 ---
 name: system-create-mcp-tool
-description: Use when exposing a Zolinga event handler as an MCP (Model Context Protocol) tool — i.e. a method clients can invoke via JSON-RPC `tools/call`. Covers handler class, manifest binding, JSON Schemas, the `Tools\CallEvent` contract, and the `schema.response` requirement enforced by `McpTools::collectTools()`.
+description: Use when exposing a Zolinga event handler as an MCP (Model Context Protocol) tool — i.e. a method clients can invoke via JSON-RPC `tools/call`. Covers handler class, manifest binding, JSON Schemas, the `Tools\CallEvent` contract, and the `schema.response` requirement enforced by `McpToolsListHandler::collectTools()`.
 argument-hint: "<module-name> <tool-name> [goal]"
 ---
 
@@ -34,7 +34,7 @@ The tool name is the string clients pass as `params.name`. It must be unique acr
 Place both files in `<module>/schema/mcp/`:
 
 - `<tool>-request.json` — describes `params.arguments` (what clients send). Becomes `inputSchema` in `tools/list`.
-- `<tool>-response.json` — **required**; describes the raw object the handler sets on `$event->response`. Becomes `outputSchema` in `tools/list` and is the contract `McpTools::collectTools()` validates against.
+- `<tool>-response.json` — **required**; describes the raw object the handler sets on `$event->response`. Becomes `outputSchema` in `tools/list` and is the contract `McpToolsListHandler::collectTools()` validates against.
 
 Use [JSON Schema 2020-12](https://json-schema.org/draft/2020-12/schema). The handler's `$event->response` MUST conform to this schema — clients will validate `result.structuredContent` against it.
 
