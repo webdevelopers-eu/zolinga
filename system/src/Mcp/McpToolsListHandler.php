@@ -116,7 +116,15 @@ class McpToolsListHandler implements ListenerInterface
             return false;
         }
 
-        return !$this->isReservedEvent((string) $atom['event']);
+        $eventName = (string) $atom['event'];
+
+        // Skip wildcard event patterns — they are broadcast listeners, not
+        // callable tools.
+        if (str_contains($eventName, '*')) {
+            return false;
+        }
+
+        return !$this->isReservedEvent($eventName);
     }
 
     /**

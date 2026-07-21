@@ -8,6 +8,8 @@ use Zolinga\System\Events\Mcp\McpEvent;
 
 /**
  * Abstract base event for all MCP `prompts/*` JSON-RPC methods.
+ * 
+ * @see https://modelcontextprotocol.io/specification/2025-11-25/server/prompts
  *
  * Concrete subclasses: {@see ListEvent} (`prompts/list`), {@see GetEvent}
  * (`prompts/get`).
