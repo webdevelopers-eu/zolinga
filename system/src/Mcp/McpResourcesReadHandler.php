@@ -86,34 +86,41 @@ class McpResourcesReadHandler implements ListenerInterface
     {
         global $api;
 
+        $api->log->info('mcp:system', "Reading resource: $requestUri");
+
         $basename = basename($basename); // Just to be sure.
         $metaUri = "module://$module/mcp/resources/$basename.meta.json";
         $metaPath = $api->fs->toPath($metaUri);
         if (!$metaPath || !is_file($metaPath)) {
+            $api->log->info('mcp:system', "Resource meta not found: $metaUri");
             $event->setStatus(StatusEnum::NOT_FOUND, 'Resource not found: ' . $requestUri);
             return;
         }
 
         $meta = json_decode((string) file_get_contents($metaPath), true);
         if (!is_array($meta) || !isset($meta['uri'])) {
+            $api->log->info('mcp:system', "Resource descriptor invalid: $requestUri");
             $event->setStatus(StatusEnum::NOT_FOUND, 'Resource descriptor missing or invalid: ' . $requestUri);
             return;
         }
 
         $contentPath = $api->fs->toPath($meta['uri']);
         if (!$contentPath || !is_file($contentPath)) {
+            $api->log->info('mcp:system', "Resource content file not found: {$meta['uri']}");
             $event->setStatus(StatusEnum::NOT_FOUND, 'Resource content file not found: ' . $requestUri);
             return;
         }
 
         $contents = file_get_contents($contentPath);
         if ($contents === false) {
+            $api->log->info('mcp:system', "Failed to read resource content: $requestUri");
             $event->setStatus(StatusEnum::ERROR, 'Failed to read resource content: ' . $requestUri);
             return;
         }
 
         $mimeType = $meta['mimeType'] ?? 'application/octet-stream';
         $this->buildResponse($event, $requestUri, $mimeType, $contents);
+        $api->log->info('mcp:system', "Resource served: $requestUri ($mimeType, " . strlen($contents) . " bytes)");
         $event->setStatus(StatusEnum::OK, 'OK');
     }
 
