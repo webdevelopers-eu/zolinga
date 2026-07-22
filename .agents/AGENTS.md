@@ -42,6 +42,9 @@ Repository core skills:
 - `system-i18n-coding`
 - `system-changelog`
 - `system-debug-database`
+- `system-create-mcp-tool`
+- `system-convert-remote-event-to-mcp-tool`
+- `system-create-mcp-resource`
 
 Module-provided skills appear as `{module-name}-{skill-name}` in `.agents/skills/` after module installation.
 

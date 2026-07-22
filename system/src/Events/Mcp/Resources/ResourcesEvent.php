@@ -28,7 +28,7 @@ abstract class ResourcesEvent extends McpEvent
      *
      * @var array<string>
      */
-    public const ALLOWED_URI_SCHEMES = ['mcp-system', 'http', 'https'];
+    public const ALLOWED_URI_SCHEMES = ['mcp-*', 'http', 'https'];
 
     /**
      * Check if a URI uses an allowed scheme.
@@ -38,6 +38,15 @@ abstract class ResourcesEvent extends McpEvent
      */
     protected function isAllowedScheme(string $scheme): bool
     {
-        return in_array($scheme, self::ALLOWED_URI_SCHEMES, true);
+
+        foreach (self::ALLOWED_URI_SCHEMES as $allowedScheme) {
+            if ($allowedScheme === $scheme) {
+                return true;
+            }
+            if (str_ends_with($allowedScheme, '*') && str_starts_with($scheme, rtrim($allowedScheme, '*'))) {
+                return true;
+            }
+        }
+        return false;
     }
 }
