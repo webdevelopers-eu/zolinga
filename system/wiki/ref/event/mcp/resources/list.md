@@ -2,7 +2,7 @@
 
 The MCP `resources/list` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as a [`Resources\ListEvent`](:Zolinga Core:Events and Listeners:MCP) with the `mcp` origin.
 
-The system-provided [`\Zolinga\System\Mcp\McpResourcesListHandler::onList()`](:ref:class:Zolinga\\System\\Mcp\\McpResourcesListHandler) handles this event. It scans each module's `mcp/resources/*.meta.json` files, rewrites the internal `uri` to the external `mcp-system:static:<module>:<basename>` scheme, and returns the resource descriptors.
+The system-provided [`\Zolinga\System\Mcp\McpResourcesListHandler::onList()`](:ref:class:Zolinga\\System\\Mcp\\McpResourcesListHandler) handles this event. It scans each module's `mcp/resources/*.meta.json` files, rewrites the internal `uri` to the external `mcp-system:<module>:<basename>` scheme, and returns the resource descriptors.
 
 ## Request
 
@@ -14,7 +14,7 @@ The response is a `{ resources: [...] }` payload, where each entry has at least:
 
 | Field         | Type   | Notes |
 |---------------|--------|-------|
-| `uri`         | `string` | External URI in `mcp-system:static:<module>:<basename>` format. |
+| `uri`         | `string` | External URI in `mcp-system:<module>:<basename>` format. |
 | `name`        | `string` | Unique resource identifier (typically the filename). |
 | `title`       | `string` | Human-readable title (optional, from `.meta.json`). |
 | `description` | `string` | One-line description (optional, from `.meta.json`). |
@@ -38,7 +38,7 @@ curl -X POST https://your-host/mcp \
   "result": {
     "resources": [
       {
-        "uri": "mcp-system:static:ipdefender:about.md",
+        "uri": "mcp-system:ipdefender:about.md",
         "name": "about.md",
         "title": "About IP Defender",
         "description": "Overview of the IP Defender SaaS platform.",
@@ -63,7 +63,7 @@ class MyResourcesListHandler implements ListenerInterface
     public function onList(ListEvent $event): void
     {
         $event->addResource(
-            uri: 'mcp-system:static:my-module:dynamic-resource',
+            uri: 'mcp-system:my-module:dynamic-resource',
             name: 'dynamic-resource',
             title: 'Dynamic Resource',
             description: 'Generated at runtime.',

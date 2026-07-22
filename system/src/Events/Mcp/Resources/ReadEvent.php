@@ -14,7 +14,7 @@ use InvalidArgumentException;
  * Dispatched by the MCP gateway when a client sends a `resources/read`
  * JSON-RPC request. The event type is `mcp:resources/read:<scheme>` where
  * `<scheme>` is the URI scheme of the requested resource (e.g.
- * `mcp:resources/read:mcp-system` for `mcp-system:static:...` URIs).
+ * `mcp:resources/read:mcp-system` for `mcp-system:...` URIs).
  *
  * Handlers read the resource file and populate `$event->response` with
  * either `{ uri, mimeType, text }` for text resources or

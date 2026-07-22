@@ -11,7 +11,7 @@ use Zolinga\System\Types\StatusEnum;
 /**
  * Handles MCP `resources/read` requests for the `mcp-system` URI scheme.
  *
- * Parses the `mcp-system:static:<module>:<basename>` URI, resolves the
+ * Parses the `mcp-system:<module>:<basename>` URI, resolves the
  * corresponding `.meta.json` descriptor, reads the actual content file,
  * and returns it as either `text` or `blob` (base64-encoded) based on
  * the MIME type declared in the `.meta.json`.
@@ -47,26 +47,26 @@ class McpResourcesReadHandler implements ListenerInterface
     }
 
     /**
-     * Parse a `mcp-system:static:<module>:<basename>` URI into its components.
+     * Parse a `mcp-system:<module>:<basename>` URI into its components.
      *
      * @param string $uri
      * @return array{module: string, basename: string}|null
      */
     private function parseUri(string $uri): ?array
     {
-        $parts = explode(':', $uri, 4);
-        if (count($parts) < 4) {
+        $parts = explode(':', $uri, 3);
+        if (count($parts) < 3) {
             return null;
         }
-        if ($parts[0] !== 'mcp-system' || $parts[1] !== 'static') {
+        if ($parts[0] !== 'mcp-system') {
             return null;
         }
 
-        $module = basename($parts[2]);
-        $basename = basename($parts[3]);
+        $module = basename($parts[1]);
+        $basename = basename($parts[2]);
 
         // Directory traversal protection: basename must match the raw value.
-        if ($module !== $parts[2] || $basename !== $parts[3]) {
+        if ($module !== $parts[1] || $basename !== $parts[2]) {
             return null;
         }
 

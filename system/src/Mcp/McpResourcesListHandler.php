@@ -13,7 +13,7 @@ use Zolinga\System\Types\StatusEnum;
  *
  * Discovers module-provided resources by scanning each module's
  * `mcp/resources/*.meta.json` files. Rewrites the internal `uri` field
- * to the external `mcp-system:static:<module>:<basename>` scheme so that
+ * to the external `mcp-system:<module>:<basename>` scheme so that
  * internal Zolinga paths are never leaked to MCP clients.
  *
  * @see https://modelcontextprotocol.io/specification/2025-11-25/server/resources
@@ -76,7 +76,7 @@ class McpResourcesListHandler implements ListenerInterface
         }
 
         $basename = basename($metaFile, '.meta.json');
-        $json['uri'] = "mcp-system:static:$module:$basename";
+        $json['uri'] = "mcp-system:$module:$basename";
 
         if (!isset($json['name']) || !is_string($json['name']) || $json['name'] === '') {
             $api->log->warning('system:mcp', "MCP resource meta file missing 'name' field: $metaFile");
