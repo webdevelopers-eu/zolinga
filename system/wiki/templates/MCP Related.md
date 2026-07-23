@@ -1,0 +1,6 @@
+- [MCP Tools](:Zolinga Core:MCP:Tools) - Expose Zolinga events as callable MCP tools.
+- [MCP Resources](:Zolinga Core:MCP:Resources) - Serve module files as discoverable MCP resources.
+- [MCP Prompts](:Zolinga Core:MCP:Prompts) - Provide reusable prompt templates to MCP clients.
+- [Running the System: MCP](:Zolinga Core:Running the System:MCP) - Full request/response flow, method-to-event mapping, and error handling.
+- [Events and Listeners: MCP](:Zolinga Core:Events and Listeners:MCP) - MCP event class hierarchy and listener contract.
+- [MCP Specification](https://modelcontextprotocol.io/specification/2025-06-18) - The official MCP specification.

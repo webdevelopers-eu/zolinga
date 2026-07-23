@@ -211,8 +211,7 @@ Not supported. This is a non-streaming implementation of the MCP Streamable HTTP
 
 Configure your web server so that `/mcp` is reachable only by trusted origins. The endpoint is unauthenticated by default; use the `right` field on a listener manifest entry and an [`AuthorizeEvent`](:Zolinga Core:Events and Listeners:Authorization) provider to gate access to specific tools.
 
-# See Also
 
-- [`\Zolinga\System\Events\Mcp\McpEvent`](:Zolinga Core:Events and Listeners:MCP)
-- [Paths and Zolinga URI](:Zolinga Core:Paths and Zolinga URI)
-- [MCP specification](https://modelcontextprotocol.io/specification/2025-06-18)
+# Related
+
+{{MCP Related}}

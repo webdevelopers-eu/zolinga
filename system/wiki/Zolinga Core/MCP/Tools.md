@@ -72,10 +72,7 @@ curl -X POST https://your-host/mcp \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"my-module-search","arguments":{"query":"test"}}}'
 ```
 
-## See Also
 
-- [MCP (Model Context Protocol)](:Zolinga Core:Running the System:MCP)
-- [MCP Events](:Zolinga Core:Events and Listeners:MCP)
-- [MCP Resources](:Zolinga Core:MCP:Resources)
-- [`tools/list` event reference](:ref:event:tools/list)
-- [`tools/call` event reference](:ref:event:tools/call)
+# Related
+
+{{MCP Related}}

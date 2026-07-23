@@ -92,8 +92,7 @@ curl -X POST https://your-host/mcp \
 - Directory traversal is blocked: `basename()` is applied to both module and basename components, and the result must match the raw input.
 - Only URI schemes in the `ResourcesEvent::ALLOWED_URI_SCHEMES` whitelist (`mcp-system`, `http`, `https`) are accepted in responses.
 
-## See Also
 
-- [MCP (Model Context Protocol)](:Zolinga Core:Running the System:MCP)
-- [MCP Events](:Zolinga Core:Events and Listeners:MCP)
-- [MCP Tools](:Zolinga Core:MCP:Tools)
+# Related
+
+{{MCP Related}}

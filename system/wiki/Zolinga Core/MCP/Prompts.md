@@ -127,3 +127,7 @@ $event->addPrompt(
     arguments: [['name' => 'q', 'required' => true]]
 );
 ```
+
+# Related
+
+{{MCP Related}}

@@ -134,8 +134,7 @@ class MyEchoHandler implements ListenerInterface
 
 The `schema.response` declaration is **required** for the tool to be exposed in `tools/list` — `McpToolsListHandler::collectTools()` skips any tool without one and logs an error.
 
-## See Also
 
-- [MCP (Model Context Protocol)](:Zolinga Core:Running the System:MCP)
-- [Events and Listeners](:Zolinga Core:Events and Listeners)
-- [Event Authorization](:Zolinga Core:Events and Listeners:Event Authorization)
+# Related
+
+{{MCP Related}}
