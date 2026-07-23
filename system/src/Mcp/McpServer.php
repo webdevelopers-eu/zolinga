@@ -294,7 +294,7 @@ class McpServer
 
         if (!headers_sent()) {
             header('Content-Type: application/json; charset=utf-8');
-            header('Refresh: 0; url=/');
+            header('Refresh: 5; url=/');
             http_response_code(405);
         }
         echo json_encode([
