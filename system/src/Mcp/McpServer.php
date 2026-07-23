@@ -290,8 +290,11 @@ class McpServer
      */
     private function sendMethodNotAllowed(string $method): void
     {
+        global $api;
+
         if (!headers_sent()) {
             header('Content-Type: application/json; charset=utf-8');
+            header('Refresh: 0; url=/');
             http_response_code(405);
         }
         echo json_encode([
@@ -300,7 +303,7 @@ class McpServer
             'error' => [
                 'code' => -32600,
                 'message' => 'Method Not Allowed: ' . McpHelper::truncateForEcho($method)
-                    . ' is not supported by this non-streaming MCP gateway.',
+                    . ' is not supported by this non-streaming MCP gateway. This endpoint is meant for AI agents and other non-browser clients. Use POST requests only.',
             ],
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $this->logAccess(405);
