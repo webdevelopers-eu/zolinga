@@ -71,6 +71,13 @@ class McpServer
      */
     public function run(): void
     {
+        global $api;
+
+        if (empty($api->config['mcp']['enabled'])) {
+            $this->sendDisabled();
+            return;
+        }
+
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
         if ($method === 'OPTIONS') {
             $this->sendOptionsOk();
@@ -304,6 +311,23 @@ class McpServer
      *
      * @return void
      */
+    private function sendDisabled(): void
+    {
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(404);
+        }
+        echo json_encode([
+            'jsonrpc' => '2.0',
+            'id' => null,
+            'error' => [
+                'code' => -32601,
+                'message' => 'MCP gateway is disabled.',
+            ],
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $this->logAccess(404);
+    }
+
     private function sendOptionsOk(): void
     {
         if (!headers_sent()) {

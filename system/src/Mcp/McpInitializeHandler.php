@@ -49,10 +49,12 @@ class McpInitializeHandler implements ListenerInterface
             'capabilities' => [
                 'tools' => ['listChanged' => false],
                 'resources' => new \stdClass(),
+                'prompts' => new \stdClass(),
             ],
             'serverInfo' => $this->serverInfo,
             'instructions' => 'Use `tools/list` to discover available tools and `tools/call` to invoke them. '
-                . 'Use `resources/list` to discover available resources and `resources/read` to read their contents.',
+                . 'Use `resources/list` to discover available resources and `resources/read` to read their contents. '
+                . 'Use `prompts/list` to discover available prompts and `prompts/get` to retrieve prompt messages.',
         ];
         $event->setStatus(StatusEnum::OK, 'Initialized.');
     }

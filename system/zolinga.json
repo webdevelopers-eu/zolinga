@@ -1,6 +1,6 @@
 {
   "name": "Zolinga Framework",
-  "version": "1.6.19",
+  "version": "1.6.21",
   "description": "Zolinga PHP framework that makes sense.",
   "authors": [
     "Danny Sevcik <danny@zolinga.net>"
@@ -258,6 +258,24 @@
       "origin": [
         "mcp"
       ]
+    },
+    {
+      "event": "mcp:prompts/list",
+      "description": "MCP `prompts/list` request handler. Discovers module-provided prompts from `mcp/prompts/*.meta.json` files and returns them with rewritten `mcp-system:<module>:<basename>` names.",
+      "class": "\\Zolinga\\System\\Mcp\\McpPromptsListHandler",
+      "method": "onList",
+      "origin": [
+        "mcp"
+      ]
+    },
+    {
+      "event": "mcp:prompts/get:mcp-system",
+      "description": "MCP `prompts/get` request handler for the `mcp-system` URI scheme. Reads a prompt definition by its `mcp-system:<module>:<basename>` name, resolves file references, applies argument substitution, and returns the messages array.",
+      "class": "\\Zolinga\\System\\Mcp\\McpPromptsGetHandler",
+      "method": "onGet",
+      "origin": [
+        "mcp"
+      ]
     }
   ],
   "emit": [
@@ -420,6 +438,22 @@
       "origin": [
         "mcp"
       ]
+    },
+    {
+      "event": "mcp:prompts/list",
+      "description": "MCP `prompts/list` request, dispatched by the MCP gateway. Returns the list of available prompts discovered from module `mcp/prompts/*.meta.json` files.",
+      "class": "\\Zolinga\\System\\Events\\Mcp\\Prompts\\ListEvent",
+      "origin": [
+        "mcp"
+      ]
+    },
+    {
+      "event": "mcp:prompts/get:*",
+      "description": "MCP `prompts/get` request, dispatched by the MCP gateway. Suffix is the URI scheme of the requested prompt name.",
+      "class": "\\Zolinga\\System\\Events\\Mcp\\Prompts\\GetEvent",
+      "origin": [
+        "mcp"
+      ]
     }
   ],
   "webComponents": [
@@ -477,6 +511,10 @@
       "allowedIps": [
         "*"
       ]
+    },
+    "mcp": {
+      "# enabled": "Enable or disable MCP (Model Context Protocol) gateway.",
+      "enabled": true
     },
     "debug": {
       "# allowedIps": "List of IP addresses that can see debug info or '*' for all, or 'cli' for command line interface.  You can use '*' and '?' as wildcards. E.g. 192.168.* or 192.168.1.?",

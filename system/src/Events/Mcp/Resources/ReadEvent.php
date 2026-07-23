@@ -7,6 +7,7 @@ namespace Zolinga\System\Events\Mcp\Resources;
 use ArrayObject;
 use ArrayAccess;
 use InvalidArgumentException;
+use Zolinga\System\Mcp\Exceptions\McpInvalidRequestException;
 
 /**
  * MCP `resources/read` event.
@@ -36,6 +37,7 @@ class ReadEvent extends ResourcesEvent
      * @param string|int|null $jsonrpcId The JSON-RPC request id.
      * @param ArrayAccess<string, mixed>|array<string, mixed> $request The JSON-RPC params (contains `uri`).
      * @param ArrayAccess<string, mixed>|array<string, mixed> $response The JSON-RPC result.
+     * @throws McpInvalidRequestException If the URI uses a disallowed or missing scheme.
      */
     public function __construct(
         string|int|null $jsonrpcId = null,
@@ -47,8 +49,8 @@ class ReadEvent extends ResourcesEvent
         $type = 'mcp:resources/read' . ($scheme !== '' ? ':' . $scheme : '');
 
         if ($this->isAllowedScheme($scheme) === false) {
-            throw new InvalidArgumentException(
-                'Resource read request URI "' . $uri . '" uses a disallowed scheme ' . json_encode($scheme) . '. '
+            throw new McpInvalidRequestException(
+                'Resource read request URI "' . $uri . '" uses a disallowed scheme ' . json_encode($scheme) . '.'
             );
         }
 
