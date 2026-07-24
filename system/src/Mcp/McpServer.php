@@ -377,7 +377,7 @@ class McpServer
         ), [
             'status' => $status,
             'size' => strlen($this->rawBody),
-            'method' => $event?->type,
+            'method' => McpHelper::truncateForEcho($event?->type ?? '-'),
         ]);
     }
 }
