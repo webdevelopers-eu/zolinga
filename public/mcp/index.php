@@ -46,6 +46,7 @@ header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, MCP-Protocol-Version, Accept');
 header('Access-Control-Max-Age: 86400');
 header('Allow: POST, OPTIONS');
+header('Refresh: 0; url=/dist/system/mcp-redirect.html'); // For browsers
 
 // OPTIONS preflight: respond 204, no body.
 if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? '')) === 'OPTIONS') {
