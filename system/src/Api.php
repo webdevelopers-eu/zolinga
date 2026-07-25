@@ -122,9 +122,8 @@ class Api
 
             // Authorization required
             if (!empty($subscription['right']) && !($event instanceof AuthorizeEvent)) {
-                $authEvent = new AuthorizeEvent('system:authorize', AuthorizeEvent::ORIGIN_INTERNAL, [$subscription['right']]);
-                $authEvent->dispatch();
-                if (!$authEvent->isAuthorized($subscription['right'])) {
+                /** @var AuthorizeEvent $authEvent */
+                if (!$this->isAuthorized($subscription['right'], $authEvent)) {
                     // TRANSLATORS: Error message shown when a caller is not authorized to perform the requested action. The event type is appended in parentheses.
                     $event->setStatus($authEvent->requiresLogin ? StatusEnum::UNAUTHORIZED : StatusEnum::FORBIDDEN, dgettext('system', "You are not authorized to perform this action.") . ' (' . $event->type . ')');
                     continue;
@@ -139,6 +138,32 @@ class Api
 
         $event->totalTime += microtime(true) - $timer;
         return $event;
+    }
+
+    /**
+     * Check if the current user has the given right(s).
+     *
+     * Dispatches a `system:authorize` event and returns true if all
+     * rights are authorized, false otherwise. The AuthorizeEvent is
+     * available via the second parameter for closer inspection
+     * (e.g. checking `requiresLogin` to distinguish 401 vs 403).
+     *
+     * Example:
+     *
+     * if (!$api->isAuthorized('member of users', $authEvent)) {
+     *     $status = $authEvent->requiresLogin ? 401 : 403;
+     * }
+     *
+     * @param string|array<string> $rights one or more right strings to check
+     * @param AuthorizeEvent|null $authEvent output parameter for the AuthorizeEvent
+     * @return bool true if all rights are authorized, false otherwise
+     */
+    public function isAuthorized(string|array $rights, ?AuthorizeEvent &$authEvent = null): bool
+    {
+        $rightsArr = is_array($rights) ? $rights : [$rights];
+        $authEvent = new AuthorizeEvent('system:authorize', AuthorizeEvent::ORIGIN_INTERNAL, $rightsArr);
+        $authEvent->dispatch();
+        return $authEvent->isAuthorized();
     }
 
     private function processEvent(Event $event, ListenerInterface $listener, string $method): void

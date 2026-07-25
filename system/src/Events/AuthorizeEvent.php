@@ -145,16 +145,13 @@ class AuthorizeEvent extends Event implements StoppableInterface
     /**
      * Check if the right is authorized.
      *
-     * @param string|Stringable $right
+     * Returns true if all requested rights have been authorized (i.e. no
+     * unauthorized rights remain), false otherwise.
+     *
      * @return boolean
      */
-    public function isAuthorized(string|Stringable $right): bool
+    public function isAuthorized(): bool
     {
-        foreach ($this->authorized as $aRight) {
-            if (strval($aRight) == strval($right)) {
-                return true;
-            }
-        }
-        return false;
+        return $this->status === StatusEnum::OK;
     }
 }

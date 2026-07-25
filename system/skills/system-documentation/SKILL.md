@@ -1,6 +1,6 @@
 ---
 name: system-documentation
-description: Use when writing or updating user-facing wiki documentation for features, modules, events, or content tags. Guides a user-oriented writing style focused on tasks and outcomes rather than internal implementation.
+description: ALWAYS use when writing or updating ANY wiki documentation in this repository. Mandatory for all wiki changes. Guides a user-oriented writing style focused on tasks and outcomes. Enforces the no-duplication rule: reference existing content rather than repeating it.
 argument-hint: "<module-name> [event-or-topic]"
 ---
 

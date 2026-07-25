@@ -1,6 +1,6 @@
 ---
 name: system-php-coding-style
-description: Use when writing or reviewing PHP code in this repository to enforce strict typing, naming, file layout, and listener/service interface conventions.
+description: ALWAYS use when writing, modifying, or reviewing ANY PHP code in this repository. Enforces strict typing, naming, file layout, method length, and listener/service interface conventions. This skill is mandatory for all programming tasks.
 argument-hint: "<module-name> [class-or-file]"
 ---
 
@@ -8,8 +8,10 @@ argument-hint: "<module-name> [class-or-file]"
 
 ## Use When
 
+- **MANDATORY for any task that involves writing, modifying, or reviewing PHP code.**
 - Implementing new PHP classes, listeners, services, or models.
 - Refactoring PHP for repository style compliance.
+- This skill must be loaded BEFORE writing any PHP code, no exceptions.
 
 ## Rules
 
