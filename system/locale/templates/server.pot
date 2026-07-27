@@ -1,0 +1,9 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#. TRANSLATORS: Error message shown when a caller is not authorized to perform the requested action. The event type is appended in parentheses.
+msgid "You are not authorized to perform this action."
+msgstr ""

@@ -1,0 +1,63 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#. TRANSLATORS: Adjacent context (line 1): This is a secure channel where AI assistants connect to our servers. It is built for machines, not browsers.
+#. TRANSLATORS: Adjacent context (line 2): Think of it as a <1>secure service entrance</1> for artificial intelligence. AI assistants connect here to exchange data, run searches, and get things done automatically. There is nothing to click or see - it speaks a language only computers understand.
+#. TRANSLATORS: Adjacent context (line 3): Taking you to the home page<1>...</1>
+#. TRANSLATORS: This string is inside a <h1> element, which is a heading / follow rules for headings or capter titles in {{TARGET_LANG}} langauge.
+#. TRANSLATORS: Context for all strings below. This page is shown to humans who accidentally open the /mcp/ URL in a browser. The /mcp/ endpoint is a machine-to-machine API gateway (Model Context Protocol) where AI assistants (software like Copilot, Claude) connect to our servers programmatically. There is nothing for a human to see or do here. The page reassures the visitor and auto-redirects to the home page after 180 seconds. Tone: calm, informative, non-alarming. The visitor did nothing wrong.
+#. TRANSLATORS: Page heading. "AI Agent" = a software program that performs tasks autonomously (not a human agent). "Gateway" = an entry point / portal. Together: the technical endpoint where AI software connects. Keep it short, like a page title.
+msgid "AI Agent Gateway"
+msgstr ""
+
+#. TRANSLATORS: Adjacent context (line -3): This is a secure channel where AI assistants connect to our servers. It is built for machines, not browsers.
+#. TRANSLATORS: Adjacent context (line -2): Think of it as a <1>secure service entrance</1> for artificial intelligence. AI assistants connect here to exchange data, run searches, and get things done automatically. There is nothing to click or see - it speaks a language only computers understand.
+#. TRANSLATORS: Adjacent context (line -1): Taking you to the home page<1>...</1>
+#. TRANSLATORS: This string is inside a <a> element, which is a link / if it has "href" attribute apply SEO rules, otherwise treat as generic element.
+#. TRANSLATORS: Context for all strings below. This page is shown to humans who accidentally open the /mcp/ URL in a browser. The /mcp/ endpoint is a machine-to-machine API gateway (Model Context Protocol) where AI assistants (software like Copilot, Claude) connect to our servers programmatically. There is nothing for a human to see or do here. The page reassures the visitor and auto-redirects to the home page after 180 seconds. Tone: calm, informative, non-alarming. The visitor did nothing wrong.
+#. TRANSLATORS: Call-to-action button. Links to the home page. Keep it short and action-oriented.
+msgid "Go to Home Page"
+msgstr ""
+
+#. TRANSLATORS: Adjacent context (line -3): AI Agent Gateway
+#. TRANSLATORS: Adjacent context (line -2): This is a secure channel where AI assistants connect to our servers. It is built for machines, not browsers.
+#. TRANSLATORS: Adjacent context (line -1): Think of it as a <1>secure service entrance</1> for artificial intelligence. AI assistants connect here to exchange data, run searches, and get things done automatically. There is nothing to click or see - it speaks a language only computers understand.
+#. TRANSLATORS: Adjacent context (line 1): Go to Home Page
+#. TRANSLATORS: This string is inside a <p> element, which is a paragraph / follow rules for general text in {{TARGET_LANG}} language.
+#. TRANSLATORS: Context for all strings below. This page is shown to humans who accidentally open the /mcp/ URL in a browser. The /mcp/ endpoint is a machine-to-machine API gateway (Model Context Protocol) where AI assistants (software like Copilot, Claude) connect to our servers programmatically. There is nothing for a human to see or do here. The page reassures the visitor and auto-redirects to the home page after 180 seconds. Tone: calm, informative, non-alarming. The visitor did nothing wrong.
+#. TRANSLATORS: Auto-redirect notice. The <1>...</1> is an animated ellipsis (three dots) - keep it at the end. This tells the visitor they will be sent to the home page automatically.
+msgid "Taking you to the home page<1>...</1>"
+msgstr ""
+
+#. TRANSLATORS: Adjacent context (line -2): AI Agent Gateway
+#. TRANSLATORS: Adjacent context (line -1): This is a secure channel where AI assistants connect to our servers. It is built for machines, not browsers.
+#. TRANSLATORS: Adjacent context (line 1): Taking you to the home page<1>...</1>
+#. TRANSLATORS: Adjacent context (line 2): Go to Home Page
+#. TRANSLATORS: This string is inside a <p> element, which is a paragraph / follow rules for general text in {{TARGET_LANG}} language.
+#. TRANSLATORS: Context for all strings below. This page is shown to humans who accidentally open the /mcp/ URL in a browser. The /mcp/ endpoint is a machine-to-machine API gateway (Model Context Protocol) where AI assistants (software like Copilot, Claude) connect to our servers programmatically. There is nothing for a human to see or do here. The page reassures the visitor and auto-redirects to the home page after 180 seconds. Tone: calm, informative, non-alarming. The visitor did nothing wrong.
+#. TRANSLATORS: Explanatory paragraph. "Secure service entrance" is a metaphor like a back door for staff - keep the <1> tag wrapping it bold. "Artificial intelligence" = AI software. "Exchange data, run searches, get things done" = the tasks the AI performs via the API. "Speaks a language only computers understand" = uses a machine protocol, not human language. Keep the tone reassuring.
+msgid ""
+"Think of it as a <1>secure service entrance</1> for artificial intelligence. "
+"AI assistants connect here to exchange data, run searches, and get things "
+"done automatically. There is nothing to click or see - it speaks a language "
+"only computers understand."
+msgstr ""
+
+#. TRANSLATORS: Adjacent context (line -1): AI Agent Gateway
+#. TRANSLATORS: Adjacent context (line 1): Think of it as a <1>secure service entrance</1> for artificial intelligence. AI assistants connect here to exchange data, run searches, and get things done automatically. There is nothing to click or see - it speaks a language only computers understand.
+#. TRANSLATORS: Adjacent context (line 2): Taking you to the home page<1>...</1>
+#. TRANSLATORS: Adjacent context (line 3): Go to Home Page
+#. TRANSLATORS: This string is inside a <p> element, which is a paragraph / follow rules for general text in {{TARGET_LANG}} language.
+#. TRANSLATORS: Context for all strings below. This page is shown to humans who accidentally open the /mcp/ URL in a browser. The /mcp/ endpoint is a machine-to-machine API gateway (Model Context Protocol) where AI assistants (software like Copilot, Claude) connect to our servers programmatically. There is nothing for a human to see or do here. The page reassures the visitor and auto-redirects to the home page after 180 seconds. Tone: calm, informative, non-alarming. The visitor did nothing wrong.
+#. TRANSLATORS: Subtitle. "Secure channel" = an encrypted API connection, not a chat. "AI assistants" = software programs like Copilot or Claude, not human assistants. "Built for machines, not browsers" = designed for programs, not web browsers. Convey that this URL is normal, just not meant for human visitors.
+msgid ""
+"This is a secure channel where AI assistants connect to our servers. It is "
+"built for machines, not browsers."
+msgstr ""
+
+#. TRANSLATORS: Error message shown when a caller is not authorized to perform the requested action. The event type is appended in parentheses.
+msgid "You are not authorized to perform this action."
+msgstr ""
