@@ -101,7 +101,7 @@ h1 {
     border-radius: 12px;
     padding: 1.1rem 1.25rem;
     margin: 0 0 1.5rem;
-    text-align: left;
+    text-align: start;
 }
 
 .info-box p {

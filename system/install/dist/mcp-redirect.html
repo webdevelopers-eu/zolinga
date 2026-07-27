@@ -1,11 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs-CZ">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <meta http-equiv="refresh" content="180; url=/">
+    <script>
+        const lang = document.cookie.split('; ').find(row => row.startsWith('lang='));
+        if (lang) {
+            const langCode = lang.split('=')[1];
+            document.documentElement.lang = langCode;
+            if (/^(ar|he|fa|ur)\b/i.test(langCode)) {
+                document.documentElement.dir = 'rtl';
+            }
+        }
+    </script>
     <title>API Endpoint</title>
     <style>
         *,
