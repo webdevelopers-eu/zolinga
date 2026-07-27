@@ -1,6 +1,6 @@
 {
   "name": "Zolinga Framework",
-  "version": "1.6.21",
+  "version": "1.6.22",
   "description": "Zolinga PHP framework that makes sense.",
   "authors": [
     "Danny Sevcik <danny@zolinga.net>"
@@ -481,6 +481,11 @@
       "tag": "wiki-login",
       "description": "WIKI authorization",
       "module": "wiki/wiki-login.js"
+    },
+    {
+      "tag": "mcp-redirect",
+      "description": "Friendly card shown to browsers that land on the /mcp/ AI agent gateway URL. Explains the endpoint is for machines and links back to the home page.",
+      "module": "web-components/mcp-redirect/mcp-redirect.js"
     }
   ],
   "autoload": {

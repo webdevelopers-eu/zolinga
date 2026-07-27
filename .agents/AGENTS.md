@@ -27,11 +27,11 @@ Repository core skills:
 - `system-authoring-manifest`
 - `system-coding-standards`
 - `system-module-development`
-- `system-php-coding-style`
+- `system-php-coding-style` - **REQUIRED** for any PHP work. Load before creating or modifying PHP code.
 - `system-database-schema-updates`
 - `system-install-scripts`
 - `system-content-tags`
-- `system-web-components`
+- `system-web-components` — **REQUIRED** for any front-end web component / widget work. Load before creating or modifying custom elements.
 - `system-translations`
 - `system-custom-api-endpoints`
 - `system-documentation`

@@ -4,6 +4,11 @@ All notable changes to the Zolinga System module are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.22] - 2026-07-27
+
+### Added
+- `mcp-redirect` web component. The browser-facing `/mcp/` redirect page now loads a `<mcp-redirect>` custom tag whose HTML/CSS live in the component. Text content is translatable via gettext (domain `system`).
+
 ## [1.6.21] - 2026-07-22
 
 ### Added

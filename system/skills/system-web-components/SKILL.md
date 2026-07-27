@@ -1,6 +1,6 @@
 ---
 name: system-web-components
-description: Use when creating or modifying Zolinga web components in install/dist, registering them through module zolinga.json, and documenting them correctly.
+description: ALWAYS use when creating, modifying, or reviewing ANY front-end web components, widgets, or custom elements in this repository. Mandatory for all web component work — creating new components, modifying existing ones, registering in zolinga.json, writing component docs, or debugging component loading/readiness/communication.
 argument-hint: "<module-name> <component-tag>"
 ---
 
@@ -8,10 +8,13 @@ argument-hint: "<module-name> <component-tag>"
 
 ## Use When
 
+**This skill is MANDATORY for any task involving front-end web components or widgets.** Always load and apply it before writing or editing component code.
+
 - Creating new web components or modifying existing ones.
 - Registering components in `zolinga.json`.
 - Writing component `.md` docs.
 - Debugging component loading, readiness, or inter-component communication.
+- Any work touching `install/dist/web-components/`, custom elements, Shadow DOM, or the `WebComponent` / `WebComponentIntl` base classes.
 
 ## File Structure
 
