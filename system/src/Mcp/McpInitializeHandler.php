@@ -28,11 +28,13 @@ class McpInitializeHandler implements ListenerInterface
     public function __construct()
     {
         global $api;
-        $name = parse_url($api->config['baseURL'], PHP_URL_HOST) ?: 'Zolinga Server';
+        $name = $api->config['mcp']['server']['name'] ?: (parse_url($api->config['baseURL'] ?: 'http://localhost/', PHP_URL_HOST));
+        $title = $api->config['mcp']['server']['title'] ?: ('MCP Gateway for ' . $name);
+        $version = $api->config['mcp']['server']['version'] ?: '9.10.2';
         $this->serverInfo = [
             'name' => $name,
-            'title' => 'MCP Gateway for ' . $name,
-            'version' => '1.0.0',
+            'title' => $title,
+            'version' => $version,
         ];
     }
 

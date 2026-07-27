@@ -1,6 +1,6 @@
 {
   "name": "Zolinga Framework",
-  "version": "1.6.22",
+  "version": "1.6.25",
   "description": "Zolinga PHP framework that makes sense.",
   "authors": [
     "Danny Sevcik <danny@zolinga.net>"
@@ -519,7 +519,15 @@
     },
     "mcp": {
       "# enabled": "Enable or disable MCP (Model Context Protocol) gateway.",
-      "enabled": true
+      "enabled": true,
+      "server": {
+        "# name": "Server name reported to MCP clients during initialize. If empty, defaults to the baseURL host.",
+        "name": "",
+        "# title": "Server title reported to MCP clients during initialize. If empty, defaults to 'MCP Gateway for <name>'.",
+        "title": "",
+        "# version": "Server version reported to MCP clients during initialize. If empty, defaults to the system module version.",
+        "version": ""
+      }
     },
     "debug": {
       "# allowedIps": "List of IP addresses that can see debug info or '*' for all, or 'cli' for command line interface.  You can use '*' and '?' as wildcards. E.g. 192.168.* or 192.168.1.?",
