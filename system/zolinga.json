@@ -229,19 +229,6 @@
       ]
     },
     {
-      "event": "echo",
-      "description": "MCP debug tool: echoes the `message` argument back to the client. Useful as a smoke test for the MCP gateway. Use only for MCP debugging. Do not use under normal circumstances.",
-      "class": "\\Zolinga\\System\\Mcp\\McpEchoHandler",
-      "method": "onEcho",
-      "origin": [
-        "mcp"
-      ],
-      "schema": {
-        "request": "module://system/schema/mcp/echo-request.json",
-        "response": "module://system/schema/mcp/echo-response.json"
-      }
-    },
-    {
       "event": "mcp:resources/list",
       "description": "MCP `resources/list` request handler. Discovers module-provided resources from `mcp/resources/*.meta.json` files and returns them with rewritten `mcp-system:<module>:<basename>` URIs.",
       "class": "\\Zolinga\\System\\Mcp\\McpResourcesListHandler",
