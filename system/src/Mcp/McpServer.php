@@ -350,7 +350,7 @@ class McpServer
     {
         if ($status === StatusEnum::UNAUTHORIZED) {
             global $api;
-            $prmUrl = $api->url->resolveUrl('/.well-known/oauth-protected-resource');
+            $prmUrl = $api->url->resolveUrl('/.well-known/oauth-protected-resource/mcp');
             header('WWW-Authenticate: Bearer resource_metadata="' . $prmUrl . '"');
         }
     }
