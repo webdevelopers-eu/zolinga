@@ -208,11 +208,12 @@ You can check out and install useful official modules directly from the CLI:
 ./bin/zolinga install --module=zolinga-cms,zolinga-intl,zolinga-db,zolinga-cron
 ```
 
-* **Zolinga CMS** (`zolinga-cms`) — Database-free, files-centric, ultra-performance management system.
-* **Zolinga Cron** (`zolinga-cron`) — Flexible automated schedule and task manager.
-* **Zolinga DB** (`zolinga-db`) — Hyper-clean MySQL database mapper.
-* **Zolinga RMS** (`zolinga-rms`) — Robust, minimal rights-management and authorization layers.
-* **Zolinga Intl** (`zolinga-intl`) — Multi-locale support, localizing both PHP and front-end JS easily.
-* **Zolinga AI** (`zolinga-ai`) — Built-in LLM interfaces designed to allow the core to speak directly with generative endpoints.
+* **[Zolinga CMS](https://github.com/webdevelopers-eu/zolinga-cms)** (`zolinga-cms`) — Database-free, files-centric, ultra-performance management system.
+* **[Zolinga Cron](https://github.com/webdevelopers-eu/zolinga-cron)** (`zolinga-cron`) — Flexible automated schedule and task manager.
+* **[Zolinga DB](https://github.com/webdevelopers-eu/zolinga-db)** (`zolinga-db`) — Hyper-clean MySQL database mapper.
+* **[Zolinga RMS](https://github.com/webdevelopers-eu/zolinga-rms)** (`zolinga-rms`) — Robust, minimal rights-management and authorization layers.
+* **[Zolinga Commons](https://github.com/webdevelopers-eu/zolinga-commons)** (`zolinga-commons`) — Common widgets, design elements, and interactive client-side helpers.
+* **[Zolinga Intl](https://github.com/webdevelopers-eu/zolinga-intl)** (`zolinga-intl`) — Multi-locale support, localizing both PHP and front-end JS easily.
+* **[Zolinga AI](https://github.com/webdevelopers-eu/zolinga-ai)** (`zolinga-ai`) — Built-in LLM interfaces designed to allow the core to speak directly with generative endpoints.
 
 Enjoy building without the bloat. Welcome to the vibe era of programming! 🚀
