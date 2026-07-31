@@ -70,7 +70,7 @@ class Bootstrap
      * Return `ls` like file info.
      *
      * @access private
-     * @param string $filename
+     * @param string $perms file permissions as returned by fileperms()
      * @return string
      */
     private function getPermSymbolic(int $perms):string {

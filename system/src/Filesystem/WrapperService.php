@@ -102,6 +102,10 @@ class WrapperService implements ServiceInterface
             $urlHost = $parts['host'] ?? null;
         }
 
+        if (str_contains($urlHost ?? '', '..') || str_contains($urlPath ?? '', '..')) {
+            return false;
+        }
+
         return match ($urlScheme) {
             'wiki' => isset($this->moduleLocations[$urlHost]) ? ROOT_DIR . $this->moduleLocations[$urlHost]['dirname'] . '/wiki' . $urlPath : false,
             'module' => isset($this->moduleLocations[$urlHost]) ? ROOT_DIR . $this->moduleLocations[$urlHost]['dirname'] . $urlPath : false,

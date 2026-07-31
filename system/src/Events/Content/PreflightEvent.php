@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Events\Content;
 
-use Zolinga\System\Types\{ContentMimeTypesEnum, StatusEnum, SeverityEnum};
-use Zolinga\System\Events\{ContentEvent, StoppableInterface, StoppableTrait};
+use Zolinga\System\Types\ContentMimeTypesEnum;
+use Zolinga\System\Types\StatusEnum;
+use Zolinga\System\Events\ContentEvent;
 
 /**
  * Event that is supposed to be triggered before the content is generated.
@@ -61,7 +62,8 @@ class PreflightEvent extends ContentEvent
 
         switch ($this->mimeType) {
             case ContentMimeTypesEnum::TEXT_HTML:
-                return "<html><body><h1>Error</h1><p>{$publicErrorMessage}</p></body></html>";
+                $safeError = htmlspecialchars($publicErrorMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+                return "<html><body><h1>Error</h1><p>{$safeError}</p></body></html>";
             case ContentMimeTypesEnum::APPLICATION_JSON:
                 return json_encode(['error' => $publicErrorMessage], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             case ContentMimeTypesEnum::TEXT_PLAIN:

@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Zolinga\System;
 
-use ArrayAccess;
 use Zolinga\System\Events\{Event, StoppableInterface, ServiceInterface, ListenerInterface, AuthorizeEvent};
-use Zolinga\System\Types\{StatusEnum, SeverityEnum};
-use Zolinga\System\Config\Atom\{ListenAtom, EmitAtom, WebComponentAtom, AtomInterface};
+use Zolinga\System\Types\StatusEnum;
+use Zolinga\System\Config\Atom\ListenAtom;
 
 /**
  * Main System API class.
@@ -178,7 +177,11 @@ class Api
             $err = $e->getMessage() . ' [' . $fileName . ':' . $e->getLine() . ']';
             $this->log->error('system', $err);
             trigger_error($err . ' [' . $fileName . ':' . $e->getLine() . ']', E_USER_WARNING);
-            $event->setStatus(StatusEnum::ERROR, $err);
+            if (defined('ZOLINGA_DEBUG') && ZOLINGA_DEBUG) {
+                $event->setStatus(StatusEnum::ERROR, $err);
+            } else {
+                $event->setStatus(StatusEnum::ERROR, 'An internal error occurred. Please try again later.');
+            }
         }
     }
 
