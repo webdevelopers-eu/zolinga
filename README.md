@@ -1,99 +1,69 @@
-# Zolinga PHP Framework - "Built for People. Optimized for AI Agents."
+# Zolinga PHP Framework — The Vibe Coder’s Dream 🚀
+
 *Etymology: In the Chichewa language of Africa, the word "zolinga" means "goals."*
 
-Zolinga Framework is a lightweight PHP framework designed from the ground up for AI agents and vibe coding. Fully ✋hand-coded🤚, it avoids AI-generated scaffolding. It is minimal, modular, and structured to keep codebases simple, readable, and easy for both humans and AI to navigate. Its self-contained documentation is written for developers and AI agents, making it easier to explore projects, understand code, and build clean, high-quality software faster.
+Zolinga is a ultra-lightweight PHP framework designed for **vibe coders**, beginning developers, and AI agents. It is fully ✋hand-coded🤚, avoiding bloated AI-generated scaffolding. By keeping the codebase extremely lean, Zolinga provides a clean, predictable, and low-complexity blueprint that lets you and your AI build real apps at the speed of thought.
 
-> "You will recognize a well designed framework by the speed and ease with which you can add new features and fix bugs without modifying it, and by its ability to remain stable and unchanged for years while still supporting evolving requirements."
+---
 
-## Advantages
+## Why Zolinga is the Ultimate AI + Vibe Coding Framework
 
-- **Event-Driven Architecture** — Everything is an event. Local, remote (HTTP), and CLI origins are first-class citizens. Dispatch an event from a cron job, a web request, or another Zolinga instance over the network — same API, zero ceremony. No service container boilerplate, no event bus packages to install.
-- **Built-in Multilingual** — Core-supported `gettext`/`dngettext` pipeline with context-aware disambiguation, automatic string extraction, `.po`/`.mo` compilation, and JS-side `gettext` imports. No third-party i18n packages needed — it just works out of the box.
-- **Database-less CMS with Dynamic Content Tags** — HTML pages are stored as files, not database rows. Pluggable `<content-tag>` elements let any module inject dynamic output via event listeners. `<include-file>`, `<replace-vars>`, `<ai-text>` — compose pages declaratively without touching PHP. Swap to a DB-backed CMS later without rewriting templates.
-- **AI-Native Content Generation** — `<ai-text>` tag generates and caches AI-powered content directly in pages. Set a `uuid` for stable caching, add `remove-invalid-links` for sanitization, use `{{random}}` variables for variation. No prompt-chaining libraries, no LangChain — it's a CMS tag.
-- **Immutable API, 10-Year Stability** — No major-version upgrade treadmill. The core API is designed to stay stable for a decade. Dependencies are WHATWG Web Components, bare PHP, and own modules — all under your control. No `composer update` surprises breaking your app.
-- **Self-Contained, Git-Tracked Documentation** — Every module ships its own `wiki/` folder. Documentation lives next to the code, versioned in git, and can include private docs without external wiki servers. AI agents and developers read the same source of truth.
-- **Zero-Config Web Components** — Register a component in `zolinga.json`, drop the `.js` file in `install/dist/web-components/`, done. The system auto-defines it with `customElements.define()`. Shadow DOM, event broadcasting, and modal handling come built-in via the base `WebComponent` class.
-- **Unified CLI & Web Gateway** — `bin/zolinga event:name <params>` fires any CLI-origin event from the terminal. Run health checks, trigger imports, execute test scripts — same event system, same listeners, no separate CLI framework needed.
+### 🪙 Low-Token Vibe Architecture
+Standard PHP frameworks like Laravel or Symfony are massive. They overload your LLM's context window, draining your wallet in API costs and confusing your AI companion with endless layers of inheritance. 
+* **Tiny Footprint:** Zolinga is so clean and compact that AI agents can read, understand, and reason about your entire codebase in a single prompt.
+* **Fewer Tokens, Better Code:** Experience lightning-fast responses, near-zero hallucinations, and massive savings on OpenAI/Anthropic/Gemini bills.
 
-**Table of Contents**
+### 🔋 Plug-and-Play Agent Cartridges
+Forget bloated packages, dependency hell, and messy integration code. In Zolinga, features are organized into self-contained, modular **Agent Cartridges**.
+* **Zero Boilerplate:** Each cartridge (contained inside [modules/](modules/)) declares its interfaces, routes, and background jobs in a simple JSON manifest, [zolinga.json](zolinga.json).
+* **AI-First Discoverability:** Your AI agent can scan the manifest files, immediately understand what events a cartridge handles, and write perfect code to interact with them inside [modules/](modules/).
 
-- [Zolinga PHP Framework](#zolinga-php-framework)
-  - [Advantages](#advantages)
-  - [But... why?](#but-why)
-  - [Introduction](#introduction)
-  - [Target Audience](#target-audience)
-  - [Requirements](#requirements)
-  - [Installation](#installation)
-    - [The Common Way](#the-common-way)
-    - [Docker Quick Test](#docker-quick-test)
-    - [Apache](#apache)
-  - [Anatomy of a Module](#anatomy-of-a-module)
-    - [Manifest File](#manifest-file)
-  - [Installing Modules](#installing-modules)
-- [Documentation](#documentation)
-- [Related Modules](#related-modules)
+### ⚡ Unified Event-Driven Voodoo
+In Zolinga, **everything is an event**. Whether a request comes from a user visiting a webpage, an automated cron job, or the command line—it is handled exactly the same way.
+* Dispatch an event anywhere, and your AI can easily hook into it or extend it.
+* Zero service container overhead, zero ceremony. Simple, direct, and fast PHP 8.4 code.
 
-## But... why?
+---
 
-I'm fully committed to a single project, and these components—framework, cron, translation module, database access, a database-less CMS, and simple Rights Management—are the vital building blocks needed for it. After two months of intense effort and drawing from 25 years of experience, I felt it was fitting to give back to the open-source community before delving into the closed-source aspect of the project.
+## Table of Contents
 
-You might wonder why not opt for an existing solution? Well, the project I'm working on is anticipated to run for the next 10 years. 90% of the code has no parallel in existing modules. For that reason, it needs to be both minimalistic and immutable. Minimalistic because fewer features equate to less maintenance headaches and fewer upgrade issues. Immutable because it significantly reduces the cost of maintaining modules. 
+- [Zolinga PHP Framework — The Vibe Coder’s Dream 🚀](#zolinga-php-framework--the-vibe-coders-dream-)
+  - [Why Zolinga is the Ultimate AI + Vibe Coding Framework](#why-zolinga-is-the-ultimate-ai--vibe-coding-framework)
+    - [🪙 Low-Token Vibe Architecture](#-low-token-vibe-architecture)
+    - [🔋 Plug-and-Play Agent Cartridges](#-plug-and-play-agent-cartridges)
+    - [⚡ Unified Event-Driven Voodoo](#-unified-event-driven-voodoo)
+  - [The 2-Minute Quickstart](#the-2-minute-quickstart)
+    - [The Simple Way (Local PHP)](#the-simple-way-local-php)
+    - [The Fast Way (Docker Container)](#the-fast-way-docker-container)
+    - [Running with Apache](#running-with-apache)
+  - [How to Vibe Code - Anatomy of an Agent Cartridge](#how-to-vibe-code---anatomy-of-an-agent-cartridge)
+    - [The Cartridge Manifest](#the-cartridge-manifest)
+    - [The Cartridge Logic](#the-cartridge-logic)
+  - [Built-In Framework Superpowers](#built-in-superpowers)
+  - [Pre-Loaded Agent Cartridges](#pre-loaded-agent-cartridges)
 
-The problem with all popular frameworks is their sheer popularity. They tend to be inundated with competing needs, ideas, and requirements, leading to a perpetual cycle of breaking compatibility, adding unnecessary features, and fixing bugs. My project isn't intended to be upgraded or rewritten every two years, which is the average lifespan of a major release in any popular framework. It needs to run for 10 years stright with minimal investment. Constantly working on the app to keep up with the extensive list of fixed bugs from vendors, for features you don't even use, is not a feasible solution.
+---
 
-So, that's how this minimalistic and maximally immutable project came to be.
+## The 2-Minute Quickstart
 
-It had to meet the following criteria:
+Getting started is designed to be effortless. You don’t need complex package managers or build scripts list.
 
-- Be minimalistic, devoid of any unnecessary features, yet have a smart design to cover all current and future use cases
-- Ensure strict, well-defined modularity to effortlessly incorporate new features and seamlessly expand the project. From front-end components and JavaScript to the backend with PHP.
-- Have an immutable API wherever possible (WHATWG Web Components, bare PHP, own modules - dependencies that are stable and/or under full control)
-- Require a minimalistic, database-less CMS that facilitates updates via FTP or similar methods. It must support pluggable dynamic elements managed by other modules, with a customizable templating system that can be easily extended. Additionally, it must seamlessly integrate with the ability to be replaced with a full-blown, database-driven version when necessary.
-- Include simple Rights Management
-- Offer Cron support to schedule and execute tasks
-- Provide unmatched language translation support (expecting usage in 8+ languages)
-- Offer a simple MySQL API
-- Have comprehensive documentation
-- Adhere to simple programming rules to ensure easy onboarding for professionals with varying skill levels
-- Have an built-in git-controlled documentation system that can include private documentation without the need to maintain and update external documentation servers
+### The Simple Way (Local PHP)
 
-Let me introduce you to Zolinga, a PHP framework that meets all these criteria.
+1. **Clone the project:**
+   ```bash
+   git clone https://github.com/webdevelopers-eu/zolinga.git
+   ```
+2. **Launch the built-in server:**
+   ```bash
+   ./bin/zolinga --server
+   ```
+3. **Explore your setup:**
+   Open your browser to the local URL shown in your terminal. You can access the unified in-app developer guide at `/wiki` using the default password `ZOLINGA`.
 
-## Introduction
-Zolinga is a minimalist and well-thought-out PHP framework. It does not require a database (although modules might). It encapsulates the distilled essence of practical experience gained over years of developing web applications. It offers a simple yet comprehensive API for building robust, efficient, and stable applications.
+### The Fast Way (Docker Container)
 
-**This is an innovative addition to the PHP framework landscape, so I encourage you to approach it with a sense of adventure, albeit with caution. Dive in and discover the streamlined efficiency and robustness that Zolinga offers.**
-
-## Target Audience
-
-If you're tired of overcomplicated and extensive solutions for simple problems and are eager to explore new approaches, Zolinga is for you. Whether you're a PHP developer at any level, Zolinga offers a refreshing alternative.
-
-With Zolinga, you can craft your project with ease, focusing on coding essential features without the burden of unnecessary components. Zolinga's minimalist API design makes it perfect for those who prefer to use minimal features or are eager to add minimalistic components to their projects. Despite its minimalist approach, Zolinga is a powerful platform capable of handling even the largest projects, offering indefinite growth potential.
-
-Start small and easy and grow with your project at your own pace in any direction, thanks to Zolinga's smart flexibility and scalability. 
-
-## Requirements
-- PHP 8.2 or higher
-
-## Installation
-
-### The Common Way
-To install Zolinga, follow these steps:
-
-1. Clone the repository to your local machine.
-```bash
-    git clone https://github.com/webdevelopers-eu/zolinga.git
-```
-
-2. Configure your web server to serve the `public` directory (see section Apache bellow as an example). Alternatively, you can use the built-in PHP web server by running the following script `./bin/zolinga --server` inside the Zolinga directory.
-
-3. Navigate to the URL depending on how you started the server. If you ran `./bin/zolinga --server` then follow the instructions in the console. If you configured your web server to serve the `public` directory, then you know what to do. You should first visit the `/wiki/` URL. The WIKI page default password is `ZOLINGA` (Duh! 😜). Bundled Zolinga WIKI is the right place to start digging deeper into the Zolinga framework.
-
-### Docker Quick Test
-
-If you prefer testing a new project inside Docker, here is a quick *2-minute* installation guide to
-pull the PHP image and run the Zolinga framework inside a container. 😜
+Have Docker installed? Spin up Zolinga in under two minutes:
 
 ```bash
 $ docker pull php
@@ -103,141 +73,123 @@ dock:$ git clone https://github.com/webdevelopers-eu/zolinga.git /tmp/zolinga
 dock:$ /tmp/zolinga/bin/zolinga --server
 ```
 
-* Then visit [http://localhost:8888](http://localhost:8888) in your browser.
-* WIKI Documentation: [http://localhost:8888/wiki](http://localhost:8888/wiki) (password: "WIKI")
+Now, visit [http://localhost:8888](http://localhost:8888) and start vibing!
 
+### Running with Apache
 
-
-### Apache
-
-This is an example how Apache on Debian can be configured to serve Zolinga.
+If you are running on Debian/Ubuntu and prefer a traditional Apache setup:
 
 ```bash
-# Checkout the repository into /var/www folder 
+# Clone the repository
 $ git clone https://github.com/webdevelopers-eu/zolinga.git /var/www/zolinga.localhost
 
-# Set the correct permission - www-data user is the common user for Apache
-$ chown -R www-data.www-data /var/www/zolinga.localhost
+# Set standard permissions for Apache
+$ chown -R www-data:www-data /var/www/zolinga.localhost
 
-# Generate example Apache configuration file and put it into /etc/apache2/sites-available
+# Use the zolinga CLI tool to scaffold your Apache virtual host file
 $ /var/www/zolinga.localhost/bin/zolinga skeleton:apache --serverName=zolinga.local --ip=127.0.0.1 > /etc/apache2/sites-available/010-zolinga.conf
 
-# Enable the newly created configuration file
+# Enable the site and reload
 $ a2ensite 010-zolinga.conf
-
-# Restart Apache
 $ systemctl restart apache2
 ```
 
-Then visit [http://zolinga.localhost](http://zolinga.localhost) in your browser.
+---
 
-Of course it presumes that PHP is already installed on your system. If not, you can install it by running the following commands:
+## How to Vibe Code - Anatomy of an Agent Cartridge
 
-```bash
-apt install libapache2-mod-php8.2
-a2enmod php8.2
-```
+When vibe coding, simply point your AI to [zolinga.json](zolinga.json) and ask: *"Add a new capability that does X."* 
 
-## Anatomy of a Module
-A module is a directory that contains a `zolinga.json` file, which describes the module's functionality to the system. This file specifies the script autoload rules and the events that the module listens to. The listener manifest section allows you to define event handlers that respond to various system events resulting in processing various types of requests, such as HTTP, AJAX, and command line. Special events can also instantiate your event handler as a system service to be directly accessed by other code through `$api->{serviceName}` syntax for maximum speed and versatility.
+Every Agent Cartridge lives in a folder inside the [modules/](modules/) directory. It contains a manifest file and simple PSR-compliant source scripts.
 
-### Manifest File
-Each module contains a `zolinga.json` file that describes the module. 
+### The Cartridge Manifest
 
-Module manifest file example:
+Your cartridge defines its inputs and exports inside a [zolinga.json](zolinga.json) manifest file:
 
 ```json
 {
-    "name": "Hello World",
-    "description": "A simple Hello World module.",
+    "name": "Hello Vibe",
+    "description": "Greeting cartridge designed for AI orchestration.",
     "version": "1.0.0",
-    "authors": ["John Doe <john@example.com>"],
+    "authors": ["Vibe Coder <developer@example.com>"],
     "listen": [
         {
             "event": "system:content:html",
-            "class": "\\Example\\HelloWorld\\Server",
+            "class": "\\Example\\HelloVibe\\Server",
             "method": "outputPage",
             "priority": 0.8,
             "origin": ["remote"]
         }
     ],
     "autoload": {
-        "Example\\HelloWorld\\": "src/"
+        "Example\\HelloVibe\\": "src/"
     },
     "config": {
-        "helloWorld": {
-            "myGreeting": "Hello World! 🥳🎉"
+        "helloVibe": {
+            "myGreeting": "Hello Vibe Coder! 🥳🎉"
         }
     }
 }
-``` 
-Yes, as you would guess, if you dispatch an event `system:content:html` from a remote origin, the `outputPage` method of the `Server` class in the `Example\HelloWorld` namespace will be called. (In the web request flow, `index.php` first dispatches a `system:content:preflight` event to determine the content type, then dispatches the appropriate content event — `system:content:html`, `system:content:json`, or `system:content:text` — based on the MIME type set by preflight handlers.)
+```
+
+### The Cartridge Logic
+
+The companion PHP code is incredibly clean and written in modern PHP. For example, to handle the web request event above:
 
 ```php
+declare(strict_types=1);
+
+namespace Example\HelloVibe;
+
+use Zolinga\System\Events\ListenerInterface;
 use Zolinga\System\Events\Event;
 
-(new Event('system:content:html', Event::ORIGIN_REMOTE))->dispatch();
+class Server implements ListenerInterface 
+{
+    /**
+     * Responds to HTML content requests.
+     */
+    public function outputPage(Event $event): void 
+    {
+        // Zero boilerplates. Just access the API state and vibe.
+        global $api;
+        
+        $greeting = $api->config['helloVibe']['myGreeting'] ?? 'Hello!';
+        echo "<h1>$greeting</h1>";
+        
+        $event->setStatus(Event::STATUS_COMPLETED);
+    }
+}
 ```
 
-This is all there is to it. Except for a few optional syntax sugars to make the module manifest easier to write and read, you don't need to know anything more than what is in this example. You're practically the Zolinga expert now!
+---
 
-For more information refer to inbuilt WIKI documentation in your Zolinga installation. The WIKI is available at the URL `/wiki/` upon initial installation - see the section [Installation](#installation) for more details.
+## Built-In Framework Superpowers
 
-## Installing Modules
+* **Database-less CMS with Dynamic Tags:** Pages are simple static HTML files, not rows in a database. Inject dynamic logic anywhere with markup tags like `<replace-vars>` or `<include-file>`. Extremely fast to load, easy to back up, and easily understood by AI.
+* **Instant Multilingual (Gettext):** Native translation out-of-the-box. Context-aware translations are defined in standard `.po`/`.mo` structures with direct JavaScript frontend binding. No huge localization libraries needed.
+* **No-Config Web Components:** Build slick custom frontends effortlessly. Drop your JS web component file into your cartridge's distribution folder, and Zolinga automatically registers it in the browser window using WHATWG Web Components.
+* **Git-Tracked Local Wiki:** All cartridge and core documentation is stored inside the code repository itself in Markdown format. As your AI edits your codebase, it keeps your documentation automatically in sync inside git.
 
-To install new module run the following command:
+---
 
-```bash
-./bin/zolinga install --module={ID}
-```
+## Pre-Loaded Agent Cartridges
 
-Example:
-
-```bash
-./bin/zolinga install --module=zolinga-cms
-``` 
-
-To list all available modules run the following command:
+You can check out and install useful official cartridges directly from the CLI:
 
 ```bash
+# List available cartridges
 ./bin/zolinga install --list
+
+# Plug in and install the CMS and translation layers
+./bin/zolinga install --module=zolinga-cms,zolinga-intl,zolinga-db,zolinga-cron
 ```
 
-# Documentation
+* **Zolinga CMS** (`zolinga-cms`) — Database-free, files-centric, ultra-performance management system.
+* **Zolinga Cron** (`zolinga-cron`) — Flexible automated schedule and task manager.
+* **Zolinga DB** (`zolinga-db`) — Hyper-clean MySQL database mapper.
+* **Zolinga RMS** (`zolinga-rms`) — Robust, minimal rights-management and authorization layers.
+* **Zolinga Intl** (`zolinga-intl`) — Multi-locale support, localizing both PHP and front-end JS easily.
+* **Zolinga AI** (`zolinga-ai`) — Built-in LLM interfaces designed to allow the core to speak directly with generative endpoints.
 
-Zolinga is a highly extensible system with a modular architecture. Some of its modules, along with their documentation, may be proprietary. As a result, there is no single, comprehensive online documentation available for the entire system. However, Zolinga stands out with its robust self-documenting capabilities and an integrated WIKI. This built-in WIKI dynamically displays all the necessary documentation tailored to your specific installation, including details for every installed module.
-
-The key advantage is that each module comes with its own documentation, which is automatically integrated into the system-wide WIKI upon installation. This ensures that your work, modules, and progress are visible only to you and others who have the same software setup. You’ll never encounter documentation for features or modules you haven’t installed, guaranteeing that the documentation you see always matches the exact version of your installation.
-
-For a sneak peek into the online documentation for the core and base modules, you can visit [Zolinga.ORG Documentation](https://www.zolinga.org/wiki). However, always refer to your local documentation, as it may include additional modules, including any custom ones you’ve developed or installed.
-
-It was challenging to implement, but the results speak for themselves—it works great!
-
-By default, the WIKI is available at the URL /wiki/ upon initial installation. You can change both the URL path and the password in the config file.
-
-Enjoy! 🎉
-
-# Related Modules
-
-You may want to check also other modules. Just add them to Zolinga by running
-
-```bash
-./bin/zolinga install --module=ID[,ID,...]
-```
-
-E.g.
-
-```bash
-./bin/zolinga install --list
-./bin/zolinga install --module=zolinga-cron,zolinga-db,zolinga-rms,zolinga-intl,zolinga-cms
-```
-
-- [Zolinga CMS](https://github.com/webdevelopers-eu/zolinga-cms) - databaseless content management system, id `zolinga-cms`
-- [Zolinga Cron](https://github.com/webdevelopers-eu/zolinga-cron) - cron jobs, id `zolinga-cron`
-- [Zolinga DB](https://github.com/webdevelopers-eu/zolinga-db) - simple MySQL API, id `zolinga-db`
-- [Zolinga RMS](https://github.com/webdevelopers-eu/zolinga-rms) - simple Rights Management, id `zolinga-rms`
-- [Zolinga Commons](https://github.com/webdevelopers-eu/zolinga-commons) - contains common widgets and other goodies, id `zolinga-commons`
-- [Zolinga Intl](https://github.com/webdevelopers-eu/zolinga-intl) - language translation support, id `zolinga-intl`
-- [Zolinga AI](https://github.com/webdevelopers-eu/zolinga-ai) - AI support, id `zolinga-ai`
-
-When you install a module, it will be automatically added to the `modules` directory and its documentation will be merged into inbuilt Zolinga WIKI Documentation right in your Zolinga installation.
+Enjoy building without the bloat. Welcome to the vibe era of programming! 🚀
