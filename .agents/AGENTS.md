@@ -18,6 +18,7 @@ This is a modular system with multiple independent git repositories. The main gi
 ## Skills Available
 
 Repository core skills:
+- `system-check-modules` — **REQUIRED first** for any new feature/page/capability on a fresh checkout. Install official modules (CMS, DB, Intl, ...) before building custom ones. See README.md "Pre-Loaded Modules".
 - `system-reuse-first`
 - `system-create-skill`
 - `system-create-handler`
