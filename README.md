@@ -13,7 +13,7 @@ Standard PHP frameworks like Laravel or Symfony are massive. They overload your 
 * **Tiny Footprint:** Zolinga is so clean and compact that AI agents can read, understand, and reason about your entire codebase in a single prompt.
 * **Fewer Tokens, Better Code:** Experience lightning-fast responses, near-zero hallucinations, and massive savings on OpenAI/Anthropic/Gemini bills.
 
-### � Modular Simplicity
+### 🔌 Modular Simplicity
 Forget bloated packages, dependency hell, and messy boilerplate. In Zolinga, features are organized into self-contained, modular **modules** inside the [modules/](modules/) directory.
 * **Zero Boilerplate:** Each module declares its event listeners, interfaces, and settings in a simple JSON manifest, [zolinga.json](zolinga.json).
 * **AI-First Discoverability:** Your AI agent can scan the manifest files, instantly understand what events a module handles, and write perfect code to interact with them inside [modules/](modules/).
@@ -35,9 +35,10 @@ In Zolinga, **everything is an event**. Whether a request comes from a user visi
 - [Zolinga PHP Framework — The Vibe Coder’s Dream 🚀](#zolinga-php-framework--the-vibe-coders-dream-)
   - [Why Zolinga is the Ultimate AI + Vibe Coding Framework](#why-zolinga-is-the-ultimate-ai--vibe-coding-framework)
     - [🪙 Low-Token Vibe Architecture](#-low-token-vibe-architecture)
-    - [� Modular Simplicity](#-modular-simplicity)
+    - [🔌 Modular Simplicity](#-modular-simplicity)
     - [🔋 Plug-and-Play Agent Cartridges](#-plug-and-play-agent-cartridges)
     - [⚡ Unified Event-Driven Voodoo](#-unified-event-driven-voodoo)
+  - [The Architecture of Difference: Zolinga vs. Legacy Frameworks](#the-architecture-of-difference-zolinga-vs-legacy-frameworks)
   - [The 2-Minute Quickstart](#the-2-minute-quickstart)
     - [The Simple Way (Local PHP)](#the-simple-way-local-php)
     - [The Fast Way (Docker Container)](#the-fast-way-docker-container)
@@ -45,8 +46,22 @@ In Zolinga, **everything is an event**. Whether a request comes from a user visi
   - [How to Vibe Code - Anatomy of a Module](#how-to-vibe-code---anatomy-of-a-module)
     - [The Module Manifest](#the-module-manifest)
     - [The Module Logic](#the-module-logic)
-  - [Built-In Framework Superpowers](#built-in-superpowers)
+  - [Built-In Framework Superpowers](#built-in-framework-superpowers)
   - [Pre-Loaded Modules](#pre-loaded-modules)
+
+---
+
+## The Architecture of Difference: Zolinga vs. Legacy Frameworks
+
+Zolinga isn't just a mini-framework; it is designed on a completely different set of assumptions about development. Here is how it stacks up against traditional heavyweights like Laravel or Symfony:
+
+| Dimension | Legacy Frameworks (Laravel, Symfony) | Zolinga Framework |
+| :--- | :--- | :--- |
+| **AI Native Execution** | Zero native support. Requires custom middleware controllers, third-party libraries, and manual endpoint mapping. | **Native Model Context Protocol (MCP) Server.** Speaks JSON-RPC 2.0 natively at `/mcp/`. AI agents list tools, inspect resources, and use prompts out-of-the-box. |
+| **Parsing & Templating** | Dynamic regex string replacement engines (Blade, Twig) compile code to messy files. Highly prone to generation errors. | **Logical DOM-Centric Architecture.** Translates and renders HTML templates strictly via the native **PHP DOM extension** and XPath, ensuring structured schema stability. |
+| **Dependency Lifespan** | Deep composer/npm trees under constant change. High maintenance costs, major breaking updates every 12–24 months. | **Immutable Framework Dependency.** Zero external packages. Built strictly on WHATWG web component standards and bare PHP 8.4—designed to run unaltered for 10+ years. |
+| **Service Wiring** | Complex Dependency Injection Containers (DIC), reflection/binding configs, and heavy services setup. | **Global `$api` State & Manifest Wiring.** Fully decoupled module manifests auto-load and register event listeners instantly. Direct, lightning-fast execution. |
+| **Developer Wiki** | Centralized documentation servers or disconnected text documents that quickly drift out of sync. | **Self-Inlined Markdown Wikis.** Each module carries its own Markdown files that compiled in real-time to a secure, local developer Wiki. |
 
 ---
 
