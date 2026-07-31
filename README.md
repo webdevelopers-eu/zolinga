@@ -13,10 +13,15 @@ Standard PHP frameworks like Laravel or Symfony are massive. They overload your 
 * **Tiny Footprint:** Zolinga is so clean and compact that AI agents can read, understand, and reason about your entire codebase in a single prompt.
 * **Fewer Tokens, Better Code:** Experience lightning-fast responses, near-zero hallucinations, and massive savings on OpenAI/Anthropic/Gemini bills.
 
+### � Modular Simplicity
+Forget bloated packages, dependency hell, and messy boilerplate. In Zolinga, features are organized into self-contained, modular **modules** inside the [modules/](modules/) directory.
+* **Zero Boilerplate:** Each module declares its event listeners, interfaces, and settings in a simple JSON manifest, [zolinga.json](zolinga.json).
+* **AI-First Discoverability:** Your AI agent can scan the manifest files, instantly understand what events a module handles, and write perfect code to interact with them inside [modules/](modules/).
+
 ### 🔋 Plug-and-Play Agent Cartridges
-Forget bloated packages, dependency hell, and messy integration code. In Zolinga, features are organized into self-contained, modular **Agent Cartridges**.
-* **Zero Boilerplate:** Each cartridge (contained inside [modules/](modules/)) declares its interfaces, routes, and background jobs in a simple JSON manifest, [zolinga.json](zolinga.json).
-* **AI-First Discoverability:** Your AI agent can scan the manifest files, immediately understand what events a cartridge handles, and write perfect code to interact with them inside [modules/](modules/).
+Teaching your AI companion how to build and maintain your app is as simple as inserting a retro game cartridge.
+* **Symlinked Skills:** When a module is installed, its specialized AI prompts and domain-specific action specifications—its **Agent Cartridges**—are automatically symlinked into [.agents/skills/](.agents/skills/).
+* **Instant Expert AI:** These cartridges instantly slot directly into your development agent's active memory pool, teaching your AI precisely how to test, document, and expand that module without confusing or overloading its main instruction context!
 
 ### ⚡ Unified Event-Driven Voodoo
 In Zolinga, **everything is an event**. Whether a request comes from a user visiting a webpage, an automated cron job, or the command line—it is handled exactly the same way.
@@ -30,17 +35,18 @@ In Zolinga, **everything is an event**. Whether a request comes from a user visi
 - [Zolinga PHP Framework — The Vibe Coder’s Dream 🚀](#zolinga-php-framework--the-vibe-coders-dream-)
   - [Why Zolinga is the Ultimate AI + Vibe Coding Framework](#why-zolinga-is-the-ultimate-ai--vibe-coding-framework)
     - [🪙 Low-Token Vibe Architecture](#-low-token-vibe-architecture)
+    - [� Modular Simplicity](#-modular-simplicity)
     - [🔋 Plug-and-Play Agent Cartridges](#-plug-and-play-agent-cartridges)
     - [⚡ Unified Event-Driven Voodoo](#-unified-event-driven-voodoo)
   - [The 2-Minute Quickstart](#the-2-minute-quickstart)
     - [The Simple Way (Local PHP)](#the-simple-way-local-php)
     - [The Fast Way (Docker Container)](#the-fast-way-docker-container)
     - [Running with Apache](#running-with-apache)
-  - [How to Vibe Code - Anatomy of an Agent Cartridge](#how-to-vibe-code---anatomy-of-an-agent-cartridge)
-    - [The Cartridge Manifest](#the-cartridge-manifest)
-    - [The Cartridge Logic](#the-cartridge-logic)
+  - [How to Vibe Code - Anatomy of a Module](#how-to-vibe-code---anatomy-of-a-module)
+    - [The Module Manifest](#the-module-manifest)
+    - [The Module Logic](#the-module-logic)
   - [Built-In Framework Superpowers](#built-in-superpowers)
-  - [Pre-Loaded Agent Cartridges](#pre-loaded-agent-cartridges)
+  - [Pre-Loaded Modules](#pre-loaded-modules)
 
 ---
 
@@ -96,20 +102,20 @@ $ systemctl restart apache2
 
 ---
 
-## How to Vibe Code - Anatomy of an Agent Cartridge
+## How to Vibe Code - Anatomy of a Module
 
 When vibe coding, simply point your AI to [zolinga.json](zolinga.json) and ask: *"Add a new capability that does X."* 
 
-Every Agent Cartridge lives in a folder inside the [modules/](modules/) directory. It contains a manifest file and simple PSR-compliant source scripts.
+Every module lives in a folder inside the [modules/](modules/) directory. It contains a manifest file and simple PSR-compliant source scripts.
 
-### The Cartridge Manifest
+### The Module Manifest
 
-Your cartridge defines its inputs and exports inside a [zolinga.json](zolinga.json) manifest file:
+Your module defines its inputs, capabilities, and settings inside a [zolinga.json](zolinga.json) manifest file:
 
 ```json
 {
     "name": "Hello Vibe",
-    "description": "Greeting cartridge designed for AI orchestration.",
+    "description": "Greeting module designed for AI orchestration.",
     "version": "1.0.0",
     "authors": ["Vibe Coder <developer@example.com>"],
     "listen": [
@@ -132,7 +138,7 @@ Your cartridge defines its inputs and exports inside a [zolinga.json](zolinga.js
 }
 ```
 
-### The Cartridge Logic
+### The Module Logic
 
 The companion PHP code is incredibly clean and written in modern PHP. For example, to handle the web request event above:
 
@@ -151,7 +157,7 @@ class Server implements ListenerInterface
      */
     public function outputPage(Event $event): void 
     {
-        // Zero boilerplates. Just access the API state and vibe.
+        // Zero boilerplate. Just access the global API services and vibe.
         global $api;
         
         $greeting = $api->config['helloVibe']['myGreeting'] ?? 'Hello!';
@@ -168,20 +174,20 @@ class Server implements ListenerInterface
 
 * **Database-less CMS with Dynamic Tags:** Pages are simple static HTML files, not rows in a database. Inject dynamic logic anywhere with markup tags like `<replace-vars>` or `<include-file>`. Extremely fast to load, easy to back up, and easily understood by AI.
 * **Instant Multilingual (Gettext):** Native translation out-of-the-box. Context-aware translations are defined in standard `.po`/`.mo` structures with direct JavaScript frontend binding. No huge localization libraries needed.
-* **No-Config Web Components:** Build slick custom frontends effortlessly. Drop your JS web component file into your cartridge's distribution folder, and Zolinga automatically registers it in the browser window using WHATWG Web Components.
-* **Git-Tracked Local Wiki:** All cartridge and core documentation is stored inside the code repository itself in Markdown format. As your AI edits your codebase, it keeps your documentation automatically in sync inside git.
+* **No-Config Web Components:** Build slick custom frontends effortlessly. Drop your JS web component file into your module's distribution folder, and Zolinga automatically registers it in the browser window using WHATWG Web Components.
+* **Git-Tracked Local Wiki:** All module and core documentation is stored inside the code repository itself in Markdown format. As your AI edits your codebase, it keeps your documentation automatically in sync inside git.
 
 ---
 
-## Pre-Loaded Agent Cartridges
+## Pre-Loaded Modules & Cartridges
 
-You can check out and install useful official cartridges directly from the CLI:
+You can check out and install useful official modules directly from the CLI:
 
 ```bash
-# List available cartridges
+# List available modules
 ./bin/zolinga install --list
 
-# Plug in and install the CMS and translation layers
+# Plug in and install the CMS and translation layers (which also slots in their respective Agent Cartridges)
 ./bin/zolinga install --module=zolinga-cms,zolinga-intl,zolinga-db,zolinga-cron
 ```
 
