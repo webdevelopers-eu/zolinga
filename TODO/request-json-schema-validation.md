@@ -1,6 +1,6 @@
 # Validate Input
 
-Condition: when PHP support JSON SCHEMA validation
+Condition: when [PHP support](https://wiki.php.net/rfc/json_schema_validation) JSON SCHEMA validation. Maybe PHP 8.6?
 
 Description: Be able to statically declare event parameters and validate them against a JSON SCHEMA. 
 
