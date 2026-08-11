@@ -35,6 +35,7 @@
 !/config/README.txt
 !/config/*.json.example
 
+/TODO/
 
 /tmp/
 /public/tmp/
