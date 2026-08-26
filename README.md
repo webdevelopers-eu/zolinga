@@ -1,7 +1,5 @@
 # Zolinga PHP Framework — The Vibe Coder’s Dream 🚀
 
-> 🤖 Built for People. 🧠 Orchestrated by AI. Lightweight PHP framework with native MCP support. ✨ Hand-crafted from the ground up, and micro-optimized to minimize token usage with AI.
-
 *Etymology: In the Chichewa language of Africa, the word "zolinga" means "goals."*
 
 Zolinga is an ultra-lightweight PHP framework designed for vibe coders, beginning developers, experienced professionals, and AI agents. It is fully ✋ hand-coded 🤚, avoiding bloated AI-generated scaffolding.
