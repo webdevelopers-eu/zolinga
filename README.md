@@ -4,7 +4,9 @@
 
 *Etymology: In the Chichewa language of Africa, the word "zolinga" means "goals."*
 
-Zolinga is a ultra-lightweight PHP framework designed for **vibe coders**, beginning developers, and AI agents. It is fully ✋hand-coded🤚, avoiding bloated AI-generated scaffolding. By keeping the codebase extremely lean, Zolinga provides a clean, predictable, and low-complexity blueprint that lets you and your AI build real apps at the speed of thought.
+Zolinga is an ultra-lightweight PHP framework designed for vibe coders, beginning developers, experienced professionals, and AI agents. It is fully ✋ hand-coded 🤚, avoiding bloated AI-generated scaffolding.
+
+By keeping the codebase extremely lean, Zolinga provides a clean, predictable, and low-complexity foundation for building real, maintainable applications at the speed of thought - whether you are learning, vibe coding with AI, or building production software professionally.
 
 ---
 
