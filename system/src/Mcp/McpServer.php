@@ -422,14 +422,17 @@ class McpServer
         $authInfo = trim(($token[0] ?? '') . ' ' . ($token[1] ? 'crc32=' . dechex(crc32($token[1])) : '')) ?: 'noauth';
         $ua = $_SERVER['HTTP_USER_AGENT'] ?? '-';
         
-        $api->log->info('system:mcp', McpHelper::truncateForEcho(
-            "MCP Request[$authInfo]: status=$status, method=" . ($event?->type ?? '-')
-            . ", size=" . strlen($this->rawBody) . "B"
+        $api->log->info(
+            'system:mcp', 
+            McpHelper::truncateForEcho(
+            "MCP Request[$authInfo]: status=$status, method=" . ($event?->type ?? '-') . ", size=" . strlen($this->rawBody) . "B"
         ), [
             'status' => $status,
             'size' => strlen($this->rawBody),
             'method' => McpHelper::truncateForEcho($event?->type ?? '-'),
             'user_agent' => McpHelper::truncateForEcho($ua),
+            'request' => McpHelper::truncateForEcho($event?->request ?? '-'),
+            'response' => McpHelper::truncateForEcho($this->response ?? '-')
         ]);
     }
 }
