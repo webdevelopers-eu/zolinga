@@ -74,7 +74,7 @@ if (!preg_match(MCP_ALLOWED_PATH_REGEX, $path)) {
 // event type, e.g. "mcp:initialize@admin" instead of "mcp:initialize".
 // This lets the system expose route-specific MCP hooks. See McpEvent.
 if (str_starts_with($path, '/mcp/oauth')) {
-    $forceOauth = true;
+    $forceOauth = false;
     $tenant = ltrim(str_replace('/mcp/oauth', '', $path), '/');
 } else {
     $forceOauth = false;
@@ -93,5 +93,7 @@ try {
         // on the next request.
         session_destroy();
     }
-    header('MCP-Session-Reset: ' . (int)(session_status() === PHP_SESSION_NONE));
+    if (!headers_sent()) {
+        header('MCP-Session-Reset: ' . (int)(session_status() === PHP_SESSION_NONE));
+    }
 }

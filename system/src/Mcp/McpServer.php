@@ -73,7 +73,7 @@ class McpServer
      * @param string $tenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
      * @return void
      */
-    public function run(bool $forceOauth, string $tenant): void
+    public function run(bool $forceOauth, string $userTenant): void
     {
         global $api;
 
@@ -108,12 +108,14 @@ class McpServer
         $data = $this->parseBody();
 
         // Call on inherited tentants too
+        $tenant = $userTenant;
         do {
             $event = McpEvent::fromJsonRpc($tenant, $data);
             $event->dispatch();
-            $tenant = dirname($tenant);
-        } while ($tenant && $tenant !== '.');
+            $tenant = strlen($tenant) ? trim(dirname($tenant), '.') : null;
+        } while ($tenant !== null);
 
+        $api->log->info('system:mcp', "MCP request processed: method={$event->type}, status={$event->status->name}, userTenant={$userTenant}");
         $this->send($event);
     }
 
@@ -131,7 +133,7 @@ class McpServer
             if (!headers_sent()) {
                 http_response_code(204);
             }
-            $this->logAccess(204);
+            $this->logAccess(204, $event);
             return;
         }
 
@@ -144,7 +146,7 @@ class McpServer
             http_response_code($httpStatus);
         }
         echo json_encode($response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $this->logAccess($httpStatus);
+        $this->logAccess($httpStatus, $event);
     }
 
     /**
@@ -362,10 +364,9 @@ class McpServer
      * @param int $status The HTTP status code.
      * @return void
      */
-    private function logAccess(int $status): void
+    private function logAccess(int $status, ?McpEvent $event = null): void
     {
         global $api;
-        $event = $this->event;
 
         $token = (isset($_SERVER['HTTP_AUTHORIZATION']) ? array_map('trim', explode(' ', $_SERVER['HTTP_AUTHORIZATION'], 2)) : [null, null])
             + [null, null];
