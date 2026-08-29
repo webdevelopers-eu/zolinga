@@ -1,15 +1,22 @@
 # MCP (Model Context Protocol)
 
-Expose Zolinga events as [MCP](https://modelcontextprotocol.io/) tools and module files as MCP resources. The endpoint at `public/mcp/index.php` accepts JSON-RPC 2.0 requests from MCP clients, dispatches them as [`\Zolinga\System\Events\Mcp\McpEvent`](:Zolinga Core:Events and Listeners:MCP) objects (one concrete subclass per JSON-RPC method) with the `mcp` origin, and serializes the response back as a JSON-RPC 2.0 message.
+Expose Zolinga events as [MCP](https://modelcontextprotocol.io/) tools and module files as MCP resources. The gateway accepts JSON-RPC 2.0 requests from MCP clients, dispatches them as [`\Zolinga\System\Events\Mcp\McpEvent`](:Zolinga Core:Events and Listeners:MCP) objects (one concrete subclass per JSON-RPC method) with the `mcp` origin, and serializes the response back as a JSON-RPC 2.0 message.
+
+Two endpoints are available:
+
+- **`/mcp`** — mixed authentication. Some tools require authentication, others are public. Use this for general-purpose access.
+- **`/mcp/oauth`** — always requires authentication. Every request returns HTTP 401 until the client authenticates. Use this when your MCP client expects uniform authentication across all requests (e.g. Hermes).
 
 The gateway supports two MCP capability areas:
 
 - **Tools** — expose any Zolinga event as a callable tool. See [MCP Tools](:Zolinga Core:MCP:Tools).
 - **Resources** — expose module files (docs, images, etc.) as discoverable resources. See [MCP Resources](:Zolinga Core:MCP:Resources).
 
-This is a non-streaming implementation of MCP — every request returns a single JSON-RPC response. The endpoint is HTTP `POST` only.
+This is a non-streaming implementation of MCP — every request returns a single JSON-RPC response. Both endpoints are HTTP `POST` only.
 
 # Quick Start
+
+These examples use the `/mcp` endpoint (mixed authentication). Replace with `/mcp/oauth` if you need all requests to require authentication.
 
 Send an `initialize` request:
 
@@ -71,6 +78,35 @@ Response (per the [MCP `tools/call` spec](https://modelcontextprotocol.io/specif
   }
 }
 ```
+
+## Using the OAuth Endpoint
+
+The `/mcp/oauth` endpoint requires a valid OAuth Bearer token for all requests. Without authentication, you receive HTTP 401:
+
+```bash
+curl -X POST http://localhost:8080/mcp/oauth \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
+  -D-
+```
+
+Response includes the `WWW-Authenticate` header with OAuth metadata:
+
+```
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer resource_metadata="https://your-domain.com/.well-known/oauth-protected-resource/mcp"
+```
+
+After completing the OAuth flow and obtaining an access token, include it in the `Authorization` header:
+
+```bash
+curl -X POST http://localhost:8080/mcp/oauth \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <your-access-token>' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+See [OAuth Authorization](:Zolinga OAuth:Authorization) for the complete OAuth flow.
 
 # Exposing a Listener as an MCP Tool
 
@@ -207,9 +243,44 @@ Not supported. This is a non-streaming implementation of the MCP Streamable HTTP
 | [`McpHelper`](:ref:class:Zolinga\System\Mcp\McpHelper) | Misc helpers (status → error code, response normalization, `envelope()` for `tools/call` results). |
 | `Exceptions\McpException` + subclasses | Top-level errors (`McpParseErrorException`, `McpInvalidRequestException`, `McpMethodNotFoundException`, `McpInvalidParamsException`, `McpInternalErrorException`). |
 
+# Choosing an Endpoint
+
+Use **`/mcp/oauth`** when:
+
+- Your MCP client expects OAuth authentication before listing tools (e.g. Hermes).
+- You want every request to require authentication — no public tool access.
+- The client triggers OAuth flow by receiving an HTTP 401 response with a `WWW-Authenticate: Bearer` challenge.
+
+Use **`/mcp`** when:
+
+- You want to expose some tools publicly without authentication.
+- Your MCP client supports per-tool authentication (checks the `right` field in the tool definition).
+- You prefer mixed access: public discovery with protected tools.
+
+Both endpoints serve the same tools and resources. The only difference is when authentication is enforced:
+
+| Endpoint       | Authentication                                    |
+|----------------|---------------------------------------------------|
+| `/mcp`         | Per-tool. Public tools work without auth.         |
+| `/mcp/oauth`   | Always. Returns HTTP 401 until client authenticates. |
+
+Configure your MCP client with the appropriate endpoint URL:
+
+```bash
+# For clients that need uniform authentication
+https://your-domain.com/mcp/oauth
+
+# For general-purpose access with mixed authentication
+https://your-domain.com/mcp
+```
+
 # Security
 
-Configure your web server so that `/mcp` is reachable only by trusted origins. The endpoint is unauthenticated by default; use the `right` field on a listener manifest entry and an [`AuthorizeEvent`](:Zolinga Core:Events and Listeners:Authorization) provider to gate access to specific tools.
+Configure your web server so that `/mcp` and `/mcp/oauth` are reachable only by trusted origins. Use the `right` field on a listener manifest entry and an [`AuthorizeEvent`](:Zolinga Core:Events and Listeners:Authorization) provider to gate access to specific tools.
+
+The `/mcp/oauth` endpoint enforces OAuth authentication at the gateway level — unauthenticated requests receive HTTP 401 with a `WWW-Authenticate: Bearer` header pointing to the OAuth authorization server metadata. Clients must complete the OAuth flow before accessing any tools.
+
+The `/mcp` endpoint allows per-tool authentication — tools without a `right` field are publicly accessible; tools with a `right` field require a valid OAuth Bearer token in the `Authorization` header. See [OAuth Authorization](:Zolinga OAuth:Authorization) for configuration details.
 
 
 # Related

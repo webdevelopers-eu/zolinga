@@ -7,6 +7,8 @@ namespace Zolinga\System\Mcp;
 use Zolinga\System\Events\Mcp\{McpEvent, Tools\CallEvent};
 use Zolinga\System\Mcp\Exceptions\{McpException, McpInvalidRequestException, McpMethodNotFoundException, McpParseErrorException};
 use Zolinga\System\Types\StatusEnum;
+use Zolinga\System\Types\OriginEnum;
+use Zolinga\System\Events\AuthorizeEvent;
 
 /**
  * Stateful per-request MCP gateway.
@@ -69,7 +71,7 @@ class McpServer
      *
      * @return void
      */
-    public function run(): void
+    public function run(bool $forceOauth): void
     {
         global $api;
 
@@ -89,9 +91,50 @@ class McpServer
             return;
         }
 
+        // Issue: many MCP clients (like Hermes Agent) do not support per-tool access rights
+        // and if tools/list is allowed they don't start OAuth flow. Going to /mcp/oauth
+        // will require all calls to be authenticated.
+        if ($forceOauth) {
+            // Should initialize the user
+            $api->dispatchEvent(new AuthorizeEvent("system:authorize", OriginEnum::MCP, ['oauth2:scope']));
+            if ($api->user->isGuest()) {
+                $this->sendUnauthorized();
+                return;
+            }
+        }
+
         $data = $this->parseBody();
         $this->response = $this->dispatch($data);
         $this->send();
+        
+    }
+
+    /**
+     * Emit the response. 204 for notifications, otherwise JSON with
+     * MCP protocol headers.
+     *
+     * @return void
+     */
+    private function send(): void
+    {
+        if ($this->response === null) {
+            if (!headers_sent()) {
+                http_response_code(204);
+            }
+            $this->logAccess(204);
+            return;
+        }
+
+        // Derive HTTP status from the event (200 for OK, 401 for UNAUTHORIZED, etc.)
+        $httpStatus = $this->event?->status->value ?? 200;
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+            header('MCP-Protocol-Version: ' . McpInitializeHandler::PROTOCOL_VERSION);
+            $this->sendHeadersForStatus($this->event?->status);
+            http_response_code($httpStatus);
+        }
+        echo json_encode($this->response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $this->logAccess($httpStatus);
     }
 
     /**
@@ -237,34 +280,6 @@ class McpServer
     }
 
     /**
-     * Emit the response. 204 for notifications, otherwise JSON with
-     * MCP protocol headers.
-     *
-     * @return void
-     */
-    private function send(): void
-    {
-        if ($this->response === null) {
-            if (!headers_sent()) {
-                http_response_code(204);
-            }
-            $this->logAccess(204);
-            return;
-        }
-
-        // Derive HTTP status from the event (200 for OK, 401 for UNAUTHORIZED, etc.)
-        $httpStatus = $this->event?->status->value ?? 200;
-        if (!headers_sent()) {
-            header('Content-Type: application/json; charset=utf-8');
-            header('MCP-Protocol-Version: ' . McpInitializeHandler::PROTOCOL_VERSION);
-            $this->sendHeadersForStatus($this->event?->status);
-            http_response_code($httpStatus);
-        }
-        echo json_encode($this->response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $this->logAccess($httpStatus);
-    }
-
-    /**
      * Emit a top-level error response from an {@see McpException}.
      *
      * @param McpException $error
@@ -330,6 +345,28 @@ class McpServer
         $this->logAccess(404);
     }
 
+    private function sendUnauthorized(): void
+    {
+        global $api;
+
+        if (!headers_sent()) {
+            $prmUrl = $api->url->resolveUrl('/.well-known/oauth-protected-resource/mcp');
+            header('WWW-Authenticate: Bearer resource_metadata="' . $prmUrl . '"');            
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(401);
+        }
+
+        echo json_encode([
+            'jsonrpc' => '2.0',
+            'id' => null,
+            'error' => [
+                'code' => -32600,
+                'message' => 'Unauthorized: Authentication required.',
+            ],
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $this->logAccess(401);
+    }
+
     private function sendOptionsOk(): void
     {
         if (!headers_sent()) {
@@ -349,9 +386,7 @@ class McpServer
     private function sendHeadersForStatus(?StatusEnum $status): void
     {
         if ($status === StatusEnum::UNAUTHORIZED) {
-            global $api;
-            $prmUrl = $api->url->resolveUrl('/.well-known/oauth-protected-resource/mcp');
-            header('WWW-Authenticate: Bearer resource_metadata="' . $prmUrl . '"');
+            $this->sendUnauthorized();
         }
     }
 

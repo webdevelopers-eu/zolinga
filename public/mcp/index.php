@@ -60,8 +60,10 @@ require($_SERVER['DOCUMENT_ROOT'] . '/../system/loader.php');
 //     header('Mcp-Session-Id: ' . session_id());
 // }
 
+$path = $_SERVER['REQUEST_URI'] ?? '';
+
 try {
-    (new McpServer())->run();
+    (new McpServer())->run(forceOauth: str_ends_with($path, 'oauth'));
 } catch (McpException $e) {
     (new McpServer())->sendError($e);
 } finally {
