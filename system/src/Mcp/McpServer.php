@@ -96,7 +96,7 @@ class McpServer
         // will require all calls to be authenticated.
         if ($forceOauth) {
             // Should initialize the user
-            $api->dispatchEvent(new AuthorizeEvent("system:authorize", OriginEnum::MCP, ['oauth2:scope']));
+            $api->dispatchEvent(new AuthorizeEvent("system:authorize", OriginEnum::INTERNAL, ['oauth2:scope']));
             if ($api->user->isGuest()) {
                 $this->sendUnauthorized();
                 return;
