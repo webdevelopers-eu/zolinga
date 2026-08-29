@@ -34,12 +34,14 @@ class ReadEvent extends ResourcesEvent
      * it to the event type so that handlers can register for specific schemes
      * (e.g. `mcp:resources/read:mcp-system`).
      *
+     * @param string $tenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
      * @param string|int|null $jsonrpcId The JSON-RPC request id.
      * @param ArrayAccess<string, mixed>|array<string, mixed> $request The JSON-RPC params (contains `uri`).
      * @param ArrayAccess<string, mixed>|array<string, mixed> $response The JSON-RPC result.
      * @throws McpInvalidRequestException If the URI uses a disallowed or missing scheme.
      */
     public function __construct(
+        string $tenant = '',
         string|int|null $jsonrpcId = null,
         ArrayAccess|array $request = new ArrayObject,
         ArrayAccess|array $response = new ArrayObject
@@ -54,7 +56,7 @@ class ReadEvent extends ResourcesEvent
             );
         }
 
-        parent::__construct($type, $jsonrpcId, $request, $response);
+        parent::__construct($tenant, $type, $jsonrpcId, $request, $response);
     }
 
     /**

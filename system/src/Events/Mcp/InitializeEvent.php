@@ -25,10 +25,11 @@ class InitializeEvent extends McpEvent
      * @param ArrayAccess<string, mixed>|array<string, mixed> $response The JSON-RPC result.
      */
     public function __construct(
+        string $tenant,
         string|int|null $jsonrpcId = null,
         ArrayAccess|array $request = new ArrayObject,
         ArrayAccess|array $response = new ArrayObject
     ) {
-        parent::__construct('mcp:initialize', $jsonrpcId, $request, $response);
+        parent::__construct($tenant, 'mcp:initialize', $jsonrpcId, $request, $response);
     }
 }

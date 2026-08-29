@@ -211,7 +211,7 @@
       ]
     },
     {
-      "event": "mcp:initialize",
+      "event": "mcp:initialize*",
       "description": "MCP (Model Context Protocol) `initialize` request handler. Returns the lifecycle initialization payload: protocolVersion, capabilities, serverInfo, and instructions.",
       "class": "\\Zolinga\\System\\Mcp\\McpInitializeHandler",
       "method": "onInitialize",
@@ -220,7 +220,7 @@
       ]
     },
     {
-      "event": "mcp:tools/list",
+      "event": "mcp:tools/list*",
       "description": "MCP `tools/list` request handler. Walks the merged manifest and returns every listener that opts in to the `mcp` origin as an MCP tool, including descriptions and JSON Schema files referenced by `schema.request` / `schema.response`.",
       "class": "\\Zolinga\\System\\Mcp\\McpToolsListHandler",
       "method": "onList",
@@ -229,7 +229,7 @@
       ]
     },
     {
-      "event": "mcp:resources/list",
+      "event": "mcp:resources/list*",
       "description": "MCP `resources/list` request handler. Discovers module-provided resources from `mcp/resources/*.meta.json` files and returns them with rewritten `mcp-system:<module>:<basename>` URIs.",
       "class": "\\Zolinga\\System\\Mcp\\McpResourcesListHandler",
       "method": "onList",
@@ -238,7 +238,7 @@
       ]
     },
     {
-      "event": "mcp:resources/read:mcp-system",
+      "event": "mcp:resources/read:mcp-system*",
       "description": "MCP `resources/read` request handler for the `mcp-system` URI scheme. Reads a resource file by its `mcp-system:<module>:<basename>` URI and returns the contents as text or blob.",
       "class": "\\Zolinga\\System\\Mcp\\McpResourcesReadHandler",
       "method": "onRead",
@@ -247,7 +247,7 @@
       ]
     },
     {
-      "event": "mcp:prompts/list",
+      "event": "mcp:prompts/list*",
       "description": "MCP `prompts/list` request handler. Discovers module-provided prompts from `mcp/prompts/*.meta.json` files and returns them with rewritten `mcp-system:<module>:<basename>` names.",
       "class": "\\Zolinga\\System\\Mcp\\McpPromptsListHandler",
       "method": "onList",
@@ -256,7 +256,7 @@
       ]
     },
     {
-      "event": "mcp:prompts/get:mcp-system",
+      "event": "mcp:prompts/get:mcp-system*",
       "description": "MCP `prompts/get` request handler for the `mcp-system` URI scheme. Reads a prompt definition by its `mcp-system:<module>:<basename>` name, resolves file references, applies argument substitution, and returns the messages array.",
       "class": "\\Zolinga\\System\\Mcp\\McpPromptsGetHandler",
       "method": "onGet",

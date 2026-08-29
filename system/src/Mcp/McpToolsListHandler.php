@@ -80,7 +80,7 @@ class McpToolsListHandler implements ListenerInterface
             }
 
             $eventName = (string) $atom['event'];
-            $toolName = $eventName;
+            $toolName = preg_replace('/@.*$/', '', $eventName); // strip tenant suffix for tool name
 
             if (isset($seen[$eventName])) {
                 // Keep the highest-priority description for the same event.

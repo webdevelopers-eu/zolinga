@@ -1,6 +1,6 @@
 # MCP Events
 
-`\Zolinga\System\Events\Mcp\McpEvent` is the abstract base event class fired by the [MCP gateway](:Zolinga Core:Running the System:MCP) at `public/mcp/index.php`. It extends [`RequestResponseEvent`](:Zolinga Core:Events and Listeners) and carries the JSON-RPC request id alongside the standard request/response pair.
+`\Zolinga\System\Events\Mcp\McpEvent` is the abstract base event class fired by the [MCP gateway](:Zolinga Core:Running the System:MCP) at `public/mcp/index.php`. It extends [`RequestResponseEvent`](:Zolinga Core:Events and Listeners) and carries the JSON-RPC request id alongside the standard request/response pair. On `/mcp/oauth/{tenant}`, the gateway appends `@{tenant}` to the dispatched event type.
 
 The gateway dispatches one concrete subclass per JSON-RPC method. `McpEvent::fromJsonRpc()` is the factory that validates the JSON-RPC 2.0 envelope and resolves the correct subclass via a `match` on the `method` field:
 
@@ -17,13 +17,15 @@ The gateway dispatches one concrete subclass per JSON-RPC method. `McpEvent::fro
 The `resources/read` event type includes the URI scheme as a suffix (e.g. `mcp:resources/read:mcp-system`), allowing handlers to register for specific URI schemes. See [MCP Resources](:Zolinga Core:MCP:Resources) for details.
 | anything else         | —                                            | `McpMethodNotFoundException` thrown  |
 
-`Tools\CallEvent` is the only subclass whose `type` is not derived from the method name — it is the bare tool name (`params.name`) so the event dispatches to the tool's own listener. The other subclasses hard-code their `mcp:`-prefixed `type` in their constructor.
+The table shows the base event type. On `/mcp/oauth/{tenant}`, the gateway appends `@{tenant}`, so `mcp:initialize` becomes `mcp:initialize@admin` and `echo` becomes `echo@admin` on `/mcp/oauth/admin`.
+
+`Tools\CallEvent` is the only subclass whose base `type` is not derived from the method name — it is the bare tool name (`params.name`) so the event dispatches to the tool's own listener. The other subclasses hard-code their `mcp:`-prefixed base `type` in their constructor.
 
 For `tools/call` the gateway wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope. For all other methods the gateway serializes `$event->response` verbatim as the JSON-RPC `result`. The gateway distinguishes a `tools/call` invocation by `instanceof Tools\CallEvent` (not by a flag or event-name prefix) and wraps the response accordingly.
 
 ## Origin
 
-MCP events are always dispatched with the `mcp` [`OriginEnum`](:Zolinga Core:Events and Listeners) value. To opt in to MCP delivery, a listener must include `"mcp"` in its `origin` array (or the wildcard `"*"`).
+MCP events are always dispatched with the `mcp` [`OriginEnum`](:Zolinga Core:Events and Listeners) value. Tenant routes change the event `type`, not the origin. To opt in to MCP delivery, a listener must include `"mcp"` in its `origin` array (or the wildcard `"*"`).
 
 ## `McpEvent` (abstract base)
 
@@ -35,16 +37,17 @@ You normally do not construct MCP events yourself — the gateway calls `McpEven
 use Zolinga\System\Events\Mcp\Tools\CallEvent;
 
 $event = new CallEvent(
+    tenant: 'admin',
     jsonrpcId: 1,
     params: ['name' => 'echo', 'arguments' => ['message' => 'hi']],
 );
-// $event->type === 'echo'
+// $event->type === 'echo@admin'
 // $event->request === ['message' => 'hi']
 ```
 
 | Property     | Type                              | Notes |
 |--------------|-----------------------------------|-------|
-| `type`       | `string`                          | The Zolinga event type. For protocol methods it is the method with `/` → `:` and prefixed with `mcp:` (e.g. `tools/list` → `mcp:tools/list`). For `tools/call` it is the bare tool name (`params.name`). Each concrete subclass sets this in its constructor. |
+| `type`       | `string`                          | The Zolinga event type. On the base routes, protocol methods use the method with `/` → `:` and an `mcp:` prefix (e.g. `tools/list` → `mcp:tools/list`), while `tools/call` uses the bare tool name (`params.name`). On `/mcp/oauth/{tenant}`, the gateway appends `@{tenant}` to the dispatched type. Each concrete subclass sets the base type in its constructor. |
 | `jsonrpcId`  | `string\|int\|null`               | The JSON-RPC `id`. `null` indicates a notification (no reply sent). |
 | `request`    | `ArrayAccess\|array`              | The JSON-RPC `params` payload. For `tools/call` it is `params.arguments`. |
 | `response`   | `ArrayAccess\|array`              | Populate this with whatever the JSON-RPC `result` should be. For plain events the gateway serializes it under `result` as-is. For `tools/call` it becomes `result.structuredContent`. |
@@ -66,7 +69,7 @@ For plain MCP events (anything that is not a `Tools\CallEvent`), the gateway map
 
 ## `tools/call` events
 
-For `tools/call` invocations the gateway dispatches a `Tools\CallEvent` with `type = "<name>"` (where `<name>` is the JSON-RPC `params.name` argument). The gateway always wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope, never in a JSON-RPC `error` block.
+For `tools/call` invocations the gateway dispatches a `Tools\CallEvent` with `type = "<name>"` on the base routes, or `type = "<name>@{tenant}"` on `/mcp/oauth/{tenant}` (where `<name>` is the JSON-RPC `params.name` argument). The gateway always wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope, never in a JSON-RPC `error` block.
 
 ### Tool name validation
 

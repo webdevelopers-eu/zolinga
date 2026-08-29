@@ -2,7 +2,7 @@ Priority: 0.7
 
 # MCP (Model Context Protocol)
 
-Zolinga speaks the [Model Context Protocol](https://modelcontextprotocol.io/) — an open standard that lets AI assistants and other MCP clients discover and call functionality on your server. The endpoint at `/mcp` accepts JSON-RPC 2.0 requests over HTTP `POST` and translates each one into a Zolinga event. Any module can expose its events as MCP tools, its files as MCP resources, and its prompt templates as MCP prompts — no extra framework required.
+Zolinga speaks the [Model Context Protocol](https://modelcontextprotocol.io/) — an open standard that lets AI assistants and other MCP clients discover and call functionality on your server. The MCP gateway is available at `/mcp`, `/mcp/oauth`, and `/mcp/oauth/{tenant}`. Each endpoint accepts JSON-RPC 2.0 requests over HTTP `POST` and translates them into Zolinga events. Any module can expose its events as MCP tools, its files as MCP resources, and its prompt templates as MCP prompts — no extra framework required.
 
 This is a **non-streaming** implementation: every request returns a single JSON-RPC response. Batching is not supported.
 
@@ -13,6 +13,8 @@ This is a **non-streaming** implementation: every request returns a single JSON-
 - **Expose prompts** — Provide reusable prompt templates that clients retrieve via `prompts/list` and `prompts/get`. See [MCP Prompts](:Zolinga Core:MCP:Prompts).
 
 # Quick Start
+
+These examples use `/mcp`. Replace it with `/mcp/oauth` for always-authenticated access, or with `/mcp/oauth/admin` to bind the requests to the `@admin` MCP event variant.
 
 Send an `initialize` request to begin a session:
 
@@ -54,7 +56,7 @@ curl -X POST http://localhost:8080/mcp \
 
 # How It Fits Together
 
-The gateway at `public/mcp/index.php` is a thin translator: each JSON-RPC `method` becomes a Zolinga event, the event is dispatched to listeners that opted in to the `mcp` origin, and the response is serialized back as a JSON-RPC 2.0 message. For `tools/call` the gateway wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope automatically.
+The gateway at `public/mcp/index.php` is a thin translator: each JSON-RPC `method` becomes a Zolinga event, the event is dispatched to listeners that opted in to the `mcp` origin, and the response is serialized back as a JSON-RPC 2.0 message. On `/mcp/oauth/{tenant}`, the gateway appends `@{tenant}` to every dispatched event type, so `/mcp/oauth/admin` dispatches events such as `mcp:initialize@admin` and `echo@admin`. For `tools/call` the gateway wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope automatically.
 
 For the full request/response flow, method-to-event mapping, and error handling see [Running the System: MCP](:Zolinga Core:Running the System:MCP). For the event class hierarchy and listener contract see [Events and Listeners: MCP](:Zolinga Core:Events and Listeners:MCP).
 

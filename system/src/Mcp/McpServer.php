@@ -69,9 +69,11 @@ class McpServer
      * Full request lifecycle: HTTP method check, body parse, dispatch, send.
      * Entry point used by `public/mcp/index.php`.
      *
+     * @param bool $forceOauth If true, require OAuth2 authentication for all requests unconditionally.
+     * @param string $tenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
      * @return void
      */
-    public function run(bool $forceOauth): void
+    public function run(bool $forceOauth, string $tenant): void
     {
         global $api;
 
@@ -104,7 +106,7 @@ class McpServer
         }
 
         $data = $this->parseBody();
-        $this->response = $this->dispatch($data);
+        $this->response = $this->dispatch($tenant, $data);
         $this->send();
         
     }
@@ -181,15 +183,16 @@ class McpServer
      * Dispatch a single JSON-RPC request and return the response payload,
      * or null for notifications.
      *
+     * @param string $tenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
      * @param array<string, mixed> $data
      * @return array<string, mixed>|null
      */
-    private function dispatch(array $data): ?array
+    private function dispatch(string $tenant, array $data): ?array
     {
         global $api;
 
         try {
-            $event = McpEvent::fromJsonRpc($data);
+            $event = McpEvent::fromJsonRpc($tenant, $data);
         } catch (McpException $e) {
             // Invalid envelope: notifications (no id) get no reply.
             if (!array_key_exists('id', $data)) {

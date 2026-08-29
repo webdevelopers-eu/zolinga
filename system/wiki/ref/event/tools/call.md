@@ -1,14 +1,14 @@
 # `tools/call` Event
 
-The MCP `tools/call` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as a [`Tools\CallEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` (the bare tool name) and the `mcp` origin.
+The MCP `tools/call` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as a [`Tools\CallEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` on the base routes, or `type = "<name>@{tenant}"` on `/mcp/oauth/{tenant}`, and always with the `mcp` origin.
 
-The gateway uses `params.name` verbatim as the event type and passes `params.arguments` as the event request. The tool's handler sets the raw structured payload on `$event->response`; the gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope and serializes it as the JSON-RPC `result`.
+The gateway uses `params.name` verbatim as the base event type and passes `params.arguments` as the event request. The tool's handler sets the raw structured payload on `$event->response`; the gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope and serializes it as the JSON-RPC `result`.
 
 ## Request
 
 | Field         | Type   | Notes |
 |---------------|--------|-------|
-| `params.name`        | `string` | Required. The tool name; the gateway uses it verbatim as the event type and dispatches that event. |
+| `params.name`        | `string` | Required. The tool name; the gateway uses it verbatim as the base event type and dispatches that event, or `<name>@{tenant}` on `/mcp/oauth/{tenant}`. |
 | `params.arguments`   | `object` | Optional. Tool arguments; becomes `$event->request`. |
 
 ## Response (gateway-built envelope on `result`)
