@@ -62,6 +62,13 @@ require($_SERVER['DOCUMENT_ROOT'] . '/../system/loader.php');
 
 $path = $_SERVER['REQUEST_URI'] ?? '';
 
+// We support only /mcp, /mcp/oauth, and /mcp/oauth/* paths. Anything else is a 404.
+if (!preg_match('@\A/mcp(/oauth(/.*)?)?\z@', $path)) {
+    http_response_code(404);
+    header('X-Error: Not Found <' . htmlspecialchars($path) . '>');
+    exit;
+}
+
 try {
     (new McpServer())->run(forceOauth: str_ends_with($path, 'oauth'));
 } catch (McpException $e) {
