@@ -19,7 +19,7 @@ use Zolinga\System\Types\StatusEnum;
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-22
  */
-class McpResourcesListHandler extends \Zolinga\System\Mcp\McpHandler
+class McpResourcesListHandler extends McpHandler
 {
     /**
      * Handle the `resources/list` event.
@@ -74,7 +74,7 @@ class McpResourcesListHandler extends \Zolinga\System\Mcp\McpHandler
             return;
         }
 
-        if (!$this->isMatchingTenant($json, $event)) {
+        if (!$this->isMatchingTenant($json['tenants'] ?? null, $event->tenant)) {
             return;
         }
 

@@ -102,7 +102,7 @@ class McpResourcesReadHandler extends \Zolinga\System\Mcp\McpHandler
             return;
         }
 
-        parent::assertTenant($meta, $event);
+        parent::assertTenant($meta['tenants'] ?? null, $event->tenant);
 
         $contentPath = $api->fs->toPath($meta['uri']);
         if (!$contentPath || !is_file($contentPath)) {

@@ -104,7 +104,7 @@ class McpPromptsGetHandler extends \Zolinga\System\Mcp\McpHandler
             return;
         }
 
-        parent::assertTenant($meta, $event);
+        parent::assertTenant($meta['tenants'] ?? null, $event->tenant);
 
         // Validate messages field.
         if (!isset($meta['messages']) || !is_array($meta['messages'])) {

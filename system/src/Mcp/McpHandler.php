@@ -18,58 +18,50 @@ use Zolinga\System\Mcp\Exceptions\McpTenantException;
  */
 abstract class McpHandler implements ListenerInterface
 {
-    /**
-     * Normalize the optional tenant filter for a static MCP descriptor.
-     *
-     * Missing or invalid `tenants` metadata falls back to the default
-     * non-tenant route. Non-string entries are ignored.
-     *
-     * @param array<string, mixed> $meta
-     * @return array<int, string>
-     */
-    protected function extractTenants(array $meta): array
-    {
-        $rawTenants = $meta['tenants'] ?? [''];
-        if (!is_array($rawTenants)) {
-            return [''];
-        }
-
-        $tenants = [];
-        foreach ($rawTenants as $tenant) {
-            if (is_string($tenant)) {
-                $tenants[] = $tenant;
-            }
-        }
-
-        return $tenants;
-    }
 
     /**
      * Whether the descriptor is visible for the event tenant.
      *
-     * @param array<string, mixed> $meta
-     * @param McpEvent $event
+     * @param array<string>|null $tenants
+     * @param string $search
      * @return bool
      */
-    protected function isMatchingTenant(array $meta, McpEvent $event): bool
+    protected function isMatchingTenant(null|array $tenants, string $search): bool
     {
-        return in_array($event->tenant, $this->extractTenants($meta), true);
+        $tenants = $tenants ?? [''];
+        $resolved = [];
+
+        if ($search === '') {
+            return true; // Global tenant always matches.
+        }
+
+        // We inherit, so if tenant is "a/b/c" then we also match "a/b" and "a" and "" (global).
+        foreach ($tenants as $key => $value) {
+            do {
+                if ($search === $value) {
+                    return true;
+                }
+                $value = dirname($value);
+            } while (strlen($value));
+        }
+
+        return false;
     }
 
     /**
      * Assert that the descriptor is visible for the event tenant.
      *
-     * @param array<string, mixed> $meta
-     * @param McpEvent $event
+     * @param array<string>|null $tenants
+     * @param string $search
      * @return void
      * @throws McpTenantException Tenant is not allowed for this descriptor.
      */
-    protected function assertTenant(array $meta, McpEvent $event): void
-    {
-        if ($this->isMatchingTenant($meta, $event)) {
+    protected function assertTenant(null|array $tenants, string $search): void
+    {   
+        if ($this->isMatchingTenant($tenants, $search)) {
             return;
         }
 
-        throw new McpTenantException('Forbidden for this tenant.', $event->jsonrpcId);
+        throw new McpTenantException('Forbidden for this tenant.');
     }
 }
