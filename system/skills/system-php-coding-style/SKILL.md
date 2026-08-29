@@ -36,6 +36,7 @@ argument-hint: "<module-name> [class-or-file]"
 15. Methods and functions must not be longer than 50 lines. If they are, break them into smaller private methods or separate class helpers.
 16. Do not do one-line method wrappers, inline them instead.
 17. If there is a method that is only used in one place, consider inlining it unless it increases the function's complexity, size or decreases significantly the readability of the code.
+18. Inside a property hook, `$this->prop` is the backing value and does not re-enter the hook. Store the value on `$this->prop`. Do not add a parallel `$this->storedProp` field. See `system-coding-standards` (Property Hooks).
 
 ## Documentation Abstract
 

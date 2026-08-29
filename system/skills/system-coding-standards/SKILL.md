@@ -33,6 +33,22 @@ argument-hint: "<module-name> [code-change-description]"
 - **Prefer property hooks over getter/setter methods.** Use `public private(set)` for read-only public properties instead of `private` + `getFoo()`.
 - **No getter clutter.** Never write `public function getFoo(): array { return $this->foo; }` — just make the property `public` or `public private(set)` and access it directly.
 - **Computed properties use `get` hooks.** Instead of `getContext(): ?string`, use `public ?string $context { get { ... } }`.
+- **Inside a hook, `$this->prop` is the backing value.** Reading or writing `$this->prop` from that property's `get`/`set` hook does not re-enter the hook. Store the cached value there. Do not add a parallel `$this->storedProp` field.
+
+```php
+public string $markdown {
+    get {
+        if (!isset($this->markdown)) {
+            $this->markdown = self::htmlToMarkdown($this->html);
+        }
+        return $this->markdown;
+    }
+    set(string $value) {
+        $this->html = self::markdownToHtml($value);
+        $this->markdown = $value;
+    }
+}
+```
 
 ### Type Safety
 
