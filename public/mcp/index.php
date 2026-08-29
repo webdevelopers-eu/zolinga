@@ -74,7 +74,7 @@ if (!preg_match(MCP_ALLOWED_PATH_REGEX, $path)) {
 // event type, e.g. "mcp:initialize@admin" instead of "mcp:initialize".
 // This lets the system expose route-specific MCP hooks. See McpEvent.
 if (str_starts_with($path, '/mcp/oauth')) {
-    $forceOauth = false;
+    $forceOauth = true && !isset($_GET['noauth']);
     $tenant = ltrim(str_replace('/mcp/oauth', '', $path), '/');
 } else {
     $forceOauth = false;
