@@ -75,15 +75,15 @@ class McpToolsListHandler implements ListenerInterface
 
         /** @var ListenAtom $atom */
         foreach ($api->manifest['listen'] as $atom) {
-            if (!$this->isMcpToolCandidate($atom)) {
+            if (!$this->isMcpToolCandidate($event->tenant, $atom)) {
                 continue;
             }
 
             $eventName = (string) $atom['event'];
             $toolName = preg_replace('/@.*$/', '', $eventName); // strip tenant suffix for tool name
 
-            if (isset($seen[$eventName])) {
-                // Keep the highest-priority description for the same event.
+            if (isset($seen[$toolName])) {
+                // Keep the highest-priority description for the same exposed tool name.
                 continue;
             }
 
@@ -96,7 +96,7 @@ class McpToolsListHandler implements ListenerInterface
                 continue;
             }
 
-            $seen[$eventName] = true;
+            $seen[$toolName] = true;
             $this->registerTool($event, $atom, $toolName, $responseSchema);
         }
 
@@ -107,11 +107,14 @@ class McpToolsListHandler implements ListenerInterface
      * Whether a listener atom is a candidate MCP tool: it opts in to the
      * `mcp` origin and is not a reserved MCP protocol event.
      *
+     * @param string $tenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
      * @param ListenAtom $atom
      * @return bool
      */
-    private function isMcpToolCandidate(ListenAtom $atom): bool
+    private function isMcpToolCandidate(string $tenant, ListenAtom $atom): bool
     {
+        global $api;
+
         if (!in_array(OriginEnum::MCP, $atom['origin'], true)) {
             return false;
         }
@@ -124,7 +127,27 @@ class McpToolsListHandler implements ListenerInterface
             return false;
         }
 
-        return !$this->isReservedEvent($eventName);
+        if ($this->isReservedEvent($eventName)) {
+            return false;
+        }
+
+        if ($tenant === '' && str_contains($eventName, '@')) {
+            return false;
+        }
+        
+        if ($tenant && !str_ends_with($eventName, '@' . $tenant)) {
+            return false;
+        }
+
+        // If tenant is specified we list only tools that the user has access to
+        // While /mcp is open to all so we show all tools even for anonymous users
+        // /mcp/oauth/{tenant} is restricted to logged in users so we know what they can see.
+        if ($tenant !== '' && $atom['right'] && !$api->isAuthorized($atom['right'])) {
+            $api->log->info('system:mcp', "MCP tool {$eventName} is not authorized for tenant $tenant; skipping.");
+            return false;
+        }
+
+        return true;
     }
 
     /**

@@ -2,7 +2,7 @@
 
 Expose static or dynamic files from your module to MCP clients (AI assistants, IDE extensions, etc.) as discoverable resources. Clients call `resources/list` to see what is available and `resources/read` to fetch the contents.
 
-Resources are advertised via `.meta.json` descriptor files placed in your module's `mcp/resources/` directory. The system automatically discovers them and serves their contents — no manifest changes needed.
+Resources are advertised via `.meta.json` descriptor files placed in your module's `mcp/resources/` directory. The system automatically discovers them and serves their contents — no manifest changes needed. Static descriptors are filtered by the current MCP tenant before they are included in `resources/list`, and the same tenant rule is enforced again for `resources/read`. When the resource exists but the tenant is not allowed, the direct read is rejected.
 
 ## Quick Start
 
@@ -28,6 +28,20 @@ echo "# User Guide\n\nWelcome to my module." > modules/my-module/mcp/resources/g
 
 3. That's it. The resource is now discoverable via `resources/list` and readable via `resources/read`.
 
+To expose a resource only on a tenant-scoped route, add a `tenants` array:
+
+```json
+{
+  "uri": "module://my-module/mcp/resources/admin-guide.md",
+  "name": "admin-guide.md",
+  "title": "Admin Guide",
+  "tenants": ["admin"],
+  "mimeType": "text/markdown"
+}
+```
+
+Missing `tenants` is treated as `[""]`, which means the resource belongs to the default non-tenant route. The same rule is enforced by both `resources/list` and `resources/read`.
+
 ## The `.meta.json` Format
 
 | Field | Required | Description |
@@ -36,10 +50,11 @@ echo "# User Guide\n\nWelcome to my module." > modules/my-module/mcp/resources/g
 | `name` | yes | Unique identifier for the resource (typically the filename) |
 | `title` | no | Human-readable title |
 | `description` | no | One-line description |
+| `tenants` | no | Array of tenant names allowed to see the resource in `resources/list`; missing means `[""]` |
 | `mimeType` | no | MIME type; determines `text` vs `blob` response format |
 | `icons` | no | Array of icon objects (`src`, `mimeType`, `sizes`) |
 
-Extra fields are allowed and passed through to the client.
+Extra fields are allowed and passed through to the client, except internal `tenants` filter metadata which is consumed by the gateway and not exposed.
 
 ## The `mcp-system` URI Scheme
 
@@ -90,6 +105,8 @@ curl -X POST https://your-host/mcp \
 
 - Internal Zolinga paths are never exposed to clients; all resource URIs are rewritten to `mcp-system:<module>:<basename>`.
 - Directory traversal is blocked: `basename()` is applied to both module and basename components, and the result must match the raw input.
+- The optional `tenants` field is enforced for both `resources/list` and `resources/read`, so a tenant-scoped resource cannot be fetched directly from another tenant route.
+- `resources/read` returns forbidden when the resource exists but is not allowed for the current tenant route.
 - Only URI schemes in the `ResourcesEvent::ALLOWED_URI_SCHEMES` whitelist (`mcp-system`, `http`, `https`) are accepted in responses.
 
 

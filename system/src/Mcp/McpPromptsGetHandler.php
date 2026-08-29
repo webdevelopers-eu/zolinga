@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
-use Zolinga\System\Events\{ListenerInterface};
 use Zolinga\System\Events\Mcp\Prompts\GetEvent;
 use Zolinga\System\Types\StatusEnum;
 
@@ -20,7 +19,7 @@ use Zolinga\System\Types\StatusEnum;
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-22
  */
-class McpPromptsGetHandler implements ListenerInterface
+class McpPromptsGetHandler extends \Zolinga\System\Mcp\McpHandler
 {
     /**
      * Handle the `prompts/get:mcp-system` event.
@@ -104,6 +103,8 @@ class McpPromptsGetHandler implements ListenerInterface
             $event->setStatus(StatusEnum::ERROR, 'Prompt definition is invalid: ' . $requestName);
             return;
         }
+
+        parent::assertTenant($meta, $event);
 
         // Validate messages field.
         if (!isset($meta['messages']) || !is_array($meta['messages'])) {

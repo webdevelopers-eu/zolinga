@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
-use Zolinga\System\Events\{ListenerInterface};
 use Zolinga\System\Events\Mcp\Prompts\ListEvent;
 use Zolinga\System\Types\StatusEnum;
 
@@ -20,7 +19,7 @@ use Zolinga\System\Types\StatusEnum;
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-22
  */
-class McpPromptsListHandler implements ListenerInterface
+class McpPromptsListHandler extends \Zolinga\System\Mcp\McpHandler
 {
     /**
      * Handle the `prompts/list` event.
@@ -74,6 +73,12 @@ class McpPromptsListHandler implements ListenerInterface
             $api->log->warning('system:mcp', "MCP prompt meta file is not valid JSON: $metaFile");
             return;
         }
+
+        if (!$this->isMatchingTenant($json, $event)) {
+            return;
+        }
+
+        unset($json['tenants']); // do not send it to client 
 
         $basename = basename($metaFile, '.meta.json');
         $uri = "mcp-system:$module:$basename";

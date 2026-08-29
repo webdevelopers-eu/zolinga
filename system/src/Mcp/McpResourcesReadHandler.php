@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
-use Zolinga\System\Events\{ListenerInterface};
 use Zolinga\System\Events\Mcp\Resources\ReadEvent;
 use Zolinga\System\Types\StatusEnum;
 
@@ -20,7 +19,7 @@ use Zolinga\System\Types\StatusEnum;
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-22
  */
-class McpResourcesReadHandler implements ListenerInterface
+class McpResourcesReadHandler extends \Zolinga\System\Mcp\McpHandler
 {
     /**
      * Handle the `resources/read:mcp-system` event.
@@ -43,7 +42,6 @@ class McpResourcesReadHandler implements ListenerInterface
         }
 
         $this->readResource($event, $parts['module'], $parts['basename'], $uri);
-        $event->setStatus(StatusEnum::OK, 'OK');
     }
 
     /**
@@ -103,6 +101,8 @@ class McpResourcesReadHandler implements ListenerInterface
             $event->setStatus(StatusEnum::NOT_FOUND, 'Resource descriptor missing or invalid: ' . $requestUri);
             return;
         }
+
+        parent::assertTenant($meta, $event);
 
         $contentPath = $api->fs->toPath($meta['uri']);
         if (!$contentPath || !is_file($contentPath)) {

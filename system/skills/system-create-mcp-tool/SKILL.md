@@ -11,6 +11,7 @@ argument-hint: "<module-name> <tool-name> [goal]"
 - Exposing a piece of business logic as a callable MCP tool (JSON-RPC `tools/call`).
 - Adding a new entry to the `tools/list` catalogue the MCP gateway returns.
 - Wiring an existing handler into MCP delivery (most existing handlers can be reused as-is).
+- Exposing a tool only on a tenant-scoped MCP route such as `/mcp/oauth/admin`.
 
 ## Quick Anatomy
 
@@ -21,13 +22,16 @@ A tool is the **combination** of:
 - A `schema.response` JSON Schema (required) and an optional `schema.request`.
 - The tool name visible to clients is the listener's event name used verbatim.
 
-The gateway (`McpServer`) uses the JSON-RPC `tools/call` `params.name` verbatim as the event type, dispatches a `Tools\CallEvent` with `params.arguments` as the event request, and wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope. Handlers **never** build the envelope themselves. The gateway distinguishes a `tools/call` invocation by `instanceof Tools\CallEvent` (not by a flag or event-name prefix); a tool is also identified by declaring a `schema.response`.
+The gateway (`McpServer`) uses the JSON-RPC `tools/call` `params.name` as the base event type, dispatches a `Tools\CallEvent` with `params.arguments` as the event request, and wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope. On `/mcp/oauth/{tenant}`, the dispatched event type becomes `<name>@{tenant}` while the client still calls the tool as `<name>`. Handlers **never** build the envelope themselves. The gateway distinguishes a `tools/call` invocation by `instanceof Tools\CallEvent` (not by a flag or event-name prefix); a tool is also identified by declaring a `schema.response`.
 
 ## Workflow
 
 ### 1. Pick the tool name
 
-The tool name is the string clients pass as `params.name`. It must be unique across the catalogue. Convention: lower-case, kebab-friendly, no leading namespace (`echo`, `search`, `ipd-checkout`, etc.). The event name in the manifest is the tool name — there is no prefix to add or strip.
+The tool name is the string clients pass as `params.name`. It must be unique across the catalogue for the route where it is exposed. Convention: lower-case, kebab-friendly, no leading namespace (`echo`, `search`, `ipd-checkout`, etc.).
+
+- Base routes (`/mcp`, `/mcp/oauth`) use manifest event names like `my-tool`.
+- Tenant routes (`/mcp/oauth/admin`) use manifest event names like `my-tool@admin`, but clients still call them as `my-tool`.
 
 ### 2. Author the JSON Schemas
 
@@ -76,7 +80,8 @@ final class MyToolHandler implements ListenerInterface
 Rules:
 
 - Set `$event->response` to the **raw structured payload** — never to the `{ content, isError, structuredContent }` envelope. The gateway builds the envelope.
-- For errors, set a non-OK status (e.g. `BAD_REQUEST`, `NOT_FOUND`) with a descriptive message. The message ends up in `result.content[0].text`. Do not throw — the gateway logs the throw and turns it into a generic 500.
+- For errors, set a non-OK status (e.g. `BAD_REQUEST`, `NOT_FOUND`) with a descriptive message. The message ends up in `result.content[0].text`.
+- Throw only when you intentionally want the MCP gateway to preserve a structured MCP exception flow. Normal validation errors should still use `setStatus()`.
 - If the handler is generic and you want to short-circuit, call `$event->stopPropagation()`. Other Zolinga listeners on the same event will be skipped.
 
 ### 4. Register the listener in `<module>/zolinga.json`
@@ -99,7 +104,27 @@ Rules:
 }
 ```
 
-- `event` is the tool name — clients invoke it via `tools/call` with `params.name` set to this value. Reserved MCP protocol events (prefixed with `mcp:`, e.g. `mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`) are excluded from the tool list.
+Tenant-scoped tool for `/mcp/oauth/admin`:
+
+```json
+{
+  "listen": [
+    {
+      "event": "my-tool@admin",
+      "class": "\\MyModule\\Mcp\\MyToolHandler",
+      "method": "onMyTool",
+      "origin": ["mcp"],
+      "description": "Tool visible only on the admin MCP tenant.",
+      "schema": {
+        "request":  "module://my-module/schema/mcp/my-tool-request.json",
+        "response": "module://my-module/schema/mcp/my-tool-response.json"
+      }
+    }
+  ]
+}
+```
+
+- `event` is the tool name for the base routes. On tenant routes use `event: "<name>@<tenant>"`; the suffix is stripped from `tools/list`, so clients still invoke the tool via `tools/call` with `params.name = "<name>"`.
 - `origin: ["mcp"]` is required (or use `"*"` if you also want the listener to fire for non-MCP origins).
 - `schema.response` is **required**; tools without it are skipped by `tools/list` and `$api->log->error()` is called. `schema.request` is optional.
 
@@ -116,6 +141,12 @@ Rules:
 # Discover
 curl -X POST http://localhost:8080/mcp -D /dev/stderr \
   -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq '.result.tools[].name'
+
+# Discover tenant-scoped tools
+curl -X POST http://localhost:8080/mcp/oauth/admin -D /dev/stderr \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <token>' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq '.result.tools[].name'
 
 # Invoke
@@ -157,6 +188,7 @@ Expected error response (still in `result`, not a JSON-RPC `error` block):
 - **Throwing instead of `setStatus(BAD_REQUEST)`**: throws become generic 500s and the handler's user-friendly message is lost. Use `setStatus()` for client errors.
 - **Setting `$event->response` to the envelope shape**: the gateway will wrap the wrapper, producing `{ result: { content, isError, structuredContent: { content, isError, structuredContent } } }`. Don't.
 - **Forgetting `schema.response`**: `tools/list` will silently skip the tool. Check the system log (`data/system/logs/messages.log`) for an `$api->log->error()` line naming the tool.
+- **Using a base event name for a tenant-only tool**: `/mcp/oauth/{tenant}` dispatches `tools/call` as `<name>@<tenant>`. If your manifest listener is still `event: "<name>"`, the tenant route will not hit it.
 - **Returning a non-conforming response**: clients validate `structuredContent` against `outputSchema`; if it doesn't match, they reject the result. Keep the handler and the schema in sync.
 - **Missing PHP `declare(strict_types=1);` or missing `use Zolinga\System\Types\StatusEnum`**: standard PHP code-quality nits that the linter will catch.
 

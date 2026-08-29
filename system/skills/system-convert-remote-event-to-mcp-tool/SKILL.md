@@ -10,6 +10,7 @@ description: Use when exposing an existing `origin: ["remote"]` listener as an M
 - A `remote` web event already returns the exact payload you want to expose.
 - The handler does not need a new method, different arguments, or a different response shape.
 - You want the tool in `tools/list` and dispatchable via `tools/call` with zero handler code changes.
+- You may want a base-route tool or a tenant-scoped tool such as one visible only on `/mcp/oauth/admin`.
 
 If the response shape, auth, or origin needs to change, use [system-create-mcp-tool](system-skills:system-create-mcp-tool) instead.
 
@@ -39,7 +40,25 @@ Add a second `listen` entry that points at the **same** class+method as the `rem
 }
 ```
 
-The gateway uses `tools/call` `params.name` verbatim as the event type and runs the listener with `params.arguments` as the event `request`. The handler runs unchanged.
+The gateway uses `tools/call` `params.name` as the base event type and runs the listener with `params.arguments` as the event `request`. On `/mcp/oauth/{tenant}`, it appends `@{tenant}` to the dispatched event type. The handler can still run unchanged if you wire the matching event name in the manifest.
+
+Tenant-scoped variant for `/mcp/oauth/admin`:
+
+```json
+{
+  "event": "getPricingList@admin",
+  "description": "<human-readable description for the admin tools/list catalogue>",
+  "class": "Example\\App\\Api\\AlertApi",
+  "method": "onCountries",
+  "origin": ["mcp"],
+  "schema": {
+    "request":  "module://<module>/schemas/<name>Request.json",
+    "response": "module://<module>/schemas/<name>Response.json"
+  }
+}
+```
+
+`tools/list` on `/mcp/oauth/admin` exposes that tool to the client as `getPricingList`, but `tools/call` dispatches it internally as `getPricingList@admin`.
 
 ### 2. Schemas (place in `<module>/schemas/` — NOT `schema/mcp/`)
 
@@ -89,6 +108,7 @@ Add a real handler class (back to [system-create-mcp-tool](system-skills:system-
 - Different arguments than the `remote` event accepts.
 - Different response shape (e.g. strip a field, wrap in `{ data: ... }`).
 - Different auth (the `remote` event may have `"right": "member of users"`; the MCP version should have preferably `"right": "oauth2:scope mcp:tools"` to distinguish that AI can run only events specifically authorized for it using allowed OAuth2 scope). If the API does not require login omit `right` entirely.
+- Different tenant routing (for example you need a base tool and an `@admin` variant with different availability or descriptions).
 - Per-tool caching, validation, or side-effects before/after the `remote` call.
 
 ## Smoke Test

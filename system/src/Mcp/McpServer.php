@@ -208,6 +208,19 @@ class McpServer
 
         try {
             $event->dispatch();
+        } catch (McpException $e) {
+            if ($event->jsonrpcId === null) {
+                return null;
+            }
+
+            $status = \Zolinga\System\Types\StatusEnum::tryFrom($e->getHttpStatus() ?? 0) ?? $e->getJsonrpcCode()->toStatus();
+            $event->setStatus($status, $e->getMessage());
+
+            if ($event instanceof CallEvent) {
+                return $this->buildResponse($event);
+            }
+
+            return $e->toPayload();
         } catch (\Throwable $e) {
             $api->log->error('system:mcp', 'MCP dispatch failed: ' . McpHelper::truncateForEcho($e->getMessage()), [
                 'event' => McpHelper::truncateForEcho($event->type),

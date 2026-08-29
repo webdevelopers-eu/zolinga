@@ -1,6 +1,6 @@
 ---
 name: system-create-mcp-resource
-description: Use when creating or updating MCP resources — static files exposed to MCP clients via `resources/list` and `resources/read`. Covers `.meta.json` descriptors, URI rewriting, dynamic resources via `mcp:resources/list` event hook, and the `mcp-system` scheme.
+description: Use when creating or updating MCP resources — static files exposed to MCP clients via `resources/list` and `resources/read`. Covers `.meta.json` descriptors, tenant filtering, URI rewriting, dynamic resources via `mcp:resources/list` event hook, and the `mcp-system` scheme.
 argument-hint: "<module-name> <resource-name> [goal]"
 ---
 
@@ -11,6 +11,7 @@ argument-hint: "<module-name> <resource-name> [goal]"
 - Exposing a static file (Markdown doc, image, JSON data) to MCP clients as a discoverable resource.
 - Registering dynamic (non-file) resources by hooking `mcp:resources/list`.
 - Understanding URI rewriting that prevents internal Zolinga paths from leaking to clients.
+- Deciding whether a resource belongs to the base MCP endpoint or a tenant-scoped MCP route.
 
 ## How It Works
 
@@ -20,6 +21,12 @@ MCP clients discover resources via `resources/list` and fetch them via `resource
 2. **Dynamic**: Hook the `mcp:resources/list` event and add resources programmatically.
 
 For static resources, the system rewrites the internal `module://` URI to `mcp-system:<module>:<basename>` so the real file path is never exposed. For dynamic resources, the developer provides the external URI directly — the system validates the scheme is allowed (`mcp-*`, `http`, `https`) but does not rewrite it. In both cases, internal `module://` paths never reach the client.
+
+Tenant-aware MCP routes work like this:
+
+- `/mcp` and `/mcp/oauth` use the base resource events such as `mcp:resources/list` and `mcp:resources/read:mcp-system`.
+- `/mcp/oauth/{tenant}` appends `@{tenant}` to the dispatched event type, e.g. `mcp:resources/list@admin` and `mcp:resources/read:mcp-system@admin`.
+- Static resource descriptors can opt into specific tenant routes with an optional `tenants` array. Missing or invalid `tenants` behaves like `[""]`, which means the resource belongs to the base non-tenant route.
 
 ## 1. Static Resources
 
@@ -39,6 +46,18 @@ modules/my-module/mcp/resources/guide.md.meta.json <-- descriptor (same basename
   "name": "guide.md",
   "title": "User Guide",
   "description": "Getting started guide.",
+  "mimeType": "text/markdown"
+}
+```
+
+Tenant-scoped static resource:
+
+```json
+{
+  "uri": "module://my-module/mcp/resources/admin-guide.md",
+  "name": "admin-guide.md",
+  "title": "Admin Guide",
+  "tenants": ["admin"],
   "mimeType": "text/markdown"
 }
 ```
@@ -73,10 +92,11 @@ The internal `module://` URI is rewritten to `mcp-system:<module>:<basename>` on
 | `name` | yes | Unique resource identifier (typically the filename). |
 | `title` | no | Human-readable title. |
 | `description` | no | One-line description. |
+| `tenants` | no | Array of tenant names allowed to list and read the resource. Missing or invalid behaves like `[""]`. |
 | `mimeType` | no | `text/*` → returned as `text`, everything else → base64 `blob`. Defaults to `application/octet-stream`. |
 | `icons` | no | Array of `{ src, mimeType, sizes }`. |
 
-Extra fields pass through to the client unchanged.
+Extra fields pass through to the client unchanged, except `tenants`, which is internal filter metadata and is stripped from `resources/list` output.
 
 ## 2. Dynamic Resources
 
@@ -117,9 +137,11 @@ final class MyResourcesHandler implements ListenerInterface
 }
 ```
 
+To advertise resources only on `/mcp/oauth/admin`, register the listener for `mcp:resources/list@admin` instead of the base `mcp:resources/list` event.
+
 ### 2b. Read handler — serve resource contents
 
-The `ReadEvent` constructor extracts the URI scheme and appends it to the event type. So a resource with URI `mcp-my-module:daily-report` triggers event `mcp:resources/read:mcp-my-module`. Register a handler for that event:
+The `ReadEvent` constructor extracts the URI scheme and appends it to the event type. So a resource with URI `mcp-my-module:daily-report` triggers event `mcp:resources/read:mcp-my-module` on the base routes, or `mcp:resources/read:mcp-my-module@admin` on `/mcp/oauth/admin`. Register a handler for that event:
 
 ```php
 final class MyResourcesReadHandler implements ListenerInterface
@@ -135,6 +157,8 @@ final class MyResourcesReadHandler implements ListenerInterface
     }
 }
 ```
+
+For tenant-specific resources, use `@tenant` suffixed event names in the manifest.
 
 ### 2c. Register both in `zolinga.json`
 
@@ -186,6 +210,12 @@ curl -X POST https://your-host/mcp \
   -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"resources/list"}' | jq
 
+# List tenant-scoped resources
+curl -X POST https://your-host/mcp/oauth/admin \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <token>' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"resources/list"}' | jq
+
 # Read a resource
 curl -X POST https://your-host/mcp \
   -H 'Content-Type: application/json' \
@@ -195,8 +225,8 @@ curl -X POST https://your-host/mcp \
 ## References
 
 - [MCP Resources wiki](:Zolinga Core:MCP:Resources)
-- `system/src/Mcp/McpResourcesListHandler.php` — static resource discovery + URI rewriting.
-- `system/src/Mcp/McpResourcesReadHandler.php` — `mcp-system` read handler.
+- `system/src/Mcp/McpResourcesListHandler.php` — static resource discovery + tenant filtering.
+- `system/src/Mcp/McpResourcesReadHandler.php` — `mcp-system` read handler + tenant enforcement.
 - `system/src/Events/Mcp/Resources/ListEvent.php` — `addResource()` / `addResourceJson()` API.
 - `system/src/Events/Mcp/Resources/ReadEvent.php` — scheme-based event dispatch.
 - `system/src/Events/Mcp/Resources/ResourcesEvent.php` — `ALLOWED_URI_SCHEMES` with `mcp-*` wildcard.
