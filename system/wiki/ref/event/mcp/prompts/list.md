@@ -2,7 +2,7 @@
 
 The MCP `prompts/list` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as a [`Prompts\ListEvent`](:Zolinga Core:Events and Listeners:MCP) with the `mcp` origin.
 
-The system-provided [`\Zolinga\System\Mcp\McpPromptsListHandler::onList()`](:ref:class:Zolinga\\System\\Mcp\\McpPromptsListHandler) handles this event. It scans each module's `mcp/prompts/*.meta.json` files, rewrites the prompt `name` to `mcp-system:<module>:<basename>`, strips the `messages` array (list response is metadata-only), and returns the prompt descriptors.
+The system-provided [`\Zolinga\System\Mcp\McpPromptsListHandler::onList()`](:ref:class:Zolinga\\System\\Mcp\\McpPromptsListHandler) handles this event. It scans each module's `mcp/prompts/*.meta.json` files, rewrites the prompt `name` to `mcp-system:<module>:<basename>`, strips the `messages` array (list response is metadata-only), and returns the prompt descriptors. Static descriptors are filtered by tenant inheritance: `/mcp/oauth/admin` includes prompts defined for `/mcp` as well as prompts marked `admin`. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 ## Request
 

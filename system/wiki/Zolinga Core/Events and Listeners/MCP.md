@@ -17,7 +17,7 @@ The gateway dispatches one concrete subclass per JSON-RPC method. `McpEvent::fro
 The `resources/read` event type includes the URI scheme as a suffix (e.g. `mcp:resources/read:mcp-system`), allowing handlers to register for specific URI schemes. See [MCP Resources](:Zolinga Core:MCP:Resources) for details.
 | anything else         | —                                            | `McpMethodNotFoundException` thrown  |
 
-The table shows the base event type. On `/mcp/oauth/{tenant}`, the gateway appends `@{tenant}`, so `mcp:initialize` becomes `mcp:initialize@admin` and `echo` becomes `echo@admin` on `/mcp/oauth/admin`.
+The table shows the base event type. On `/mcp/oauth/{tenant}`, the gateway appends `@{tenant}`, so `mcp:initialize` becomes `mcp:initialize@admin` and `echo` becomes `echo@admin` on `/mcp/oauth/admin`. Listeners defined for parent tenants, including the base `/mcp` route, still match. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 `Tools\CallEvent` is the only subclass whose base `type` is not derived from the method name — it is the bare tool name (`params.name`) so the event dispatches to the tool's own listener. The other subclasses hard-code their `mcp:`-prefixed base `type` in their constructor.
 
@@ -69,7 +69,7 @@ For plain MCP events (anything that is not a `Tools\CallEvent`), the gateway map
 
 ## `tools/call` events
 
-For `tools/call` invocations the gateway dispatches a `Tools\CallEvent` with `type = "<name>"` on the base routes, or `type = "<name>@{tenant}"` on `/mcp/oauth/{tenant}` (where `<name>` is the JSON-RPC `params.name` argument). The gateway always wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope, never in a JSON-RPC `error` block.
+For `tools/call` invocations the gateway dispatches a `Tools\CallEvent` with `type = "<name>"` on the base routes, or `type = "<name>@{tenant}"` on `/mcp/oauth/{tenant}` (where `<name>` is the JSON-RPC `params.name` argument). Parent-tenant listeners still match, so a base `<name>` handler runs on `/mcp/oauth/admin` unless a more specific `<name>@admin` listener exists. The gateway always wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope, never in a JSON-RPC `error` block.
 
 ### Tool name validation
 

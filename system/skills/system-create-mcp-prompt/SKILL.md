@@ -26,7 +26,7 @@ Tenant-aware MCP routes work like this:
 
 - `/mcp` and `/mcp/oauth` use the base prompt events such as `mcp:prompts/list` and `mcp:prompts/get:mcp-system`.
 - `/mcp/oauth/{tenant}` appends `@{tenant}` to the dispatched event type, e.g. `mcp:prompts/list@admin` and `mcp:prompts/get:mcp-system@admin`.
-- Static prompt definitions can opt into specific tenant routes with an optional `tenants` array. Missing or invalid `tenants` behaves like `[""]`, which means the prompt belongs to the base non-tenant route.
+- Static prompt definitions can opt into specific tenant routes with an optional `tenants` array. Missing or invalid `tenants` behaves like `[""]`, the base `/mcp` route. Tenant routes inherit parent definitions, so `/mcp/oauth/admin` also sees prompts defined for `/mcp`. Nested tenants inherit too: `/mcp/oauth/admin/users` sees `admin` and `/mcp`. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 ## 1. Static Prompts
 
@@ -79,7 +79,7 @@ Note: `name` is omitted — the filename (`trademark-search`) is the identifier.
 }
 ```
 
-This prompt appears in `prompts/list` only on `/mcp/oauth/admin`, and `prompts/get` from another tenant route is rejected.
+This prompt appears in `prompts/list` on `/mcp/oauth/admin` and nested tenants such as `/mcp/oauth/admin/users`. It is hidden from `/mcp`. `prompts/get` from a tenant that does not inherit `admin` is rejected.
 
 ### Text from file (for large prompts)
 
@@ -114,7 +114,7 @@ The handler reads the file at `uri` (must use `module://` scheme, must resolve w
 | `description` | no | One-line description (also included in `prompts/get` response). |
 | `arguments` | no | Array of `{ name, description, required }`. |
 | `icons` | no | Array of icon objects. |
-| `tenants` | no | Array of tenant names allowed to see and fetch the prompt. Missing or invalid behaves like `[""]`. |
+| `tenants` | no | Array of tenant names this prompt is published on. Missing or invalid behaves like `[""]` (base `/mcp`, inherited by tenant routes). |
 | `messages` | yes (for `prompts/get`) | Array of `{ role, content }` — stripped from `prompts/list`. |
 | `name` | no (ignored for static) | Filename is the identifier. If present and mismatched, a warning is logged. |
 
@@ -216,6 +216,7 @@ curl -X POST https://your-host/mcp \
 ## References
 
 - [MCP Prompts wiki](:Zolinga Core:MCP:Prompts)
+- [MCP Tenants wiki](:Zolinga Core:MCP:Tenants)
 - `system/src/Mcp/McpPromptsListHandler.php` — static prompt discovery + tenant filtering.
 - `system/src/Mcp/McpPromptsGetHandler.php` — `mcp-system` get handler + tenant enforcement.
 - `system/src/Events/Mcp/Prompts/ListEvent.php` — `addPrompt()` / `addPromptJson()` API.

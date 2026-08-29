@@ -106,9 +106,15 @@ class McpServer
         }
 
         $data = $this->parseBody();
-        $this->response = $this->dispatch($tenant, $data);
-        $this->send();
-        
+
+        // Call on inherited tentants too
+        do {
+            $event = McpEvent::fromJsonRpc($tenant, $data);
+            $event->dispatch();
+            $tenant = dirname($tenant);
+        } while ($tenant && $tenant !== '.');
+
+        $this->send($event);
     }
 
     /**
@@ -117,9 +123,11 @@ class McpServer
      *
      * @return void
      */
-    private function send(): void
+    private function send(McpEvent $event): void
     {
-        if ($this->response === null) {
+        $response = $this->buildResponse($event);
+
+        if ($response === null) {
             if (!headers_sent()) {
                 http_response_code(204);
             }
@@ -128,14 +136,14 @@ class McpServer
         }
 
         // Derive HTTP status from the event (200 for OK, 401 for UNAUTHORIZED, etc.)
-        $httpStatus = $this->event?->status->value ?? 200;
+        $httpStatus = $event->status->value ?? 200;
         if (!headers_sent()) {
             header('Content-Type: application/json; charset=utf-8');
             header('MCP-Protocol-Version: ' . McpInitializeHandler::PROTOCOL_VERSION);
-            $this->sendHeadersForStatus($this->event?->status);
+            $this->sendHeadersForStatus($event->status);
             http_response_code($httpStatus);
         }
-        echo json_encode($this->response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        echo json_encode($response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $this->logAccess($httpStatus);
     }
 
@@ -177,64 +185,6 @@ class McpServer
         }
 
         return $decoded;
-    }
-
-    /**
-     * Dispatch a single JSON-RPC request and return the response payload,
-     * or null for notifications.
-     *
-     * @param string $tenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
-     * @param array<string, mixed> $data
-     * @return array<string, mixed>|null
-     */
-    private function dispatch(string $tenant, array $data): ?array
-    {
-        global $api;
-
-        try {
-            $event = McpEvent::fromJsonRpc($tenant, $data);
-        } catch (McpException $e) {
-            // Invalid envelope: notifications (no id) get no reply.
-            if (!array_key_exists('id', $data)) {
-                return null;
-            }
-            $payload = $e->toPayload();
-            $rawId = $data['id'];
-            $payload['id'] = is_string($rawId) || is_int($rawId) ? $rawId : null;
-            return $payload;
-        }
-
-        $this->event = $event;
-
-        try {
-            $event->dispatch();
-        } catch (McpException $e) {
-            if ($event->jsonrpcId === null) {
-                return null;
-            }
-
-            $status = \Zolinga\System\Types\StatusEnum::tryFrom($e->getHttpStatus() ?? 0) ?? $e->getJsonrpcCode()->toStatus();
-            $event->setStatus($status, $e->getMessage());
-
-            if ($event instanceof CallEvent) {
-                return $this->buildResponse($event);
-            }
-
-            return $e->toPayload();
-        } catch (\Throwable $e) {
-            $api->log->error('system:mcp', 'MCP dispatch failed: ' . McpHelper::truncateForEcho($e->getMessage()), [
-                'event' => McpHelper::truncateForEcho($event->type),
-                'exception' => $e::class,
-            ]);
-            $event->setStatus(StatusEnum::ERROR, 'Internal error: ' . McpHelper::truncateForEcho($e->getMessage()));
-        }
-
-        // Notifications: dispatched for side effects, no reply.
-        if ($event->jsonrpcId === null) {
-            return null;
-        }
-
-        return $this->buildResponse($event);
     }
 
     /**

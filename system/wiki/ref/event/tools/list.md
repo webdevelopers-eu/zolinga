@@ -4,7 +4,7 @@ The MCP `tools/list` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga C
 
 The system-provided [`\Zolinga\System\Mcp\McpToolsListHandler::onList()`](:ref:class:Zolinga\\System\\Mcp\\McpToolsListHandler) handles this event, walks the merged manifest and returns every listener that opts in to the `mcp` origin AND declares a `schema.response` (and is not a reserved MCP protocol event) as an MCP tool. The listener's event name is used verbatim as the JSON-RPC tool `name`.
 
-If you want `/mcp/oauth/admin` to expose a different catalogue than `/mcp` or `/mcp/oauth`, hook `mcp:tools/list@admin` and build the response there.
+`/mcp/oauth/admin` already includes tools defined for `/mcp`. Hook `mcp:tools/list@admin` or register `my-tool@admin` when you need extra or overriding tools for that tenant. A more specific `@tenant` listener replaces the inherited base tool of the same name. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 Reserved MCP protocol methods (`mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`) are excluded from the tool list. Listeners without a `schema.response` declaration are also excluded and an error is logged.
 

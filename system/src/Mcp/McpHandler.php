@@ -20,29 +20,29 @@ abstract class McpHandler implements ListenerInterface
 {
 
     /**
-     * Whether the descriptor is visible for the event tenant.
-     *
-     * @param array<string>|null $tenants
-     * @param string $search
+     * Answers question if user can see given object based on tenants.
+     * 
+     * Is user's tenant matching or under any of object's tenants?
+     * 
+     * The assumption is that user can see objects in parent's tenants, but not in sibling or child tenants. 
+     * 
+     * E.g.
+     * isMatchingTenant(['a/b/c'], 'a/b/c') => true
+     * isMatchingTenant(['a/b/c'], 'a/b') => false
+     * isMatchingTenant(['a/b/c'], 'a/b/c/d') => true
+     * 
+     * @param array<string>|null $objectTenants tenants that the object is defined for, at least one of them must match or be a parent of the user's tenant
+     * @param string $userTenant the tenant the user is currently in, or '' for the root tenant
      * @return bool
      */
-    protected function isMatchingTenant(null|array $tenants, string $search): bool
+    protected function isMatchingTenant(null|array $objectTenants, string $userTenant): bool
     {
-        $tenants = $tenants ?? [''];
-        $resolved = [];
+        $objectTenants = $objectTenants ?? [''];
 
-        if ($search === '') {
-            return true; // Global tenant always matches.
-        }
-
-        // We inherit, so if tenant is "a/b/c" then we also match "a/b" and "a" and "" (global).
-        foreach ($tenants as $key => $value) {
-            do {
-                if ($search === $value) {
-                    return true;
-                }
-                $value = dirname($value);
-            } while (strlen($value));
+        foreach ($objectTenants as $objectTenant) {
+            if (str_starts_with($userTenant, $objectTenant)) {
+                return true;
+            }
         }
 
         return false;
@@ -51,14 +51,14 @@ abstract class McpHandler implements ListenerInterface
     /**
      * Assert that the descriptor is visible for the event tenant.
      *
-     * @param array<string>|null $tenants
-     * @param string $search
+     * @param array<string>|null $objectTenants tenants that the object is defined for
+     * @param string $userTenant the tenant the user is currently in, or '' for the root tenant
      * @return void
      * @throws McpTenantException Tenant is not allowed for this descriptor.
      */
-    protected function assertTenant(null|array $tenants, string $search): void
+    protected function assertTenant(null|array $objectTenants, string $userTenant): void
     {   
-        if ($this->isMatchingTenant($tenants, $search)) {
+        if ($this->isMatchingTenant($objectTenants, $userTenant)) {
             return;
         }
 

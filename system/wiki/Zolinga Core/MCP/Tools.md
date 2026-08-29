@@ -8,7 +8,7 @@ Expose any Zolinga event as an [MCP](https://modelcontextprotocol.io/) tool that
 2. Declare `schema.request` and `schema.response` (JSON Schema files) — `schema.response` is **required** for the tool to appear in `tools/list`.
 3. The listener's event name becomes the tool name. Clients call it via `tools/call` with `params.name`.
 
-On `/mcp/oauth/{tenant}`, clients still send the same tool name, but the gateway dispatches the call as `<tool-name>@{tenant}`. This lets you create path-scoped MCP hooks such as `mcp:tools/list@admin` and `my-module-search@admin` for `/mcp/oauth/admin`.
+On `/mcp/oauth/{tenant}`, clients still send the same tool name, but the gateway dispatches the call as `<tool-name>@{tenant}`. Tenant routes inherit parent tools, so a listener registered as `my-module-search` is advertised and callable on `/mcp/oauth/admin`. Register `my-module-search@admin` when the tool should appear only on that tenant (and its nested tenants). See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 ## Manifest Entry
 
@@ -62,7 +62,7 @@ Use `/mcp/oauth/{tenant}` when you need a different MCP surface on the same serv
 - `/mcp/oauth/admin` appends `@admin` to dispatched event types.
 - Clients still call the tool as `my-module-search`; the `@admin` suffix is added by the gateway, not by the client.
 
-In practice this means you can expose a different `tools/list` result for `/mcp/oauth/admin`, and then handle tool execution through matching `...@admin` listeners.
+`/mcp/oauth/admin` therefore lists base `/mcp` tools plus any `...@admin` listeners. A more specific `@admin` listener replaces the inherited base tool of the same name. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 ## Tool Name Rules
 

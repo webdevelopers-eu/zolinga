@@ -26,7 +26,7 @@ Tenant-aware MCP routes work like this:
 
 - `/mcp` and `/mcp/oauth` use the base resource events such as `mcp:resources/list` and `mcp:resources/read:mcp-system`.
 - `/mcp/oauth/{tenant}` appends `@{tenant}` to the dispatched event type, e.g. `mcp:resources/list@admin` and `mcp:resources/read:mcp-system@admin`.
-- Static resource descriptors can opt into specific tenant routes with an optional `tenants` array. Missing or invalid `tenants` behaves like `[""]`, which means the resource belongs to the base non-tenant route.
+- Static resource descriptors can opt into specific tenant routes with an optional `tenants` array. Missing or invalid `tenants` behaves like `[""]`, the base `/mcp` route. Tenant routes inherit parent definitions, so `/mcp/oauth/admin` also sees resources defined for `/mcp`. Nested tenants inherit too: `/mcp/oauth/admin/users` sees `admin` and `/mcp`. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 ## 1. Static Resources
 
@@ -62,6 +62,8 @@ Tenant-scoped static resource:
 }
 ```
 
+This resource appears in `resources/list` on `/mcp/oauth/admin` and nested tenants such as `/mcp/oauth/admin/users`. It is hidden from `/mcp`. `resources/read` from a tenant that does not inherit `admin` is rejected.
+
 The `uri` can point to any file in the module, not just files in `mcp/resources/`:
 
 ```json
@@ -92,7 +94,7 @@ The internal `module://` URI is rewritten to `mcp-system:<module>:<basename>` on
 | `name` | yes | Unique resource identifier (typically the filename). |
 | `title` | no | Human-readable title. |
 | `description` | no | One-line description. |
-| `tenants` | no | Array of tenant names allowed to list and read the resource. Missing or invalid behaves like `[""]`. |
+| `tenants` | no | Array of tenant names this resource is published on. Missing or invalid behaves like `[""]` (base `/mcp`, inherited by tenant routes). |
 | `mimeType` | no | `text/*` → returned as `text`, everything else → base64 `blob`. Defaults to `application/octet-stream`. |
 | `icons` | no | Array of `{ src, mimeType, sizes }`. |
 
@@ -225,6 +227,7 @@ curl -X POST https://your-host/mcp \
 ## References
 
 - [MCP Resources wiki](:Zolinga Core:MCP:Resources)
+- [MCP Tenants wiki](:Zolinga Core:MCP:Tenants)
 - `system/src/Mcp/McpResourcesListHandler.php` — static resource discovery + tenant filtering.
 - `system/src/Mcp/McpResourcesReadHandler.php` — `mcp-system` read handler + tenant enforcement.
 - `system/src/Events/Mcp/Resources/ListEvent.php` — `addResource()` / `addResourceJson()` API.

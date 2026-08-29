@@ -4,7 +4,7 @@ The MCP `resources/read` JSON-RPC method. Dispatched by the [MCP gateway](:Zolin
 
 The event type includes the URI scheme as a suffix: `mcp:resources/read:<scheme>`. For example, a request with `uri = "mcp-system:..."` dispatches as `mcp:resources/read:mcp-system`. This lets handlers register for specific URI schemes.
 
-The system-provided [`\Zolinga\System\Mcp\McpResourcesReadHandler::onRead()`](:ref:class:Zolinga\\System\\Mcp\\McpResourcesReadHandler) handles the `mcp-system` scheme. It parses the URI, resolves the `.meta.json` descriptor, reads the content file, and returns it as `text` or `blob` based on the MIME type.
+The system-provided [`\Zolinga\System\Mcp\McpResourcesReadHandler::onRead()`](:ref:class:Zolinga\\System\\Mcp\\McpResourcesReadHandler) handles the `mcp-system` scheme. It parses the URI, resolves the `.meta.json` descriptor, reads the content file, and returns it as `text` or `blob` based on the MIME type. The same tenant inheritance used by `resources/list` is enforced here: a resource defined for `/mcp` can be read from `/mcp/oauth/admin`, but an `admin`-only resource cannot be read from `/mcp`. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 ## Request
 
@@ -70,6 +70,7 @@ Binary resource response:
 ## Security
 
 - Directory traversal is blocked: `basename()` is applied to both module and basename components.
+- Direct reads are rejected when the current tenant does not inherit the resource. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 - Only `mcp-system`, `http`, and `https` URI schemes are accepted in responses (enforced by `validateResponse()`).
 
 ## See Also

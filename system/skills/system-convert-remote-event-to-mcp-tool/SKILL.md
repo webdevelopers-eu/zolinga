@@ -40,7 +40,7 @@ Add a second `listen` entry that points at the **same** class+method as the `rem
 }
 ```
 
-The gateway uses `tools/call` `params.name` as the base event type and runs the listener with `params.arguments` as the event `request`. On `/mcp/oauth/{tenant}`, it appends `@{tenant}` to the dispatched event type. The handler can still run unchanged if you wire the matching event name in the manifest.
+The gateway uses `tools/call` `params.name` as the base event type and runs the listener with `params.arguments` as the event `request`. On `/mcp/oauth/{tenant}`, it appends `@{tenant}` to the dispatched event type. A base event name is inherited by tenant routes, so this `getPricingList` listener also runs on `/mcp/oauth/admin` unless a more specific `getPricingList@admin` listener exists.
 
 Tenant-scoped variant for `/mcp/oauth/admin`:
 
@@ -58,7 +58,7 @@ Tenant-scoped variant for `/mcp/oauth/admin`:
 }
 ```
 
-`tools/list` on `/mcp/oauth/admin` exposes that tool to the client as `getPricingList`, but `tools/call` dispatches it internally as `getPricingList@admin`.
+`tools/list` on `/mcp/oauth/admin` exposes that tool to the client as `getPricingList`. It is hidden from `/mcp`. `tools/call` on the admin route dispatches `getPricingList@admin`. Nested tenants such as `/mcp/oauth/admin/users` inherit it.
 
 ### 2. Schemas (place in `<module>/schemas/` — NOT `schema/mcp/`)
 

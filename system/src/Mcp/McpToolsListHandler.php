@@ -107,11 +107,11 @@ class McpToolsListHandler extends McpHandler
      * Whether a listener atom is a candidate MCP tool: it opts in to the
      * `mcp` origin and is not a reserved MCP protocol event.
      *
-     * @param string $tenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
+     * @param string $userTenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
      * @param ListenAtom $atom
      * @return bool
      */
-    private function isMcpToolCandidate(string $tenant, ListenAtom $atom): bool
+    private function isMcpToolCandidate(string $userTenant, ListenAtom $atom): bool
     {
         global $api;
 
@@ -119,31 +119,27 @@ class McpToolsListHandler extends McpHandler
             return false;
         }
 
-        $eventName = (string) $atom['event'];
-
         // Skip wildcard event patterns — they are broadcast listeners, not
         // callable tools.
-        if (str_contains($eventName, '*')) {
+        if (str_contains((string) $atom['event'], '*')) {
             return false;
         }
+
+        [$eventName, $eventTenant] = explode('@', (string) $atom['event']) + [1 => ''];
 
         if ($this->isReservedEvent($eventName)) {
             return false;
         }
 
-        if ($tenant === '' && str_contains($eventName, '@')) {
+        if (!$this->isMatchingTenant([$eventTenant], $userTenant)) {
             return false;
         }
         
-        if ($tenant && !str_ends_with($eventName, '@' . $tenant)) {
-            return false;
-        }
-
         // If tenant is specified we list only tools that the user has access to
         // While /mcp is open to all so we show all tools even for anonymous users
         // /mcp/oauth/{tenant} is restricted to logged in users so we know what they can see.
-        if ($tenant !== '' && $atom['right'] && !$api->isAuthorized($atom['right'])) {
-            $api->log->info('system:mcp', "MCP tool {$eventName} is not authorized for tenant $tenant; skipping.");
+        if ($userTenant !== '' && $atom['right'] && !$api->isAuthorized($atom['right'])) {
+            $api->log->info('system:mcp', "MCP tool {$eventName} is not authorized for tenant $userTenant; skipping.");
             return false;
         }
 

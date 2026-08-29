@@ -6,7 +6,7 @@ Three endpoint forms are available:
 
 - **`/mcp`** — mixed authentication. Some tools require authentication, others are public. Use this for general-purpose access.
 - **`/mcp/oauth`** — always requires authentication. Every request returns HTTP 401 until the client authenticates. Use this when your MCP client expects uniform authentication across all requests (e.g. Hermes).
-- **`/mcp/oauth/{tenant}`** — always requires authentication and appends `@{tenant}` to every dispatched event type. Use this when you want a path-scoped MCP surface such as `/mcp/oauth/admin` with its own `initialize`, `tools/list`, and `tools/call` hooks.
+- **`/mcp/oauth/{tenant}`** — always requires authentication and appends `@{tenant}` to every dispatched event type. Use this when you want a path-scoped MCP surface such as `/mcp/oauth/admin` with its own `initialize`, `tools/list`, and `tools/call` hooks. Tools, prompts, and resources on this route inherit the base `/mcp` catalogue. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 The gateway supports two MCP capability areas:
 
@@ -116,7 +116,7 @@ curl -X POST http://localhost:8080/mcp/oauth/admin \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
-That request dispatches `mcp:tools/list@admin`, which lets you return a different tool catalogue than `/mcp` or `/mcp/oauth`.
+That request dispatches `mcp:tools/list@admin`. The catalogue still includes everything defined for `/mcp`, plus any `admin` overrides. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 See [OAuth Authorization](:Zolinga OAuth:Authorization) for the complete OAuth flow.
 
@@ -144,7 +144,7 @@ with `params.name` set to that event name:
 - `event: "<name>"` — the event name is the JSON-RPC tool name. Clients invoke it via `tools/call` with `params.name = "<name>"`.
 - `schema.request` / `schema.response` — each value is a [Zolinga URI](:Zolinga Core:Paths and Zolinga URI) that resolves to a JSON Schema file. The MCP `tools/list` response embeds the parsed schema as `inputSchema` / `outputSchema`. **`schema.response` is required** for the tool to be exposed by `tools/list` — `McpToolsListHandler` logs an error and skips the tool when it is missing.
 
-On `/mcp/oauth/{tenant}`, clients still call the same tool name, but the gateway dispatches the event as `<name>@{tenant}`. That gives you a path-based hook surface: for example, `/mcp/oauth/admin` can advertise tools through `mcp:tools/list@admin` and execute them through `my-module-search@admin`.
+On `/mcp/oauth/{tenant}`, clients still call the same tool name, but the gateway dispatches the event as `<name>@{tenant}`. Parent listeners still match, so a base `my-module-search` tool is advertised and callable on `/mcp/oauth/admin`. Register `my-module-search@admin` only when you want a tenant-specific override. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 The handler class implements [`ListenerInterface`](:Zolinga Core:Events and Listeners) and receives a [`Tools\CallEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"`. It sets the raw structured payload on `$event->response`; the gateway builds the MCP envelope:
 
@@ -269,7 +269,7 @@ Use **`/mcp/oauth/{tenant}`** when:
 
 - You want a separate MCP surface keyed by the URL path.
 - You need different `initialize`, `tools/list`, or tool-call hooks for a named tenant, role, or integration.
-- You want `/mcp/oauth/admin` to dispatch `...@admin` events while leaving `/mcp` and `/mcp/oauth` on the base event names.
+- You want `/mcp/oauth/admin` to dispatch `...@admin` events while still listing tools, prompts, and resources defined for `/mcp`. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 Use **`/mcp`** when:
 
