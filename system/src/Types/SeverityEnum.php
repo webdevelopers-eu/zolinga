@@ -12,6 +12,8 @@ namespace Zolinga\System\Types;
  */
 enum SeverityEnum: string
 {
+    // Those strictly map to method names on $api->log service, so if
+    // you add more, update the log service to support them.
     case TIP = 'tip';
     case INFO = 'info';
     case WARNING = 'warning';
