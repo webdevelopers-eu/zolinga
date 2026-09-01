@@ -9,7 +9,7 @@ use Zolinga\System\Types\StatusEnum;
 
 /**
  * Abstract base for MCP action handlers that resolve a
- * `mcp-system:<module>:<basename>` request to a `.meta.json` file.
+ * `mcp-system://<module>/<subdir>/<basename>` request to a `.meta.json` file.
  *
  * Provides the shared parse-and-resolve lifecycle: extract the request
  * parameter, parse the `mcp-system` URI into module + basename, validate
@@ -43,66 +43,58 @@ abstract class AbstractMcpActionHandler extends McpHandler
      */
     public function onAction(AbstractActionEvent $event): void
     {
-        $id = $event->request[static::REQUEST_KEY] ?? null;
-        if (!is_string($id) || $id === '') {
+        $mcpUri = $event->request[static::REQUEST_KEY] ?? null;
+        if (!is_string($mcpUri) || $mcpUri === '') {
             $event->setStatus(StatusEnum::BAD_REQUEST, 'Missing or empty "' . static::REQUEST_KEY . '" parameter.');
             return;
         }
 
-        $parts = $this->parseId($id);
-        if ($parts === null) {
-            $event->setStatus(StatusEnum::BAD_REQUEST, 'Invalid ' . static::SUBDIR . ' identifier: ' . $id);
+        $metaPath = $this->mcpUriToPath($mcpUri);
+        if ($metaPath === null) {
+            $event->setStatus(StatusEnum::BAD_REQUEST, 'Invalid ' . static::SUBDIR . ' identifier: ' . $mcpUri);
             return;
         }
 
-        $this->doAction($event, $parts['module'], $parts['basename'], $id);
+        $this->doAction($event, $metaPath, $mcpUri);
     }
 
     /**
-     * Parse a `mcp-system:<module>:<basename>` identifier into its parts.
+     * Parse a `mcp-system://<module>/<subdir>/<basename>` identifier into its parts.
      *
-     * @param string $id The identifier to parse.
-     * @return array{module: string, basename: string}|null Null if invalid.
+     * @param string $mcpUri The identifier to parse.
+     * @return string|null Null if invalid.
      */
-    private function parseId(string $id): ?array
-    {
-        $parts = explode(':', $id, 3);
-        if (count($parts) < 3 || $parts[0] !== 'mcp-system') {
-            return null;
-        }
-
-        $module = basename($parts[1]);
-        $basename = basename($parts[2]);
-
-        if ($module !== $parts[1] || $basename !== $parts[2]) {
-            return null;
-        }
-
-        return ['module' => $module, 'basename' => $basename];
-    }
-
-    /**
-     * Resolve the `.meta.json` file path for a module + basename.
-     *
-     * @param string $module The module name.
-     * @param string $basename The file basename (without `.meta.json`).
-     * @return string|null The absolute path, or null if not found.
-     */
-    protected function resolveMetaPath(string $module, string $basename): ?string
+    private function mcpUriToPath(string $mcpUri): ?string
     {
         global $api;
 
-        if (!in_array($module, $api->manifest->moduleNames, true)) {
+        $parts = parse_url($mcpUri);
+        if (
+            $parts === false 
+            || !isset($parts['scheme'], $parts['host'], $parts['path'])
+            || $parts['scheme'] !== 'mcp-system'
+            || $parts['host'] === ''
+            || $parts['path'] === '') {
             return null;
         }
 
-        $zPath = "module://$module/mcp/" . static::SUBDIR . "/$basename.meta.json";
-        $realPath = $api->fs->toPath($zPath);
-        if (!$realPath || !is_file($realPath)) {
+        $module = basename($parts['host']);
+        $dirname = basename(dirname($parts['path']));
+        $basename = basename($parts['path']);
+
+        if ($dirname !== static::SUBDIR) {
+            $api->log->error('system:mcp', "MCP " . static::SUBDIR . " request '$mcpUri' has invalid subdirectory: $dirname, expected: " . static::SUBDIR);
             return null;
         }
 
-        return $realPath;
+        $zUri = 'module://' . $module . '/mcp/' . static::SUBDIR . '/' . $basename . '.meta.json';
+        $path = $api->fs->toPath($zUri);
+        if (!$path || !is_file($path)) {
+            $api->log->error('system:mcp', "MCP " . static::SUBDIR . " request '$mcpUri' resolved to non-existent file: $zUri");
+            return null;
+        }
+
+        return $path;
     }
 
     /**
@@ -129,26 +121,17 @@ abstract class AbstractMcpActionHandler extends McpHandler
      * if it returns null, they must return early.
      *
      * @param AbstractActionEvent $event The action event to populate on failure.
-     * @param string $module The resolved module name.
-     * @param string $basename The resolved file basename.
-     * @param string $requestId The original request identifier (for logging).
+     * @param string $metaPath Absolute path to the `.meta.json` file.
      * @return array<string, mixed>|null The decoded `.meta.json`, or null on failure.
      */
-    protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestId): ?array
+    protected function doAction(AbstractActionEvent $event, string $metaPath, string $mcpUri): ?array
     {
         global $api;
 
-        $metaPath = $this->resolveMetaPath($module, $basename);
-        if ($metaPath === null) {
-            $api->log->error('system:mcp', "MCP " . static::SUBDIR . " request '$requestId' for unknown module or missing file: $module/$basename");
-            $event->setStatus(StatusEnum::NOT_FOUND, ucfirst(static::SUBDIR) . ' not found: ' . $requestId);
-            return null;
-        }
-
         $meta = $this->loadMeta($metaPath);
         if ($meta === null) {
-            $api->log->error('system:mcp', "MCP " . static::SUBDIR . " request '$requestId' has invalid JSON in file: $metaPath");
-            $event->setStatus(StatusEnum::ERROR, ucfirst(static::SUBDIR) . ' definition is invalid: ' . $requestId);
+            $api->log->error('system:mcp', "MCP " . static::SUBDIR . " request '$metaPath' has invalid JSON in file: $metaPath");
+            $event->setStatus(StatusEnum::ERROR, ucfirst(static::SUBDIR) . ' definition is invalid: ' . $metaPath);
             return null;
         }
 

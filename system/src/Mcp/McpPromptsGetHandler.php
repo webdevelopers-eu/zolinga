@@ -11,7 +11,7 @@ use Zolinga\System\Types\StatusEnum;
 /**
  * Handles MCP `prompts/get` requests for the `mcp-system` URI scheme.
  *
- * Parses the `mcp-system:<module>:<basename>` name, resolves the
+ * Parses the `mcp-system://<module>/<subdir>/<basename>` name, resolves the
  * corresponding `.meta.json` prompt definition, resolves any `content.uri`
  * file references, applies `{{arg}}` substitution, and returns the
  * `{ description?, messages: [...] }` response.
@@ -29,24 +29,22 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
      * Load and serve a prompt definition.
      *
      * @param AbstractActionEvent $event
-     * @param string $module
-     * @param string $basename
-     * @param string $requestName The original name from the request.
-     * @return void
+     * @param string $metaPath Absolute path to the `.meta.json` file.
+     * @return array<string, mixed>|null Resolved prompt definition, or null on failure. The event response is populated on success.
      */
-    protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestName): ?array
+    protected function doAction(AbstractActionEvent $event, string $metaPath, string $mcpUri): ?array
     {
         assert($event instanceof GetEvent);
         global $api;
 
-        $meta = parent::doAction($event, $module, $basename, $requestName);
+        $meta = parent::doAction($event, $metaPath, $mcpUri);
         if ($meta === null) {
             return null;
         }
 
         if (!isset($meta['messages']) || !is_array($meta['messages'])) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' is missing field 'messages' or field is not an array");
-            $event->setStatus(StatusEnum::ERROR, "Prompt definition missing 'messages' field: $requestName");
+            $api->log->error('system:mcp', "MCP prompt request '$mcpUri' is missing field 'messages' or field is not an array");
+            $event->setStatus(StatusEnum::ERROR, "Prompt definition missing 'messages' field: $mcpUri");
             return null;
         }
 
@@ -56,15 +54,15 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
         }
         $error = $this->validateArguments($meta['arguments'] ?? [], $args);
         if ($error !== null) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' has invalid arguments: $error");
-            $event->setStatus(StatusEnum::BAD_REQUEST, $error);
+            $api->log->error('system:mcp', "MCP prompt request '$metaPath' has invalid arguments: $error");
+            $event->setStatus(StatusEnum::BAD_REQUEST, "$error ($mcpUri)");
             return null;
         }
 
-        $messages = $this->resolveMessages($meta['messages'], $args, $module);
+        $messages = $this->resolveMessages($meta['messages'], $args);
         if ($messages === null) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' failed to resolve prompt messages");
-            $event->setStatus(StatusEnum::ERROR, 'Failed to resolve prompt messages: ' . $requestName);
+            $api->log->error('system:mcp', "MCP prompt request '$metaPath' failed to resolve prompt messages");
+            $event->setStatus(StatusEnum::ERROR, 'Failed to resolve prompt messages: ' . $mcpUri);
             return null;
         }
 
@@ -104,14 +102,12 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
      *
      * @param array<int, array<string, mixed>> $messages
      * @param array<string, mixed> $args
-     * @param string $module The module name for path containment checks.
      * @return array<int, array<string, mixed>>|null Resolved messages, or null on error.
      */
-    private function resolveMessages(array $messages, array $args, string $module): ?array
+    private function resolveMessages(array $messages, array $args): ?array
     {
         global $api;
 
-        $moduleRoot = realpath($api->fs->toPath("module://$module/"));
         $resolved = [];
 
         foreach ($messages as $msg) {

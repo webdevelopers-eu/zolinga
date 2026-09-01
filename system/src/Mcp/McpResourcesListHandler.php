@@ -9,7 +9,7 @@ namespace Zolinga\System\Mcp;
  *
  * Discovers module-provided resources by scanning each module's
  * `mcp/resources/*.meta.json` files. Rewrites the internal `uri` field
- * to the external `mcp-system:<module>:<basename>` scheme so that
+ * to the external `mcp-system://<module>/<subdir>/<basename>` scheme so that
  * internal Zolinga paths are never leaked to MCP clients.
  *
  * @see https://modelcontextprotocol.io/specification/2025-11-25/server/resources

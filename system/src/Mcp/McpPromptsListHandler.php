@@ -9,7 +9,7 @@ namespace Zolinga\System\Mcp;
  *
  * Discovers module-provided prompts by scanning each module's
  * `mcp/prompts/*.meta.json` files. Rewrites the `name` field to the
- * external `mcp-system:<module>:<basename>` scheme so that internal
+ * external `mcp-system://<module>/<subdir>/<basename>` scheme so that internal
  * Zolinga paths are never leaked to MCP clients.
  *
  * @see https://modelcontextprotocol.io/specification/2025-11-25/server/prompts

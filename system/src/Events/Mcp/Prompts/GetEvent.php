@@ -15,7 +15,7 @@ use Zolinga\System\Mcp\Exceptions\McpInvalidRequestException;
  * Dispatched by the MCP gateway when a client sends a `prompts/get`
  * JSON-RPC request. The event type is `mcp:prompts/get:<scheme>` where
  * `<scheme>` is the URI scheme of the requested prompt name (e.g.
- * `mcp:prompts/get:mcp-system` for `mcp-system:...` names).
+ * `mcp:prompts/get:mcp-system` for `mcp-system://...` names).
  *
  * Handlers read the prompt definition and populate `$event->response` with
  * `{ description?, messages: [...] }`.
@@ -63,6 +63,8 @@ class GetEvent extends AbstractActionEvent
      */
     public function validateResponse(): void
     {
+        global $api;
+
         $messages = $this->response['messages'] ?? [];
         if (!is_array($messages)) {
             return;
@@ -81,6 +83,7 @@ class GetEvent extends AbstractActionEvent
             }
             $uri = $resource['uri'] ?? '';
             if (is_string($uri) && $uri !== '' && !$this->isAllowedScheme(parse_url($uri, PHP_URL_SCHEME) ?? '*missing-scheme*')) {
+                $api->log->error('mcp:system', "You are trying to leak to AI agent a prompt message embedded resource URI '$uri' that uses a disallowed scheme. Allowed schemes: " . implode(', ', static::ALLOWED_URI_SCHEMES) . ", message: " . json_encode($msg));
                 throw new \InvalidArgumentException(
                     'Prompt message embedded resource URI "' . $uri . '" uses a disallowed scheme. '
                     . 'Allowed schemes: ' . implode(', ', static::ALLOWED_URI_SCHEMES) . '.'

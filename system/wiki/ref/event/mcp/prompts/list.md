@@ -2,7 +2,7 @@
 
 The MCP `prompts/list` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as a [`Prompts\ListEvent`](:Zolinga Core:Events and Listeners:MCP) with the `mcp` origin.
 
-The system-provided [`\Zolinga\System\Mcp\McpPromptsListHandler::onList()`](:ref:class:Zolinga\System\Mcp\McpPromptsListHandler) handles this event. It scans each module's `mcp/prompts/*.meta.json` files, rewrites the prompt `name` to `mcp-system:<module>:<basename>`, strips the `messages` array (list response is metadata-only), and returns the prompt descriptors.
+The system-provided [`\Zolinga\System\Mcp\McpPromptsListHandler::onList()`](:ref:class:Zolinga\System\Mcp\McpPromptsListHandler) handles this event. It scans each module's `mcp/prompts/*.meta.json` files, rewrites the prompt `name` to `mcp-system://<module>/prompts/<basename>`, strips the `messages` array (list response is metadata-only), and returns the prompt descriptors.
 
 ## Request
 
@@ -14,7 +14,7 @@ The response is a `{ prompts: [...] }` payload, where each entry has:
 
 | Field         | Type   | Notes |
 |---------------|--------|-------|
-| `name`        | `string` | External identifier in `mcp-system:<module>:<basename>` format. |
+| `name`        | `string` | External identifier in `mcp-system://<module>/prompts/<basename>` format. |
 | `title`       | `string` | Human-readable title (optional, from `.meta.json`). |
 | `description` | `string` | One-line description (optional, from `.meta.json`). |
 | `arguments`   | `array`  | Array of `{ name, description, required }` (optional, from `.meta.json`). |
@@ -39,7 +39,7 @@ curl -X POST https://your-host/mcp \
   "result": {
     "prompts": [
       {
-        "name": "mcp-system:ipdefender:trademark-search",
+        "name": "mcp-system://ipdefender/prompts/trademark-search",
         "title": "Trademark Search",
         "description": "Prompt template for trademark similarity search.",
         "arguments": [
@@ -65,7 +65,7 @@ class MyPromptsListHandler implements ListenerInterface
     public function onList(ListEvent $event): void
     {
         $event->add(
-            name: 'mcp-system:my-module:dynamic-prompt',
+            name: 'mcp-system://my-module/prompts/dynamic-prompt',
             title: 'Dynamic Prompt',
             description: 'Generated at runtime.',
             arguments: [['name' => 'topic', 'required' => true]]

@@ -11,7 +11,7 @@ use Zolinga\System\Types\StatusEnum;
 /**
  * Handles MCP `resources/read` requests for the `mcp-system` URI scheme.
  *
- * Parses the `mcp-system:<module>:<basename>` URI, resolves the
+ * Parses the `mcp-system://<module>/<subdir>/<basename>` URI, resolves the
  * corresponding `.meta.json` descriptor, reads the actual content file,
  * and returns it as either `text` or `blob` (base64-encoded) based on
  * the MIME type declared in the `.meta.json`.
@@ -29,46 +29,45 @@ class McpResourcesReadHandler extends AbstractMcpActionHandler
      * Read the resource file and populate the event response.
      *
      * @param AbstractActionEvent $event
-     * @param string $module
-     * @param string $basename
-     * @param string $requestUri The original URI from the request.
-     * @return void
+     * @param string $metaPath Absolute path to the `.meta.json` file.
+     * @param string $mcpUri The original MCP URI from the request.
+     * @return array<string, mixed>|null Resolved resource descriptor, or null on failure. The event response is populated on success.
      */
-    protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestUri): ?array
+    protected function doAction(AbstractActionEvent $event, string $metaPath, string $mcpUri): ?array
     {
         assert($event instanceof ReadEvent);
         global $api;
 
-        $api->log->info('mcp:system', "Reading resource: $requestUri");
+        $api->log->info('mcp:system', "Reading resource: $metaPath");
 
-        $meta = parent::doAction($event, $module, $basename, $requestUri);
+        $meta = parent::doAction($event, $metaPath, $mcpUri);
         if ($meta === null) {
             return null;
         }
 
         if (!isset($meta['uri'])) {
-            $api->log->info('mcp:system', "Resource descriptor invalid: $requestUri");
-            $event->setStatus(StatusEnum::NOT_FOUND, 'Resource descriptor missing or invalid: ' . $requestUri);
+            $api->log->info('mcp:system', "Resource descriptor invalid: missing 'uri' field: $mcpUri");
+            $event->setStatus(StatusEnum::NOT_FOUND, 'Resource descriptor missing or invalid.');
             return null;
         }
 
         $contentPath = $api->fs->toPath($meta['uri']);
         if (!$contentPath || !is_file($contentPath)) {
-            $api->log->info('mcp:system', "Resource content file not found: {$meta['uri']}");
-            $event->setStatus(StatusEnum::NOT_FOUND, 'Resource content file not found: ' . $requestUri);
+            $api->log->info('mcp:system', "Resource content file not found: {$meta['uri']} ($mcpUri)");
+            $event->setStatus(StatusEnum::NOT_FOUND, 'Resource content file not found.');
             return null;
         }
 
         $contents = file_get_contents($contentPath);
         if ($contents === false) {
-            $api->log->info('mcp:system', "Failed to read resource content: $requestUri");
-            $event->setStatus(StatusEnum::ERROR, 'Failed to read resource content: ' . $requestUri);
+            $api->log->info('mcp:system', "Failed to read resource content: {$meta['uri']} ($mcpUri)");
+            $event->setStatus(StatusEnum::ERROR, 'Failed to read resource content: ' . $mcpUri);
             return null;
         }
 
         $mimeType = $meta['mimeType'] ?? 'application/octet-stream';
-        $this->buildResponse($event, $requestUri, $mimeType, $contents);
-        $api->log->info('mcp:system', "Resource served: $requestUri ($mimeType, " . strlen($contents) . " bytes)");
+        $this->buildResponse($event, $mcpUri, $mimeType, $contents);
+        $api->log->info('mcp:system', "Resource served: $metaPath ($mimeType, " . strlen($contents) . " bytes) ($mcpUri)");
         $event->setStatus(StatusEnum::OK, 'OK');
         return null;
     }

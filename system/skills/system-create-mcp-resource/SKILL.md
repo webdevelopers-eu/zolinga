@@ -19,7 +19,7 @@ MCP clients discover resources via `resources/list` and fetch them via `resource
 1. **Static**: Drop a `.meta.json` descriptor in `modules/<module>/mcp/resources/`. The system discovers it automatically — no manifest changes needed.
 2. **Dynamic**: Hook the `mcp:resources/list` event and add resources programmatically.
 
-For static resources, the system rewrites the internal `module://` URI to `mcp-system:<module>:<basename>` so the real file path is never exposed. For dynamic resources, the developer provides the external URI directly — the system validates the scheme is allowed (`mcp-*`, `http`, `https`) but does not rewrite it. In both cases, internal `module://` paths never reach the client.
+For static resources, the system rewrites the internal `module://` URI to `mcp-system://<module>/resources/<basename>` so the real file path is never exposed. For dynamic resources, the developer provides the external URI directly — the system validates the scheme is allowed (`mcp-*`, `http`, `https`) but does not rewrite it. In both cases, internal `module://` paths never reach the client.
 
 ## 1. Static Resources
 
@@ -58,12 +58,12 @@ Done. The resource is discoverable immediately. No `zolinga.json` changes, no ve
 
 ### What clients see
 
-The internal `module://` URI is rewritten to `mcp-system:<module>:<basename>` on the wire:
+The internal `module://` URI is rewritten to `mcp-system://<module>/resources/<basename>` on the wire:
 
 | Internal (in `.meta.json`) | External (client sees) |
 |---|---|
-| `module://ipdefender/mcp/resources/about.md` | `mcp-system:ipdefender:about.md` |
-| `module://my-module/docs/api.md` | `mcp-system:my-module:api.md` |
+| `module://ipdefender/mcp/resources/about.md` | `mcp-system://ipdefender/resources/about.md` |
+| `module://my-module/docs/api.md` | `mcp-system://my-module/resources/api.md` |
 
 ### `.meta.json` Fields
 
@@ -167,7 +167,7 @@ The **sole purpose** of this whitelist is security: preventing server-side file 
 
 - **`mcp-*`** — any scheme starting with `mcp-` (e.g. `mcp-system`, `mcp-my-module`, `mcp-anything`). Use this for all custom resources. The URI is opaque to the client; your read handler decides what it maps to internally.
 - **`http` / `https`** — for resources already served at public URLs (no path to hide).
-- **`module://`** — internal only, never sent to clients. The system rewrites it to `mcp-system:...` for static resources.
+- **`module://`** — internal only, never sent to clients. The system rewrites it to `mcp-system://...` for static resources.
 
 The `mcp-*` wildcard means you can invent any `mcp-<name>` scheme for your dynamic resources without modifying the whitelist.
 
@@ -189,7 +189,7 @@ curl -X POST https://your-host/mcp \
 # Read a resource
 curl -X POST https://your-host/mcp \
   -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"mcp-system:my-module:guide.md"}}' | jq
+  -d '{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"mcp-system://my-module/resources/guide.md"}}' | jq
 ```
 
 ## References

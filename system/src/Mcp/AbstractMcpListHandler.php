@@ -13,7 +13,7 @@ use Zolinga\System\Types\StatusEnum;
  *
  * Provides the shared scan-and-collect lifecycle: iterate modules, glob
  * meta files, validate JSON, check authorization, rewrite the identifier
- * to the `mcp-system:<module>:<basename>` scheme, and append via
+ * to the `mcp-system://<module>/<subdir>/<basename>` scheme, and append via
  * {@see AbstractListEvent::addFromMeta()}. Subclasses declare the
  * subdirectory, response key, and identifier field name.
  *
@@ -37,7 +37,7 @@ abstract class AbstractMcpListHandler extends McpHandler
     protected const RESPONSE_KEY = '';
 
     /**
-     * The meta field to rewrite with the `mcp-system:<module>:<basename>` URI
+     * The meta field to rewrite with the `mcp-system://<module>/<subdir>/<basename>` URI
      * (e.g. `name` for prompts, `uri` for resources).
      *
      * @var string
@@ -102,7 +102,7 @@ abstract class AbstractMcpListHandler extends McpHandler
         }
 
         $basename = basename($metaFile, '.meta.json');
-        $uri = "mcp-system:$module:$basename";
+        $uri = "mcp-system://$module/" . static::SUBDIR . "/$basename";
 
         $json[static::ID_FIELD] = $uri;
         unset($json['zolinga']); // to avoid leaking internal rights into the public response

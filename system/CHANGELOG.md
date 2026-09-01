@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.6.20] - 2026-07-22
 
 ### Added
-- MCP `prompts/list` and `prompts/get` support. Prompts are defined as `.meta.json` files in `modules/<module>/mcp/prompts/`. The filename is the identifier, rewritten to `mcp-system:<module>:<basename>`. Supports inline text, file references via `content.uri`, multi-message conversations, and `{{arg}}` placeholder substitution.
+- MCP `prompts/list` and `prompts/get` support. Prompts are defined as `.meta.json` files in `modules/<module>/mcp/prompts/`. The filename is the identifier, rewritten to `mcp-system://<module>/prompts/<basename>`. Supports inline text, file references via `content.uri`, multi-message conversations, and `{{arg}}` placeholder substitution.
 - `prompts` capability declared in `initialize` response.
 - `McpPromptsListHandler` and `McpPromptsGetHandler` classes.
 - `PromptsEvent`, `ListEvent`, `GetEvent` event classes with `ALLOWED_URI_SCHEMES = ['mcp-*']`.

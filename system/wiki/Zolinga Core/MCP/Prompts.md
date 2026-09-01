@@ -5,7 +5,7 @@ MCP prompts are reusable prompt templates that clients can retrieve via `prompts
 ## How It Works
 
 - **Discovery**: `prompts/list` scans each module's `mcp/prompts/*.meta.json` files and includes all descriptors.
-- **Identification**: The filename (without `.meta.json`) becomes the prompt identifier, rewritten to `mcp-system:<module>:<basename>`.
+- **Identification**: The filename (without `.meta.json`) becomes the prompt identifier, rewritten to `mcp-system://<module>/prompts/<basename>`.
 - **Retrieval**: `prompts/get` reads the `.meta.json`, resolves file references, applies `{{arg}}` substitution, and returns the `messages` array.
 
 ## Creating a Prompt
@@ -88,7 +88,7 @@ The handler reads the file at `uri` (must use `module://` scheme, must resolve w
 {
   "prompts": [
     {
-      "name": "mcp-system:ipdefender:trademark-search",
+      "name": "mcp-system://ipdefender/prompts/trademark-search",
       "title": "Trademark Search",
       "description": "Prompt template for trademark similarity search.",
       "arguments": [{ "name": "query", "description": "...", "required": true }]

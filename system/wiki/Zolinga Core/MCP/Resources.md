@@ -46,10 +46,10 @@ Extra fields are allowed and passed through to the client.
 Internal Zolinga paths (like `module://ipdefender/mcp/resources/about.md`) are never sent to MCP clients. Instead, the system rewrites them to the external scheme:
 
 ```
-mcp-system:<module>:<basename>
+mcp-system://<module>/resources/<basename>
 ```
 
-For example, `module://ipdefender/mcp/resources/about.md` becomes `mcp-system:ipdefender:about.md` on the wire. This prevents leaking internal file paths and enforces path parsing for security.
+For example, `module://ipdefender/mcp/resources/about.md` becomes `mcp-system://ipdefender/resources/about.md` on the wire. This prevents leaking internal file paths and enforces path parsing for security.
 
 ## Text vs Binary Resources
 
@@ -83,12 +83,12 @@ curl -X POST https://your-host/mcp \
 # Read a resource by its mcp-system URI
 curl -X POST https://your-host/mcp \
   -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"mcp-system:my-module:guide.md"}}'
+  -d '{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"mcp-system://my-module/resources/guide.md"}}'
 ```
 
 ## Security
 
-- Internal Zolinga paths are never exposed to clients; all resource URIs are rewritten to `mcp-system:<module>:<basename>`.
+- Internal Zolinga paths are never exposed to clients; all resource URIs are rewritten to `mcp-system://<module>/resources/<basename>`.
 - Directory traversal is blocked: `basename()` is applied to both module and basename components, and the result must match the raw input.
 - Only URI schemes in the `ResourcesEvent::ALLOWED_URI_SCHEMES` whitelist (`mcp-system`, `http`, `https`) are accepted in responses.
 

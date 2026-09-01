@@ -19,7 +19,7 @@ MCP clients discover prompts via `prompts/list` and retrieve them via `prompts/g
 1. **Static**: Drop a `.meta.json` definition in `modules/<module>/mcp/prompts/`. The system discovers it automatically — no manifest changes needed.
 2. **Dynamic**: Hook the `mcp:prompts/list` event and add prompts programmatically.
 
-For static prompts, the filename (without `.meta.json`) becomes the prompt identifier, rewritten to `mcp-system:<module>:<basename>`. The `messages` array is stripped from the list response (metadata-only) and only served by `prompts/get`.
+For static prompts, the filename (without `.meta.json`) becomes the prompt identifier, rewritten to `mcp-system://<module>/prompts/<basename>`. The `messages` array is stripped from the list response (metadata-only) and only served by `prompts/get`.
 
 ## 1. Static Prompts
 
@@ -172,7 +172,7 @@ curl -X POST https://your-host/mcp \
 # Get a prompt
 curl -X POST https://your-host/mcp \
   -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":2,"method":"prompts/get","params":{"name":"mcp-system:my-module:trademark-search","arguments":{"query":"ACME"}}}' | jq
+  -d '{"jsonrpc":"2.0","id":2,"method":"prompts/get","params":{"name":"mcp-system://my-module/prompts/trademark-search","arguments":{"query":"ACME"}}}' | jq
 ```
 
 ## References

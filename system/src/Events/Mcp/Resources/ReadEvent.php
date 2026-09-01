@@ -16,7 +16,7 @@ use Zolinga\System\Mcp\Exceptions\McpInvalidRequestException;
  * Dispatched by the MCP gateway when a client sends a `resources/read`
  * JSON-RPC request. The event type is `mcp:resources/read:<scheme>` where
  * `<scheme>` is the URI scheme of the requested resource (e.g.
- * `mcp:resources/read:mcp-system` for `mcp-system:...` URIs).
+ * `mcp:resources/read:mcp-system` for `mcp-system://...` URIs).
  *
  * Handlers read the resource file and populate `$event->response` with
  * either `{ uri, mimeType, text }` for text resources or
@@ -71,6 +71,8 @@ class ReadEvent extends AbstractActionEvent
      */
     public function validateResponse(): void
     {
+        global $api;
+
         $contents = $this->response['contents'] ?? [];
         if (!is_array($contents)) {
             return;
@@ -81,6 +83,7 @@ class ReadEvent extends AbstractActionEvent
             }
             $uri = $entry['uri'] ?? '';
             if (is_string($uri) && $uri !== '' && !$this->isAllowedScheme(parse_url($uri, PHP_URL_SCHEME) ?? '*missing-scheme*')) {
+                $api->log->error('mcp:system', "You are trying to leak to AI agent a resource URI '$uri' that uses a disallowed scheme. Allowed schemes: " . implode(', ', static::ALLOWED_URI_SCHEMES) . ", entry: " . json_encode($entry));
                 throw new InvalidArgumentException(
                     'Resource read response URI "' . $uri . '" uses a disallowed scheme. '
                     . 'Allowed schemes: ' . implode(', ', static::ALLOWED_URI_SCHEMES) . '.'
