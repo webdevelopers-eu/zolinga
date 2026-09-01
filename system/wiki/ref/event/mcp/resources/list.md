@@ -51,7 +51,7 @@ curl -X POST https://your-host/mcp \
 
 ## Adding Resources Programmatically
 
-The `ListEvent` exposes `addResourceJson()` and `addResource()` for handlers that build the resource list themselves. Both validate the URI against the allowed scheme whitelist (`mcp-system`, `http`, `https`) and require a non-empty `name`:
+The `ListEvent` exposes `addFromMeta()` and `add()` for handlers that build the resource list themselves. Both validate the URI against the allowed scheme whitelist (`mcp-system`, `http`, `https`) and require a non-empty `name`:
 
 ```php
 use Zolinga\System\Events\{ListenerInterface};
@@ -62,7 +62,7 @@ class MyResourcesListHandler implements ListenerInterface
 {
     public function onList(ListEvent $event): void
     {
-        $event->addResource(
+        $event->add(
             uri: 'mcp-system:my-module:dynamic-resource',
             name: 'dynamic-resource',
             title: 'Dynamic Resource',

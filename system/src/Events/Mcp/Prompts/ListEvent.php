@@ -7,19 +7,20 @@ namespace Zolinga\System\Events\Mcp\Prompts;
 use ArrayObject;
 use ArrayAccess;
 use InvalidArgumentException;
+use Zolinga\System\Events\Mcp\AbstractListEvent;
 
 /**
  * MCP `prompts/list` event.
  *
  * Dispatched by the MCP gateway when a client sends a `prompts/list`
  * JSON-RPC request. Handlers populate the response with prompt descriptors
- * via {@see addPromptJson()} or the convenience wrapper {@see addPrompt()}.
+ * via {@see addFromMeta()} or the convenience wrapper {@see add()}.
  *
  * @see https://modelcontextprotocol.io/specification/2025-11-25/server/prompts
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-21
  */
-class ListEvent extends PromptsEvent
+class ListEvent extends AbstractListEvent
 {
     /**
      * Constructor.
@@ -39,30 +40,26 @@ class ListEvent extends PromptsEvent
     /**
      * Append a prompt descriptor to the `prompts/list` response.
      *
-     * Validates the prompt via {@see validatePrompt()} before appending.
+     * Validates the prompt via {@see validateItem()} before appending.
      * Strips `messages` and internal `uri` fields so they never leak to
      * the list response — `messages` is only served by `prompts/get`.
      *
-     * @param array<string, mixed> $promptJson Prompt descriptor.
+     * @param array<string, mixed> $meta Prompt descriptor.
      * @return void
      * @throws InvalidArgumentException Missing required fields or disallowed scheme.
      */
-    public function addPromptJson(array $promptJson): void
+    public function addFromMeta(array $meta): void
     {
         $pickFields = ['name', 'title', 'description', 'arguments', 'icons'];
-        $subset = array_intersect_key($promptJson, array_flip($pickFields));
+        $subset = array_intersect_key($meta, array_flip($pickFields));
         
-        $this->validatePrompt($subset);
+        $this->validateItem($subset);
 
-        if (!isset($this->response['prompts']) || !is_array($this->response['prompts'])) {
-            $this->response['prompts'] = [];
-        }
-
-        $this->response['prompts'][] = $subset;
+        $this->appendItem('prompts', $subset);
     }
 
     /**
-     * Convenience wrapper for {@see addPromptJson()}.
+     * Convenience wrapper for {@see addFromMeta()}.
      *
      * @param string $name Prompt identifier (must use an allowed scheme).
      * @param string $title Human-readable title (optional).
@@ -70,9 +67,9 @@ class ListEvent extends PromptsEvent
      * @param array<int, array<string, mixed>> $arguments Prompt arguments (optional).
      * @param array<int, array<string, mixed>> $icons Icon descriptors (optional).
      * @return void
-     * @throws InvalidArgumentException Via {@see addPromptJson()}.
+     * @throws InvalidArgumentException Via {@see addFromMeta()}.
      */
-    public function addPrompt(
+    public function add(
         string $name,
         string $title = '',
         string $description = '',
@@ -92,7 +89,7 @@ class ListEvent extends PromptsEvent
         if ($icons !== []) {
             $prompt['icons'] = $icons;
         }
-        $this->addPromptJson($prompt);
+        $this->addFromMeta($prompt);
     }
 
     /**
@@ -111,7 +108,7 @@ class ListEvent extends PromptsEvent
             if (!is_array($prompt)) {
                 continue;
             }
-            $this->validatePrompt($prompt);
+            $this->validateItem($prompt);
         }
     }
 
@@ -120,13 +117,13 @@ class ListEvent extends PromptsEvent
      *
      * Requires `name` (non-empty string with an allowed scheme).
      *
-     * @param array<string, mixed> $prompt Prompt descriptor.
+     * @param array<string, mixed> $item Prompt descriptor.
      * @return void
      * @throws InvalidArgumentException Missing required fields or disallowed scheme.
      */
-    private function validatePrompt(array $prompt): void
+    private function validateItem(array $item): void
     {
-        $name = $prompt['name'] ?? null;
+        $name = $item['name'] ?? null;
         if (!is_string($name) || $name === '') {
             throw new InvalidArgumentException('Prompt "name" must be a non-empty string.');
         }
@@ -134,7 +131,7 @@ class ListEvent extends PromptsEvent
         if (!$this->isAllowedScheme(parse_url($name, PHP_URL_SCHEME) ?? '*missing-scheme*')) {
             throw new InvalidArgumentException(
                 'Prompt "name" scheme is not allowed. Allowed schemes: '
-                . implode(', ', self::ALLOWED_URI_SCHEMES)
+                . implode(', ', static::ALLOWED_URI_SCHEMES)
                 . '. Consider using a custom "mcp-<name>" scheme.'
             );
         }

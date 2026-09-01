@@ -8,6 +8,7 @@ use Zolinga\System\Events\Mcp\{McpEvent, Tools\CallEvent};
 use Zolinga\System\Mcp\Exceptions\{McpException, McpInvalidRequestException, McpMethodNotFoundException, McpParseErrorException};
 use Zolinga\System\Types\StatusEnum;
 use Zolinga\System\Types\OriginEnum;
+use Zolinga\System\Types\McpAuthorizationEnum;
 use Zolinga\System\Events\AuthorizeEvent;
 
 /**
@@ -69,10 +70,10 @@ class McpServer
      * Full request lifecycle: HTTP method check, body parse, dispatch, send.
      * Entry point used by `public/mcp/index.php`.
      *
-     * @param bool $forceOauth If true, require OAuth2 authentication for all requests unconditionally.
+     * @return void
      * @return void
      */
-    public function run(bool $forceOauth): void
+    public function run(bool $forceAuth = false): void
     {
         global $api;
 
@@ -80,6 +81,10 @@ class McpServer
             $this->sendDisabled();
             return;
         }
+
+        $authorization = $forceAuth
+            ? McpAuthorizationEnum::FORCE
+            : McpAuthorizationEnum::from($api->config['mcp']['server']['authorization'] ?? 'force');
 
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
         if ($method === 'OPTIONS') {
@@ -93,9 +98,9 @@ class McpServer
         }
 
         // Issue: many MCP clients (like Hermes Agent) do not support per-tool access rights
-        // and if tools/list is allowed they don't start OAuth flow. Going to /mcp/oauth
-        // will require all calls to be authenticated.
-        if ($forceOauth) {
+        // and if tools/list is allowed they don't start OAuth flow. Going to /mcp?auth
+        // will effectively result in the same behavior as mcp.server.authorization to "force"
+        if ($authorization === McpAuthorizationEnum::FORCE) {
             // Should initialize the user
             $api->dispatchEvent(new AuthorizeEvent("system:authorize", OriginEnum::INTERNAL, ['oauth2:scope']));
             if ($api->user->isGuest()) {

@@ -110,7 +110,7 @@ final class MyPromptsListHandler implements ListenerInterface
 {
     public function onList(ListEvent $event): void
     {
-        $event->addPrompt(
+        $event->add(
             name: 'mcp-my-module:daily-summary',
             title: 'Daily Summary',
             description: 'Generated daily summary prompt.',
@@ -180,5 +180,5 @@ curl -X POST https://your-host/mcp \
 - [MCP Prompts wiki](:Zolinga Core:MCP:Prompts)
 - `system/src/Mcp/McpPromptsListHandler.php` — static prompt discovery.
 - `system/src/Mcp/McpPromptsGetHandler.php` — `mcp-system` get handler.
-- `system/src/Events/Mcp/Prompts/ListEvent.php` — `addPrompt()` / `addPromptJson()` API.
+- `system/src/Events/Mcp/Prompts/ListEvent.php` — `add()` / `addFromMeta()` API.
 - `system/src/Events/Mcp/Prompts/GetEvent.php` — scheme extraction and validation.

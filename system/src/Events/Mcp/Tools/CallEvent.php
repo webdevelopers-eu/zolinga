@@ -6,6 +6,7 @@ namespace Zolinga\System\Events\Mcp\Tools;
 
 use ArrayObject;
 use ArrayAccess;
+use Zolinga\System\Events\Mcp\AbstractActionEvent;
 use Zolinga\System\Mcp\Exceptions\McpInvalidParamsException;
 use Zolinga\System\Mcp\McpHelper;
 
@@ -23,9 +24,17 @@ use Zolinga\System\Mcp\McpHelper;
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-21
  */
-class CallEvent extends ToolsEvent
+class CallEvent extends AbstractActionEvent
 {
     /**
+     * Constructor.
+     *
+     * Unlike {@see Prompts\GetEvent} and {@see Resources\ReadEvent}, which
+     * use scheme-qualified event types, `tools/call` uses the bare tool
+     * name as the event type. The tool name is validated via
+     * {@see McpHelper::isValidToolName()} and the `arguments` payload
+     * becomes the request.
+     *
      * @param string|int|null $jsonrpcId The JSON-RPC request id.
      * @param array<string, mixed> $params The `tools/call` params: `{ name: string, arguments: object }`.
      * @param ArrayAccess<string, mixed>|array<string, mixed> $response The tool result.

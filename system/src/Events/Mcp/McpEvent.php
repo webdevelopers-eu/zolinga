@@ -24,6 +24,8 @@ use Zolinga\System\Types\OriginEnum;
  *
  * Concrete subclasses:
  * - {@see InitializeEvent} — `initialize` lifecycle request.
+ * - {@see AbstractListEvent} — base for list discovery events (tools/list, prompts/list, resources/list).
+ * - {@see AbstractActionEvent} — base for action events (prompts/get, resources/read, tools/call).
  * - {@see Tools\CallEvent} — `tools/call` invocation (a tool execution).
  * - {@see Tools\ListEvent} — `tools/list` request (tool discovery).
  * - {@see Prompts\ListEvent}, {@see Prompts\GetEvent} — prompts protocol methods.
@@ -40,6 +42,17 @@ use Zolinga\System\Types\OriginEnum;
 abstract class McpEvent extends RequestResponseEvent implements StoppableInterface
 {
     use StoppableTrait;
+
+    /**
+     * Whitelist of URI schemes allowed in prompt names and resource URIs.
+     *
+     * Supports trailing `*` as a wildcard prefix (e.g. `mcp-*` matches
+     * `mcp-system`, `mcp-foo`). Concrete subclasses may override this
+     * constant to widen the whitelist (e.g. Resources adds `http`, `https`).
+     *
+     * @var array<int, string>
+     */
+    public const ALLOWED_URI_SCHEMES = ['mcp-*'];
 
     /**
      * JSON-RPC request id (string or number). `null` for notifications.
@@ -70,6 +83,28 @@ abstract class McpEvent extends RequestResponseEvent implements StoppableInterfa
 
         parent::__construct($type, OriginEnum::MCP, $request, $response);
         $this->jsonrpcId = $jsonrpcId;
+    }
+
+    /**
+     * Check whether a URI scheme is in the {@see ALLOWED_URI_SCHEMES} whitelist.
+     *
+     * Uses late static binding ({@see static::ALLOWED_URI_SCHEMES}) so that
+     * subclasses which override the constant get the correct whitelist.
+     *
+     * @param string $scheme The scheme to check (e.g. `mcp-system`, `https`).
+     * @return bool True if the scheme is allowed.
+     */
+    protected function isAllowedScheme(string $scheme): bool
+    {
+        foreach (static::ALLOWED_URI_SCHEMES as $allowedScheme) {
+            if ($allowedScheme === $scheme) {
+                return true;
+            }
+            if (str_ends_with($allowedScheme, '*') && str_starts_with($scheme, rtrim($allowedScheme, '*'))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

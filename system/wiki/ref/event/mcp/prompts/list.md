@@ -20,7 +20,7 @@ The response is a `{ prompts: [...] }` payload, where each entry has:
 | `arguments`   | `array`  | Array of `{ name, description, required }` (optional, from `.meta.json`). |
 | `icons`       | `array`  | Icon descriptors (optional, from `.meta.json`). |
 
-The `messages` array is **never** included in the list response — it is stripped by `addPromptJson()`. Use `prompts/get` to retrieve messages.
+The `messages` array is **never** included in the list response — it is stripped by `addFromMeta()`. Use `prompts/get` to retrieve messages.
 
 Prompts are sorted by `name` for deterministic output.
 
@@ -53,7 +53,7 @@ curl -X POST https://your-host/mcp \
 
 ## Adding Prompts Programmatically
 
-The `ListEvent` exposes `addPromptJson()` and `addPrompt()` for handlers that build the prompt list themselves. Both validate the `name` against the allowed scheme whitelist (`mcp-*` only) and strip `messages`/`uri` fields:
+The `ListEvent` exposes `addFromMeta()` and `add()` for handlers that build the prompt list themselves. Both validate the `name` against the allowed scheme whitelist (`mcp-*` only) and strip `messages`/`uri` fields:
 
 ```php
 use Zolinga\System\Events\ListenerInterface;
@@ -64,7 +64,7 @@ class MyPromptsListHandler implements ListenerInterface
 {
     public function onList(ListEvent $event): void
     {
-        $event->addPrompt(
+        $event->add(
             name: 'mcp-system:my-module:dynamic-prompt',
             title: 'Dynamic Prompt',
             description: 'Generated at runtime.',

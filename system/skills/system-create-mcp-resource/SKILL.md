@@ -98,7 +98,7 @@ final class MyResourcesHandler implements ListenerInterface
     public function onList(ListEvent $event): void
     {
         // Convenience method
-        $event->addResource(
+        $event->add(
             uri: 'mcp-my-module:daily-report',
             name: 'daily-report',
             title: 'Daily Report',
@@ -106,8 +106,8 @@ final class MyResourcesHandler implements ListenerInterface
             mimeType: 'text/plain'
         );
 
-        // Or addResourceJson() for full control over extra fields
-        $event->addResourceJson([
+        // Or addFromMeta() for full control over extra fields
+        $event->addFromMeta([
             'uri' => 'https://example.com/live-data.json',
             'name' => 'live-data',
             'title' => 'Live Data Feed',
@@ -197,7 +197,7 @@ curl -X POST https://your-host/mcp \
 - [MCP Resources wiki](:Zolinga Core:MCP:Resources)
 - `system/src/Mcp/McpResourcesListHandler.php` — static resource discovery.
 - `system/src/Mcp/McpResourcesReadHandler.php` — `mcp-system` read handler.
-- `system/src/Events/Mcp/Resources/ListEvent.php` — `addResource()` / `addResourceJson()` API.
+- `system/src/Events/Mcp/Resources/ListEvent.php` — `add()` / `addFromMeta()` API.
 - `system/src/Events/Mcp/Resources/ReadEvent.php` — scheme-based event dispatch.
 - `system/src/Events/Mcp/Resources/ResourcesEvent.php` — `ALLOWED_URI_SCHEMES` with `mcp-*` wildcard.
 - [system-create-mcp-tool](system-skills:system-create-mcp-tool) — for callable tools (different MCP primitive).

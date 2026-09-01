@@ -60,7 +60,7 @@ class McpToolsListHandler extends McpHandler
      *
      * Tools failing condition 2 are skipped and an error is logged via
      * `$api->log->error()`. Each accepted tool is appended via
-     * {@see ListEvent::addTool()}, which validates the name format and the
+     * {@see ListEvent::addFromMeta()}, which validates the name format and the
      * schema shapes. Deduplicates by event name (highest priority wins).
      *
      * @param ListEvent $event The event whose `response['tools']` is populated.
@@ -74,7 +74,7 @@ class McpToolsListHandler extends McpHandler
 
         /** @var ListenAtom $atom */
         foreach ($api->manifest['listen'] as $atom) {
-            if (!$this->isMcpToolCandidate($atom)) {
+            if (!$this->isMcpPublishable($atom)) {
                 continue;
             }
 
@@ -85,20 +85,46 @@ class McpToolsListHandler extends McpHandler
                 continue;
             }
 
-            $responseSchema = $this->requireResponseSchema($atom, $toolName);
-            if ($responseSchema === null) {
-                continue;
-            }
-
             if (!$this->requireValidToolName($atom, $toolName)) {
                 continue;
             }
 
+            if (!$this->isAuthorized($atom)) {
+                continue;
+            }
+
+            $responseSchema = $this->loadResponseJsonSchema($atom, $toolName);
+            if ($responseSchema === null) {
+                throw new \RuntimeException("MCP tool \"$toolName\" is missing a schema.response declaration; the gateway cannot safely expose it. Add a schema.response Zolinga URI to the listener's manifest entry.");
+            }
+        
             $seen[$toolName] = true;
             $this->registerTool($event, $atom, $toolName, $responseSchema);
         }
 
         $this->sortTools($event);
+    }
+
+    private function isAuthorized(ListenAtom $atom): bool
+    {
+        global $api;
+
+        // If the listener has no declared rights, it is public and always
+        // authorized.
+        if (empty($atom['right'])) {
+            return true;
+        }
+
+        // If the user is not logged in, they cannot have any rights.
+        if ($api->user->isGuest()) {
+            return false;
+        }
+
+        if (!$api->isAuthorized($atom['right'])) {
+            return false;
+        }
+
+        return false;
     }
 
     /**
@@ -108,7 +134,7 @@ class McpToolsListHandler extends McpHandler
      * @param ListenAtom $atom
      * @return bool
      */
-    private function isMcpToolCandidate(ListenAtom $atom): bool
+    private function isMcpPublishable(ListenAtom $atom): bool
     {
         if (!in_array(OriginEnum::MCP, $atom['origin'], true)) {
             return false;
@@ -135,7 +161,7 @@ class McpToolsListHandler extends McpHandler
      * @param string $toolName
      * @return array<string, mixed>|null
      */
-    private function requireResponseSchema(ListenAtom $atom, string $toolName): ?array
+    private function loadResponseJsonSchema(ListenAtom $atom, string $toolName): ?array
     {
         global $api;
 
@@ -179,7 +205,7 @@ class McpToolsListHandler extends McpHandler
     }
 
     /**
-     * Append a tool to the event response via {@see ListEvent::addTool()},
+     * Append a tool to the event response via {@see ListEvent::addFromMeta()},
      * loading the optional `schema.request` and logging+skipping on
      * validation failure.
      *
@@ -197,14 +223,14 @@ class McpToolsListHandler extends McpHandler
         $inputSchema = $requestSchema ?? ['type' => 'object', 'additionalProperties' => true];
 
         try {
-            $event->addTool(
-                $toolName,
-                (string) ($atom['description'] ?? ''),
-                $inputSchema,
-                $responseSchema
-            );
+            $event->addFromMeta([
+                'name' => $toolName,
+                'description' => (string) ($atom['description'] ?? ''),
+                'inputSchema' => $inputSchema,
+                'outputSchema' => $responseSchema,
+            ]);
         } catch (\InvalidArgumentException $e) {
-            // addTool re-validates name and schema shape; a failure here
+            // addFromMeta re-validates name and schema shape; a failure here
             // means the manifest data is inconsistent with the wire
             // contract. Log and skip rather than poisoning the response.
             $api->log->error('system:mcp', 'Skipping MCP tool "' . $toolName . '": ' . $e->getMessage(), [

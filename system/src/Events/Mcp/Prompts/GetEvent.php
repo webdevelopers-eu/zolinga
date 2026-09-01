@@ -6,6 +6,7 @@ namespace Zolinga\System\Events\Mcp\Prompts;
 
 use ArrayObject;
 use ArrayAccess;
+use Zolinga\System\Events\Mcp\AbstractActionEvent;
 use Zolinga\System\Mcp\Exceptions\McpInvalidRequestException;
 
 /**
@@ -23,8 +24,12 @@ use Zolinga\System\Mcp\Exceptions\McpInvalidRequestException;
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-21
  */
-class GetEvent extends PromptsEvent
+class GetEvent extends AbstractActionEvent
 {
+    protected const REQUEST_KEY = 'name';
+    protected const TYPE_PREFIX = 'mcp:prompts/get';
+    protected const ERROR_LABEL = 'Prompt get';
+
     /**
      * Constructor.
      *
@@ -42,16 +47,7 @@ class GetEvent extends PromptsEvent
         ArrayAccess|array $request = new ArrayObject,
         ArrayAccess|array $response = new ArrayObject
     ) {
-        $name = $request['name'] ?? '';
-        $scheme = is_string($name) ? (string) parse_url($name, PHP_URL_SCHEME) : '';
-        $type = 'mcp:prompts/get' . ($scheme !== '' ? ':' . $scheme : '');
-
-        if ($this->isAllowedScheme($scheme) === false) {
-            throw new McpInvalidRequestException(
-                'Prompt get request name "' . $name . '" uses a disallowed scheme ' . json_encode($scheme) . '.'
-            );
-        }
-
+        $type = $this->buildSchemeType($request);
         parent::__construct($type, $jsonrpcId, $request, $response);
     }
 
@@ -87,7 +83,7 @@ class GetEvent extends PromptsEvent
             if (is_string($uri) && $uri !== '' && !$this->isAllowedScheme(parse_url($uri, PHP_URL_SCHEME) ?? '*missing-scheme*')) {
                 throw new \InvalidArgumentException(
                     'Prompt message embedded resource URI "' . $uri . '" uses a disallowed scheme. '
-                    . 'Allowed schemes: ' . implode(', ', self::ALLOWED_URI_SCHEMES) . '.'
+                    . 'Allowed schemes: ' . implode(', ', static::ALLOWED_URI_SCHEMES) . '.'
                 );
             }
         }

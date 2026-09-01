@@ -513,7 +513,9 @@
         "# title": "Server title reported to MCP clients during initialize. If empty, defaults to 'MCP Gateway for <name>'.",
         "title": "",
         "# version": "Server version reported to MCP clients during initialize. If empty, defaults to the system module version.",
-        "version": ""
+        "version": "",
+        "# authorization": "Authorization mode for MCP requests: 'force': require authorization for all requests unconditionally - including tools/list and such, 'auto': throw 401/403 only when the user fails to authorize for a specific tool or resource",
+        "authorization": "force"
       }
     },
     "debug": {

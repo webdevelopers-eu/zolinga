@@ -74,6 +74,12 @@ class McpResourcesListHandler extends McpHandler
             return;
         }
 
+        if (is_array($json['zolinga']) && isset($json['zolinga']['right'])) {
+            if (!$api->isAuthorized($json['zolinga']['right'])) {
+                return;
+            }
+        }
+
         $basename = basename($metaFile, '.meta.json');
         $json['uri'] = "mcp-system:$module:$basename";
 
@@ -83,7 +89,7 @@ class McpResourcesListHandler extends McpHandler
         }
 
         try {
-            $event->addResourceJson($json);
+            $event->addFromMeta($json);
         } catch (\InvalidArgumentException $e) {
             $api->log->warning('system:mcp', 'Skipping MCP resource from ' . $metaFile . ': ' . $e->getMessage());
         }

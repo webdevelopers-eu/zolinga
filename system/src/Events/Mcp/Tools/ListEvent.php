@@ -8,6 +8,7 @@ use ArrayObject;
 use ArrayAccess;
 use InvalidArgumentException;
 use Zolinga\System\Mcp\McpHelper;
+use Zolinga\System\Events\Mcp\AbstractListEvent;
 
 /**
  * Event for the MCP `tools/list` JSON-RPC method.
@@ -16,14 +17,14 @@ use Zolinga\System\Mcp\McpHelper;
  * tools. The handler walks the merged manifest and returns every listener
  * that opts in to the `mcp` origin and declares a `schema.response`.
  *
- * Tools are appended to the response via {@see addTool()}, which validates
+ * Tools are appended to the response via {@see add()}, which validates
  * the tool name format and the schema shapes so a malformed entry can never
  * reach the wire.
  *
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-21
  */
-class ListEvent extends ToolsEvent
+class ListEvent extends AbstractListEvent
 {
     /**
      * @param string|int|null $jsonrpcId The JSON-RPC request id.
@@ -39,7 +40,7 @@ class ListEvent extends ToolsEvent
     }
 
     /**
-     * Append a tool to the `tools/list` response.
+     * Append a tool descriptor from a metadata array to the `tools/list` response.
      *
      * Validates the tool name against the MCP character class
      * (`[A-Za-z0-9_:-]{1,64}`, no `mcp:` prefix) via
@@ -47,32 +48,17 @@ class ListEvent extends ToolsEvent
      * JSON objects (arrays). Throws {@see InvalidArgumentException} on any
      * violation so a malformed tool can never be advertised on the wire.
      *
-     * The response is built lazily: the first call initialises
-     * `$this->response['tools']` to an empty array.
-     *
-     * Example:
-     * ```php
-     * $event->addTool(
-     *     name: 'echo',
-     *     description: 'Echoes the message back.',
-     *     inputSchema: ['type' => 'object', 'properties' => ['message' => ['type' => 'string']]],
-     *     outputSchema: ['type' => 'object', 'properties' => ['echo' => ['type' => 'string']]],
-     * );
-     * ```
-     *
-     * @param string $name The tool name; clients invoke it via `tools/call` with `params.name`.
-     * @param string $description Human-readable description for the `tools/list` catalogue.
-     * @param array<string, mixed> $inputSchema JSON Schema describing `params.arguments` (becomes `inputSchema`).
-     * @param array<string, mixed> $outputSchema JSON Schema describing the handler's `$event->response` (becomes `outputSchema`).
+     * @param array<string, mixed> $meta Tool descriptor with keys: `name`, `description`, `inputSchema`, `outputSchema`.
      * @return void
      * @throws InvalidArgumentException When the name is not a valid tool name or a schema is not a JSON object.
      */
-    public function addTool(
-        string $name,
-        string $description,
-        array $inputSchema,
-        array $outputSchema
-    ): void {
+    public function addFromMeta(array $meta): void
+    {
+        $name = $meta['name'] ?? '';
+        $description = $meta['description'] ?? '';
+        $inputSchema = $meta['inputSchema'] ?? ['type' => 'object', 'additionalProperties' => true];
+        $outputSchema = $meta['outputSchema'] ?? ['type' => 'object', 'additionalProperties' => true];
+
         if (!McpHelper::isValidToolName($name)) {
             throw new InvalidArgumentException(
                 'Invalid MCP tool name "' . $name . '"; must be 1..'
@@ -94,15 +80,54 @@ class ListEvent extends ToolsEvent
             );
         }
 
-        if (!isset($this->response['tools']) || !is_array($this->response['tools'])) {
-            $this->response['tools'] = [];
-        }
-
-        $this->response['tools'][] = [
+        $this->appendItem('tools', [
             'name' => $name,
             'description' => $description,
             'inputSchema' => $inputSchema,
             'outputSchema' => $outputSchema,
-        ];
+        ]);
+    }
+
+    /**
+     * Convenience wrapper for {@see addFromMeta()}.
+     *
+     * Validates the tool name against the MCP character class
+     * (`[A-Za-z0-9_:-]{1,64}`, no `mcp:` prefix) via
+     * {@see McpHelper::isValidToolName()} and checks that both schemas are
+     * JSON objects (arrays). Throws {@see InvalidArgumentException} on any
+     * violation so a malformed tool can never be advertised on the wire.
+     *
+     * The response is built lazily: the first call initialises
+     * `$this->response['tools']` to an empty array.
+     *
+     * Example:
+     * ```php
+     * $event->add(
+     *     name: 'echo',
+     *     description: 'Echoes the message back.',
+     *     inputSchema: ['type' => 'object', 'properties' => ['message' => ['type' => 'string']]],
+     *     outputSchema: ['type' => 'object', 'properties' => ['echo' => ['type' => 'string']]],
+     * );
+     * ```
+     *
+     * @param string $name The tool name; clients invoke it via `tools/call` with `params.name`.
+     * @param string $description Human-readable description for the `tools/list` catalogue.
+     * @param array<string, mixed> $inputSchema JSON Schema describing `params.arguments` (becomes `inputSchema`).
+     * @param array<string, mixed> $outputSchema JSON Schema describing the handler's `$event->response` (becomes `outputSchema`).
+     * @return void
+     * @throws InvalidArgumentException When the name is not a valid tool name or a schema is not a JSON object.
+     */
+    public function add(
+        string $name,
+        string $description,
+        array $inputSchema,
+        array $outputSchema
+    ): void {
+        $this->addFromMeta([
+            'name' => $name,
+            'description' => $description,
+            'inputSchema' => $inputSchema,
+            'outputSchema' => $outputSchema,
+        ]);
     }
 }

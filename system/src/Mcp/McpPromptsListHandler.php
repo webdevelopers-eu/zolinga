@@ -74,6 +74,12 @@ class McpPromptsListHandler extends McpHandler
             return;
         }
 
+        if (is_array($json['zolinga']) && isset($json['zolinga']['right'])) {
+            if (!$api->isAuthorized($json['zolinga']['right'])) {
+                return;
+            }
+        }
+
         $basename = basename($metaFile, '.meta.json');
         $uri = "mcp-system:$module:$basename";
 
@@ -85,7 +91,7 @@ class McpPromptsListHandler extends McpHandler
         $json['name'] = $uri;
 
         try {
-            $event->addPromptJson($json);
+            $event->addFromMeta($json);
         } catch (\InvalidArgumentException $e) {
             $api->log->warning('system:mcp', 'Skipping MCP prompt from ' . $metaFile . ': ' . $e->getMessage());
         }

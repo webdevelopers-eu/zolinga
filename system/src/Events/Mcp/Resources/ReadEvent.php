@@ -7,6 +7,7 @@ namespace Zolinga\System\Events\Mcp\Resources;
 use ArrayObject;
 use ArrayAccess;
 use InvalidArgumentException;
+use Zolinga\System\Events\Mcp\AbstractActionEvent;
 use Zolinga\System\Mcp\Exceptions\McpInvalidRequestException;
 
 /**
@@ -25,8 +26,19 @@ use Zolinga\System\Mcp\Exceptions\McpInvalidRequestException;
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-21
  */
-class ReadEvent extends ResourcesEvent
+class ReadEvent extends AbstractActionEvent
 {
+    protected const REQUEST_KEY = 'uri';
+    protected const TYPE_PREFIX = 'mcp:resources/read';
+    protected const ERROR_LABEL = 'Resource read';
+
+    /**
+     * Resources allow http and https in addition to mcp-* schemes.
+     *
+     * @var array<int, string>
+     */
+    public const ALLOWED_URI_SCHEMES = ['mcp-*', 'http', 'https'];
+
     /**
      * Constructor.
      *
@@ -44,16 +56,7 @@ class ReadEvent extends ResourcesEvent
         ArrayAccess|array $request = new ArrayObject,
         ArrayAccess|array $response = new ArrayObject
     ) {
-        $uri = $request['uri'] ?? '';
-        $scheme = is_string($uri) ? (string) parse_url($uri, PHP_URL_SCHEME) : '';
-        $type = 'mcp:resources/read' . ($scheme !== '' ? ':' . $scheme : '');
-
-        if ($this->isAllowedScheme($scheme) === false) {
-            throw new McpInvalidRequestException(
-                'Resource read request URI "' . $uri . '" uses a disallowed scheme ' . json_encode($scheme) . '.'
-            );
-        }
-
+        $type = $this->buildSchemeType($request);
         parent::__construct($type, $jsonrpcId, $request, $response);
     }
 
@@ -80,7 +83,7 @@ class ReadEvent extends ResourcesEvent
             if (is_string($uri) && $uri !== '' && !$this->isAllowedScheme(parse_url($uri, PHP_URL_SCHEME) ?? '*missing-scheme*')) {
                 throw new InvalidArgumentException(
                     'Resource read response URI "' . $uri . '" uses a disallowed scheme. '
-                    . 'Allowed schemes: ' . implode(', ', self::ALLOWED_URI_SCHEMES) . '.'
+                    . 'Allowed schemes: ' . implode(', ', static::ALLOWED_URI_SCHEMES) . '.'
                 );
             }
         }

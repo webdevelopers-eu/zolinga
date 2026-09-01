@@ -60,24 +60,8 @@ require($_SERVER['DOCUMENT_ROOT'] . '/../system/loader.php');
 //     header('Mcp-Session-Id: ' . session_id());
 // }
 
-define('MCP_ALLOWED_PATH_REGEX', '/\A\/mcp(\/oauth)?\z/');
-
-$path = $_SERVER['REQUEST_URI'] ?? '';
-if (!preg_match(MCP_ALLOWED_PATH_REGEX, $path)) {
-    http_response_code(404);
-    echo json_encode(['error' => 'Bad Request: Invalid MCP path.']);
-    exit;
-}
-
-// We support only /mcp and /mcp/oauth paths. Anything else is a 404.
-if ($path === '/mcp/oauth') {
-    $forceOauth = true && !isset($_GET['noauth']);
-} else {
-    $forceOauth = false;
-}
-
 try {
-    (new McpServer())->run($forceOauth);
+    (new McpServer())->run(forceAuth: isset($_GET['auth']));
 } catch (McpException $e) {
     (new McpServer())->sendError($e);
 } finally {

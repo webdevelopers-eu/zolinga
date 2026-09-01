@@ -120,7 +120,7 @@ The handler reads the file at `uri` (must use `module://` scheme, must resolve w
 Handlers can add prompts programmatically via the `mcp:prompts/list` event:
 
 ```php
-$event->addPrompt(
+$event->add(
     name: 'mcp-custom:my-module:dynamic-prompt',
     title: 'Dynamic Prompt',
     description: 'Generated at runtime',
