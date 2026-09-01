@@ -75,6 +75,7 @@ The internal `module://` URI is rewritten to `mcp-system://<module>/resources/<b
 | `description` | no | One-line description. |
 | `mimeType` | no | `text/*` → returned as `text`, everything else → base64 `blob`. Defaults to `application/octet-stream`. |
 | `icons` | no | Array of `{ src, mimeType, sizes }`. |
+| `zolinga.right` | no | Access restriction; any `$api->isAuthorized()` expression (e.g. `"member of users"`). Unauthorized callers don't see the resource in `resources/list` and `resources/read` returns `FORBIDDEN`. The `zolinga` block is stripped from responses. |
 
 Extra fields pass through to the client unchanged.
 

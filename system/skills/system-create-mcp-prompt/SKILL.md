@@ -88,6 +88,7 @@ The handler reads the file at `uri` (must use `module://` scheme, must resolve w
 | `arguments` | no | Array of `{ name, description, required }`. |
 | `icons` | no | Array of icon objects. |
 | `messages` | yes (for `prompts/get`) | Array of `{ role, content }` — stripped from `prompts/list`. |
+| `zolinga.right` | no | Access restriction; any `$api->isAuthorized()` expression (e.g. `"member of users"`). Unauthorized callers don't see the prompt in `prompts/list` and `prompts/get` returns `FORBIDDEN`. The `zolinga` block is stripped from responses. |
 | `name` | no (ignored for static) | Filename is the identifier. If present and mismatched, a warning is logged. |
 
 ## 2. Dynamic Prompts
