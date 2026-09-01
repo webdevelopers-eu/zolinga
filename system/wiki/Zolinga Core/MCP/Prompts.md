@@ -135,6 +135,23 @@ Any `.meta.json` descriptor can restrict access to authenticated users by adding
 - The `zolinga` block is stripped from the response before it reaches the client, so the right expression is never leaked.
 - Prompts without `zolinga.right` are public — accessible to anyone, including unauthenticated callers.
 
+### OAuth Scopes as Rights
+
+For MCP clients authenticating via OAuth 2.0, the `zolinga.right` value can use the `oauth2:scope <scope-name>` format to require a specific OAuth scope. For example:
+
+```json
+"zolinga": {
+  "right": "oauth2:scope administration"
+}
+```
+
+This checks whether the caller has the `oauth2:scope administration` right, which is granted in two ways:
+
+1. **OAuth token scope**: The `BearerTokenListener` in `zolinga-oauth` converts each space-separated scope in the access token into a corresponding `oauth2:scope <scope>` right at the `system:authorize` event. So a token with scope `administration` authorizes the right `oauth2:scope administration`.
+2. **RMS right**: If the user has an explicit RMS right `oauth2:scope administration` stored in the database, it is also authorized by the RMS `UserService::onAuthorize` listener.
+
+This mechanism works identically in `zolinga.json` listener `right` properties and in `.meta.json` `zolinga.right` fields — both are checked via `$api->isAuthorized()`.
+
 ## Security
 
 - `name` parsing uses `basename()` checks — directory traversal (`../`) is blocked.

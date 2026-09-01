@@ -75,7 +75,11 @@ The internal `module://` URI is rewritten to `mcp-system://<module>/resources/<b
 | `description` | no | One-line description. |
 | `mimeType` | no | `text/*` → returned as `text`, everything else → base64 `blob`. Defaults to `application/octet-stream`. |
 | `icons` | no | Array of `{ src, mimeType, sizes }`. |
-| `zolinga.right` | no | Access restriction; any `$api->isAuthorized()` expression (e.g. `"member of users"`). Unauthorized callers don't see the resource in `resources/list` and `resources/read` returns `FORBIDDEN`. The `zolinga` block is stripped from responses. |
+| `zolinga.right` | no | Access restriction; any `$api->isAuthorized()` expression (e.g. `"member of users"`, `"oauth2:scope administration"`). Unauthorized callers don't see the resource in `resources/list` and `resources/read` returns `FORBIDDEN`. The `zolinga` block is stripped from responses. |
+
+#### OAuth Scopes as Rights
+
+For OAuth 2.0 clients, use `"right": "oauth2:scope <scope-name>"` to require a specific OAuth scope. The `BearerTokenListener` in `zolinga-oauth` converts each scope in the access token to a `oauth2:scope <scope>` right at `system:authorize`. RMS rights with the same text also work. This applies to both `zolinga.json` listener `right` and `.meta.json` `zolinga.right`.
 
 Extra fields pass through to the client unchanged.
 

@@ -58,6 +58,39 @@ The handler sets the **raw structured payload** on `$event->response`. The gatew
 - Must not start with `mcp:` (reserved for protocol events)
 - The colon is allowed so Zolinga event names (e.g. `my-module:search`) work verbatim
 
+## Access Control
+
+Add a `right` property to the listener in `zolinga.json` to restrict a tool to authorized callers. When the caller is not authorized, the tool is omitted from `tools/list` and `tools/call` returns `FORBIDDEN`.
+
+```json
+{
+  "event": "my-module-search",
+  "class": "\\MyModule\\Mcp\\SearchHandler",
+  "method": "onSearch",
+  "origin": ["mcp"],
+  "right": "member of users",
+  "schema": { ... }
+}
+```
+
+- The `right` value is any expression accepted by `$api->isAuthorized()` (e.g. `"member of users"`, a role name, a comma-separated list).
+- Tools without `right` are public — accessible to anyone, including unauthenticated callers.
+
+### OAuth Scopes as Rights
+
+For MCP clients authenticating via OAuth 2.0, the `right` value can use the `oauth2:scope <scope-name>` format to require a specific OAuth scope. For example:
+
+```json
+"right": "oauth2:scope administration"
+```
+
+This checks whether the caller has the `oauth2:scope administration` right, which is granted in two ways:
+
+1. **OAuth token scope**: The `BearerTokenListener` in `zolinga-oauth` converts each space-separated scope in the access token into a corresponding `oauth2:scope <scope>` right at the `system:authorize` event. So a token with scope `administration` authorizes the right `oauth2:scope administration`.
+2. **RMS right**: If the user has an explicit RMS right `oauth2:scope administration` stored in the database, it is also authorized by the RMS `UserService::onAuthorize` listener.
+
+This mechanism works identically in `zolinga.json` listener `right` properties and in `.meta.json` `zolinga.right` fields (for resources and prompts) — both are checked via `$api->isAuthorized()`.
+
 ## Testing
 
 ```bash

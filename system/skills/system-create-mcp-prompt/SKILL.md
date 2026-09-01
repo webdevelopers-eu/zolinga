@@ -88,7 +88,11 @@ The handler reads the file at `uri` (must use `module://` scheme, must resolve w
 | `arguments` | no | Array of `{ name, description, required }`. |
 | `icons` | no | Array of icon objects. |
 | `messages` | yes (for `prompts/get`) | Array of `{ role, content }` — stripped from `prompts/list`. |
-| `zolinga.right` | no | Access restriction; any `$api->isAuthorized()` expression (e.g. `"member of users"`). Unauthorized callers don't see the prompt in `prompts/list` and `prompts/get` returns `FORBIDDEN`. The `zolinga` block is stripped from responses. |
+| `zolinga.right` | no | Access restriction; any `$api->isAuthorized()` expression (e.g. `"member of users"`, `"oauth2:scope administration"`). Unauthorized callers don't see the prompt in `prompts/list` and `prompts/get` returns `FORBIDDEN`. The `zolinga` block is stripped from responses. |
+
+#### OAuth Scopes as Rights
+
+For OAuth 2.0 clients, use `"right": "oauth2:scope <scope-name>"` to require a specific OAuth scope. The `BearerTokenListener` in `zolinga-oauth` converts each scope in the access token to a `oauth2:scope <scope>` right at `system:authorize`. RMS rights with the same text also work. This applies to both `zolinga.json` listener `right` and `.meta.json` `zolinga.right`.
 | `name` | no (ignored for static) | Filename is the identifier. If present and mismatched, a warning is logged. |
 
 ## 2. Dynamic Prompts
