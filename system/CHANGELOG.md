@@ -4,6 +4,11 @@ All notable changes to the Zolinga System module are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-09-01
+
+### Removed
+- MCP tenant support completely removed. The gateway now supports only `/mcp` and `/mcp/oauth` endpoints. The `/mcp/oauth/{tenant}` route, `@{tenant}` event suffixing, tenant inheritance loop, `McpTenantException`, `McpHandler::isMatchingTenant()`/`assertTenant()`, and the `tenants` field in prompt/resource `.meta.json` are all removed. All tenant references in skill files and wiki docs are cleaned up.
+
 ## [1.6.29] - 2026-08-08
 
 ### Added

@@ -1,6 +1,6 @@
 ---
 name: system-create-mcp-prompt
-description: Use when creating or updating MCP prompts — reusable prompt templates exposed to MCP clients via `prompts/list` and `prompts/get`. Covers `.meta.json` definitions, tenant filtering, `content.uri` file references, `{{arg}}` substitution, and the `mcp-system` scheme.
+description: Use when creating or updating MCP prompts — reusable prompt templates exposed to MCP clients via `prompts/list` and `prompts/get`. Covers `.meta.json` definitions, `content.uri` file references, `{{arg}}` substitution, and the `mcp-system` scheme.
 argument-hint: "<module-name> <prompt-name> [goal]"
 ---
 
@@ -11,7 +11,6 @@ argument-hint: "<module-name> <prompt-name> [goal]"
 - Exposing a reusable prompt template to MCP clients as a discoverable prompt.
 - Creating multi-message conversation templates with `{{arg}}` placeholder substitution.
 - Referencing large text files from prompt definitions via `content.uri`.
-- Deciding whether a prompt belongs to the base MCP endpoint or a tenant-scoped MCP route.
 
 ## How It Works
 
@@ -21,12 +20,6 @@ MCP clients discover prompts via `prompts/list` and retrieve them via `prompts/g
 2. **Dynamic**: Hook the `mcp:prompts/list` event and add prompts programmatically.
 
 For static prompts, the filename (without `.meta.json`) becomes the prompt identifier, rewritten to `mcp-system:<module>:<basename>`. The `messages` array is stripped from the list response (metadata-only) and only served by `prompts/get`.
-
-Tenant-aware MCP routes work like this:
-
-- `/mcp` and `/mcp/oauth` use the base prompt events such as `mcp:prompts/list` and `mcp:prompts/get:mcp-system`.
-- `/mcp/oauth/{tenant}` appends `@{tenant}` to the dispatched event type, e.g. `mcp:prompts/list@admin` and `mcp:prompts/get:mcp-system@admin`.
-- Static prompt definitions can opt into specific tenant routes with an optional `tenants` array. Missing or invalid `tenants` behaves like `[""]`, the base `/mcp` route. Tenant routes inherit parent definitions, so `/mcp/oauth/admin` also sees prompts defined for `/mcp`. Nested tenants inherit too: `/mcp/oauth/admin/users` sees `admin` and `/mcp`. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 ## 1. Static Prompts
 
@@ -61,26 +54,6 @@ modules/my-module/mcp/prompts/trademark-search.meta.json
 
 Note: `name` is omitted — the filename (`trademark-search`) is the identifier. If present and doesn't match the filename, a warning is logged.
 
-### Tenant-scoped static prompt
-
-```json
-{
-  "title": "Admin Review",
-  "tenants": ["admin"],
-  "messages": [
-    {
-      "role": "user",
-      "content": {
-        "type": "text",
-        "text": "Review the latest admin alerts."
-      }
-    }
-  ]
-}
-```
-
-This prompt appears in `prompts/list` on `/mcp/oauth/admin` and nested tenants such as `/mcp/oauth/admin/users`. It is hidden from `/mcp`. `prompts/get` from a tenant that does not inherit `admin` is rejected.
-
 ### Text from file (for large prompts)
 
 For large text bodies, use `content.uri` to reference a file within the module:
@@ -114,7 +87,6 @@ The handler reads the file at `uri` (must use `module://` scheme, must resolve w
 | `description` | no | One-line description (also included in `prompts/get` response). |
 | `arguments` | no | Array of `{ name, description, required }`. |
 | `icons` | no | Array of icon objects. |
-| `tenants` | no | Array of tenant names this prompt is published on. Missing or invalid behaves like `[""]` (base `/mcp`, inherited by tenant routes). |
 | `messages` | yes (for `prompts/get`) | Array of `{ role, content }` — stripped from `prompts/list`. |
 | `name` | no (ignored for static) | Filename is the identifier. If present and mismatched, a warning is logged. |
 
@@ -149,11 +121,9 @@ final class MyPromptsListHandler implements ListenerInterface
 }
 ```
 
-To advertise prompts only on `/mcp/oauth/admin`, register the listener for `mcp:prompts/list@admin` instead of the base `mcp:prompts/list` event.
-
 ### 2b. Get handler — serve prompt messages
 
-The `GetEvent` constructor extracts the scheme from `params.name` and appends it to the event type. So a prompt with name `mcp-my-module:daily-summary` triggers event `mcp:prompts/get:mcp-my-module` on the base routes, or `mcp:prompts/get:mcp-my-module@admin` on `/mcp/oauth/admin`.
+The `GetEvent` constructor extracts the scheme from `params.name` and appends it to the event type. So a prompt with name `mcp-my-module:daily-summary` triggers event `mcp:prompts/get:mcp-my-module`.
 
 ```php
 final class MyPromptsGetHandler implements ListenerInterface
@@ -191,20 +161,12 @@ final class MyPromptsGetHandler implements ListenerInterface
 }
 ```
 
-For tenant-specific prompts, use `@tenant` suffixed event names in the manifest.
-
 ## Testing
 
 ```bash
-# List all prompts on the base route
+# List all prompts
 curl -X POST https://your-host/mcp \
   -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"prompts/list"}' | jq
-
-# List prompts on a tenant route
-curl -X POST https://your-host/mcp/oauth/admin \
-  -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer <token>' \
   -d '{"jsonrpc":"2.0","id":1,"method":"prompts/list"}' | jq
 
 # Get a prompt
@@ -216,8 +178,7 @@ curl -X POST https://your-host/mcp \
 ## References
 
 - [MCP Prompts wiki](:Zolinga Core:MCP:Prompts)
-- [MCP Tenants wiki](:Zolinga Core:MCP:Tenants)
-- `system/src/Mcp/McpPromptsListHandler.php` — static prompt discovery + tenant filtering.
-- `system/src/Mcp/McpPromptsGetHandler.php` — `mcp-system` get handler + tenant enforcement.
+- `system/src/Mcp/McpPromptsListHandler.php` — static prompt discovery.
+- `system/src/Mcp/McpPromptsGetHandler.php` — `mcp-system` get handler.
 - `system/src/Events/Mcp/Prompts/ListEvent.php` — `addPrompt()` / `addPromptJson()` API.
 - `system/src/Events/Mcp/Prompts/GetEvent.php` — scheme extraction and validation.

@@ -2,7 +2,7 @@
 
 The MCP `resources/list` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga Core:Running the System:MCP) as a [`Resources\ListEvent`](:Zolinga Core:Events and Listeners:MCP) with the `mcp` origin.
 
-The system-provided [`\Zolinga\System\Mcp\McpResourcesListHandler::onList()`](:ref:class:Zolinga\\System\\Mcp\\McpResourcesListHandler) handles this event. It scans each module's `mcp/resources/*.meta.json` files, rewrites the internal `uri` to the external `mcp-system:<module>:<basename>` scheme, and returns the resource descriptors. Static descriptors are filtered by tenant inheritance: `/mcp/oauth/admin` includes resources defined for `/mcp` as well as resources marked `admin`. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
+The system-provided [`\Zolinga\System\Mcp\McpResourcesListHandler::onList()`](:ref:class:Zolinga\System\Mcp\McpResourcesListHandler) handles this event. It scans each module's `mcp/resources/*.meta.json` files, rewrites the internal `uri` to the external `mcp-system:<module>:<basename>` scheme, and returns the resource descriptors.
 
 ## Request
 

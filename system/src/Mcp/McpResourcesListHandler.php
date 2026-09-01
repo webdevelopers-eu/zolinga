@@ -74,12 +74,6 @@ class McpResourcesListHandler extends McpHandler
             return;
         }
 
-        if (!$this->isMatchingTenant($json['tenants'] ?? null, $event->tenant)) {
-            return;
-        }
-
-        unset($json['tenants']); // do not send it to client
-
         $basename = basename($metaFile, '.meta.json');
         $json['uri'] = "mcp-system:$module:$basename";
 

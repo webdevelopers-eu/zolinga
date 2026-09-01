@@ -104,8 +104,6 @@ class McpPromptsGetHandler extends \Zolinga\System\Mcp\McpHandler
             return;
         }
 
-        parent::assertTenant($meta['tenants'] ?? null, $event->tenant);
-
         // Validate messages field.
         if (!isset($meta['messages']) || !is_array($meta['messages'])) {
             $api->log->error('system:mcp', "MCP prompt request '$requestName' ($zPath) is missing field 'messages' or field is not an array in file: $zPath");

@@ -24,18 +24,16 @@ class ListEvent extends PromptsEvent
     /**
      * Constructor.
      *
-     * @param string $tenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
      * @param string|int|null $jsonrpcId The JSON-RPC request id.
      * @param ArrayAccess<string, mixed>|array<string, mixed> $request The JSON-RPC params.
      * @param ArrayAccess<string, mixed>|array<string, mixed> $response The JSON-RPC result.
      */
     public function __construct(
-        string $tenant = '',
         string|int|null $jsonrpcId = null,
         ArrayAccess|array $request = new ArrayObject,
         ArrayAccess|array $response = new ArrayObject
     ) {
-        parent::__construct($tenant, 'mcp:prompts/list', $jsonrpcId, $request, $response);
+        parent::__construct('mcp:prompts/list', $jsonrpcId, $request, $response);
     }
 
     /**

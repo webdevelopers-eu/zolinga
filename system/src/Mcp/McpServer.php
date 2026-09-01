@@ -70,10 +70,9 @@ class McpServer
      * Entry point used by `public/mcp/index.php`.
      *
      * @param bool $forceOauth If true, require OAuth2 authentication for all requests unconditionally.
-     * @param string $tenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
      * @return void
      */
-    public function run(bool $forceOauth, string $userTenant): void
+    public function run(bool $forceOauth): void
     {
         global $api;
 
@@ -107,15 +106,10 @@ class McpServer
 
         $data = $this->parseBody();
 
-        // Call on inherited tentants too
-        $tenant = $userTenant;
-        do {
-            $event = McpEvent::fromJsonRpc($tenant, $data);
-            $event->dispatch();
-            $tenant = strlen($tenant) ? trim(dirname($tenant), '.') : null;
-        } while ($tenant !== null);
+        $event = McpEvent::fromJsonRpc($data);
+        $event->dispatch();
 
-        $api->log->info('system:mcp', "MCP request processed: method={$event->type}, status={$event->status->name}, userTenant={$userTenant}");
+        $api->log->info('system:mcp', "MCP request processed: method={$event->type}, status={$event->status->name}");
         $this->send($event);
     }
 

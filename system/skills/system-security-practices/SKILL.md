@@ -41,7 +41,7 @@ argument-hint: "<implement|review> [area]"
 
 - Use manifest `"right"` to block broad access first. This is the high-level gate for whether the caller may use the endpoint or feature at all.
 - If the handler operates on a particular resource or state, add a second check in code for that exact target.
-- Typical cases are editing a specific CMS page, changing another user's data, manipulating a particular invoice, or accessing a tenant-specific record.
+- Typical cases are editing a specific CMS page, changing another user's data, manipulating a particular invoice, or accessing a specific record.
 - Example: a CMS edit endpoint may require a general manifest right such as `"member of editors"`, then the handler should still verify that the current user may edit that specific page.
 - In RMS-based projects this often means checking a resource-scoped right via `$api->user->hasRight(...)`. One existing rights pattern in repository docs is `access page#134`, so project-specific checks may look like `$api->user->hasRight('access cms:page#' . $pageId)` or a similar convention defined by the module.
 - Do not assume the exact resource-right string format unless the module or docs define it. Reuse existing naming patterns in that project.

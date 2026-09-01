@@ -11,7 +11,6 @@ argument-hint: "<module-name> <tool-name> [goal]"
 - Exposing a piece of business logic as a callable MCP tool (JSON-RPC `tools/call`).
 - Adding a new entry to the `tools/list` catalogue the MCP gateway returns.
 - Wiring an existing handler into MCP delivery (most existing handlers can be reused as-is).
-- Exposing a tool only on a tenant-scoped MCP route such as `/mcp/oauth/admin`.
 
 ## Quick Anatomy
 
@@ -22,16 +21,15 @@ A tool is the **combination** of:
 - A `schema.response` JSON Schema (required) and an optional `schema.request`.
 - The tool name visible to clients is the listener's event name used verbatim.
 
-The gateway (`McpServer`) uses the JSON-RPC `tools/call` `params.name` as the base event type, dispatches a `Tools\CallEvent` with `params.arguments` as the event request, and wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope. On `/mcp/oauth/{tenant}`, the dispatched event type becomes `<name>@{tenant}` while the client still calls the tool as `<name>`. Tenant routes inherit parent tools: a listener registered as `<name>` is advertised and invoked on `/mcp/oauth/admin` unless a more specific `<name>@admin` listener exists. Handlers **never** build the envelope themselves. The gateway distinguishes a `tools/call` invocation by `instanceof Tools\CallEvent` (not by a flag or event-name prefix); a tool is also identified by declaring a `schema.response`.
+The gateway (`McpServer`) uses the JSON-RPC `tools/call` `params.name` as the base event type, dispatches a `Tools\CallEvent` with `params.arguments` as the event request, and wraps the handler's response in the MCP `{ content, isError, structuredContent }` envelope. Handlers **never** build the envelope themselves. The gateway distinguishes a `tools/call` invocation by `instanceof Tools\CallEvent` (not by a flag or event-name prefix); a tool is also identified by declaring a `schema.response`.
 
 ## Workflow
 
 ### 1. Pick the tool name
 
-The tool name is the string clients pass as `params.name`. It must be unique across the catalogue for the route where it is exposed. Convention: lower-case, kebab-friendly, no leading namespace (`echo`, `search`, `ipd-checkout`, etc.).
+The tool name is the string clients pass as `params.name`. It must be unique across the catalogue. Convention: lower-case, kebab-friendly, no leading namespace (`echo`, `search`, `ipd-checkout`, etc.).
 
-- Base routes (`/mcp`, `/mcp/oauth`) use manifest event names like `my-tool`. Those tools are inherited by every tenant route.
-- Tenant-only tools use manifest event names like `my-tool@admin`. They appear on `/mcp/oauth/admin` and nested tenants, not on `/mcp`. Clients still call them as `my-tool`.
+- The manifest event name is the tool name clients see in `tools/list` and invoke via `tools/call`.
 
 ### 2. Author the JSON Schemas
 
@@ -104,27 +102,7 @@ Rules:
 }
 ```
 
-Tenant-scoped tool for `/mcp/oauth/admin`:
-
-```json
-{
-  "listen": [
-    {
-      "event": "my-tool@admin",
-      "class": "\\MyModule\\Mcp\\MyToolHandler",
-      "method": "onMyTool",
-      "origin": ["mcp"],
-      "description": "Tool visible on the admin MCP tenant and its nested tenants.",
-      "schema": {
-        "request":  "module://my-module/schema/mcp/my-tool-request.json",
-        "response": "module://my-module/schema/mcp/my-tool-response.json"
-      }
-    }
-  ]
-}
-```
-
-- `event` is the tool name for the base routes and is inherited by tenant routes. Use `event: "<name>@<tenant>"` only when the tool should not appear on `/mcp`. The suffix is stripped from `tools/list`, so clients still invoke the tool via `tools/call` with `params.name = "<name>"`.
+- `event` is the tool name clients see in `tools/list` and invoke via `tools/call`.
 - `origin: ["mcp"]` is required (or use `"*"` if you also want the listener to fire for non-MCP origins).
 - `schema.response` is **required**; tools without it are skipped by `tools/list` and `$api->log->error()` is called. `schema.request` is optional.
 
@@ -141,12 +119,6 @@ Tenant-scoped tool for `/mcp/oauth/admin`:
 # Discover
 curl -X POST http://localhost:8080/mcp -D /dev/stderr \
   -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq '.result.tools[].name'
-
-# Discover tenant-scoped tools
-curl -X POST http://localhost:8080/mcp/oauth/admin -D /dev/stderr \
-  -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer <token>' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq '.result.tools[].name'
 
 # Invoke
@@ -188,13 +160,11 @@ Expected error response (still in `result`, not a JSON-RPC `error` block):
 - **Throwing instead of `setStatus(BAD_REQUEST)`**: throws become generic 500s and the handler's user-friendly message is lost. Use `setStatus()` for client errors.
 - **Setting `$event->response` to the envelope shape**: the gateway will wrap the wrapper, producing `{ result: { content, isError, structuredContent: { content, isError, structuredContent } } }`. Don't.
 - **Forgetting `schema.response`**: `tools/list` will silently skip the tool. Check the system log (`data/system/logs/messages.log`) for an `$api->log->error()` line naming the tool.
-- **Using a base event name when you wanted a tenant-only tool**: `event: "<name>"` is inherited by `/mcp/oauth/admin`. Use `event: "<name>@admin"` when the tool must stay off `/mcp`.
 - **Returning a non-conforming response**: clients validate `structuredContent` against `outputSchema`; if it doesn't match, they reject the result. Keep the handler and the schema in sync.
 - **Missing PHP `declare(strict_types=1);` or missing `use Zolinga\System\Types\StatusEnum`**: standard PHP code-quality nits that the linter will catch.
 
 ## References
 
-- [MCP Tenants](:Zolinga Core:MCP:Tenants) — tenant routes inherit tools, prompts, and resources from `/mcp` all the way up to `""`.
 - [MCP (Model Context Protocol)](:Zolinga Core:Running the System:MCP) — endpoint overview, request/response shape, headers.
 - [MCP Events](:Zolinga Core:Events and Listeners:MCP) — full `Mcp\McpEvent` class hierarchy reference, status → envelope mapping, handler examples.
 - [`tools/call` event](:ref:event:tools/call) — per-event reference page.

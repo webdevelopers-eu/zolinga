@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
-use Zolinga\System\Events\{ListenerInterface};
 use Zolinga\System\Events\Mcp\Tools\ListEvent;
 use Zolinga\System\Types\{OriginEnum, StatusEnum};
 use Zolinga\System\Config\Atom\ListenAtom;
@@ -75,12 +74,11 @@ class McpToolsListHandler extends McpHandler
 
         /** @var ListenAtom $atom */
         foreach ($api->manifest['listen'] as $atom) {
-            if (!$this->isMcpToolCandidate($event->tenant, $atom)) {
+            if (!$this->isMcpToolCandidate($atom)) {
                 continue;
             }
 
-            $eventName = (string) $atom['event'];
-            $toolName = preg_replace('/@.*$/', '', $eventName); // strip tenant suffix for tool name
+            $toolName = (string) $atom['event'];
 
             if (isset($seen[$toolName])) {
                 // Keep the highest-priority description for the same exposed tool name.
@@ -107,14 +105,11 @@ class McpToolsListHandler extends McpHandler
      * Whether a listener atom is a candidate MCP tool: it opts in to the
      * `mcp` origin and is not a reserved MCP protocol event.
      *
-     * @param string $userTenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
      * @param ListenAtom $atom
      * @return bool
      */
-    private function isMcpToolCandidate(string $userTenant, ListenAtom $atom): bool
+    private function isMcpToolCandidate(ListenAtom $atom): bool
     {
-        global $api;
-
         if (!in_array(OriginEnum::MCP, $atom['origin'], true)) {
             return false;
         }
@@ -125,21 +120,7 @@ class McpToolsListHandler extends McpHandler
             return false;
         }
 
-        [$eventName, $eventTenant] = explode('@', (string) $atom['event']) + [1 => ''];
-
-        if ($this->isReservedEvent($eventName)) {
-            return false;
-        }
-
-        if (!$this->isMatchingTenant([$eventTenant], $userTenant)) {
-            return false;
-        }
-        
-        // If tenant is specified we list only tools that the user has access to
-        // While /mcp is open to all so we show all tools even for anonymous users
-        // /mcp/oauth/{tenant} is restricted to logged in users so we know what they can see.
-        if ($userTenant !== '' && $atom['right'] && !$api->isAuthorized($atom['right'])) {
-            $api->log->info('system:mcp', "MCP tool {$eventName} is not authorized for tenant $userTenant; skipping.");
+        if ($this->isReservedEvent((string) $atom['event'])) {
             return false;
         }
 

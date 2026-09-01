@@ -26,14 +26,12 @@ use Zolinga\System\Mcp\McpHelper;
 class CallEvent extends ToolsEvent
 {
     /**
-     * @param string $tenant The tenant name of the request - prefix all event types with this tenant for multi-tenant MCPs.
      * @param string|int|null $jsonrpcId The JSON-RPC request id.
      * @param array<string, mixed> $params The `tools/call` params: `{ name: string, arguments: object }`.
      * @param ArrayAccess<string, mixed>|array<string, mixed> $response The tool result.
      * @throws McpInvalidParamsException Missing/invalid tool `name`.
      */
     public function __construct(
-        string $tenant = '',
         string|int|null $jsonrpcId = null,
         array $params = [],
         ArrayAccess|array $response = new ArrayObject
@@ -47,6 +45,6 @@ class CallEvent extends ToolsEvent
         }
         $arguments = $params['arguments'] ?? [];
         $request = is_array($arguments) ? $arguments : [];
-        parent::__construct($tenant, $name, $jsonrpcId, new ArrayObject($request), $response);
+        parent::__construct($name, $jsonrpcId, new ArrayObject($request), $response);
     }
 }

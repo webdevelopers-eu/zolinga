@@ -51,14 +51,12 @@ abstract class McpEvent extends RequestResponseEvent implements StoppableInterfa
     /**
      * Constructor.
      *
-    * @param string $tenant The tenant name of the request. When present, append it to the event type using the at-sign separator.
      * @param string $type The event type (JSON-RPC method or tool name).
      * @param string|int|null $jsonrpcId The JSON-RPC request id, or null for notifications.
      * @param ArrayAccess<string, mixed>|array<string, mixed> $request The JSON-RPC `params` payload.
      * @param ArrayAccess<string, mixed>|array<string, mixed> $response The JSON-RPC `result` to return.
      */
     public function __construct(
-        public readonly string $tenant,
         string $type,
         string|int|null $jsonrpcId = null,
         ArrayAccess|array $request = new ArrayObject,
@@ -70,9 +68,7 @@ abstract class McpEvent extends RequestResponseEvent implements StoppableInterfa
             );
         }
 
-        $eventType = $this->tenant === '' ? $type : $type . '@' . $this->tenant;
-
-        parent::__construct($eventType, OriginEnum::MCP, $request, $response);
+        parent::__construct($type, OriginEnum::MCP, $request, $response);
         $this->jsonrpcId = $jsonrpcId;
     }
 
@@ -113,13 +109,12 @@ abstract class McpEvent extends RequestResponseEvent implements StoppableInterfa
      * returns a new event instance with the request set to `params` (or
      * `params.arguments` for `tools/call`).
      *
-        * @param string $tenant The tenant name of the request. When present, append it to the event type using the at-sign separator.
-     * @param array<string, mixed> $data Decoded JSON-RPC request object.
+        * @param array<string, mixed> $data Decoded JSON-RPC request object.
      * @return McpEvent
      * @throws McpInvalidRequestException Missing/invalid `jsonrpc`, `method`, `id`, or `params`.
      * @throws McpMethodNotFoundException  Unknown/unsupported JSON-RPC `method`.
      */
-    public static function fromJsonRpc(string $tenant, array $data): McpEvent
+    public static function fromJsonRpc(array $data): McpEvent
     {
         if (($data['jsonrpc'] ?? null) !== '2.0') {
             throw new McpInvalidRequestException('Missing or invalid "jsonrpc" field; must be "2.0".');
@@ -137,13 +132,12 @@ abstract class McpEvent extends RequestResponseEvent implements StoppableInterfa
             throw new McpInvalidRequestException('Invalid "params" field; must be an object or array.');
         }
 
-        return self::buildEvent($tenant, $method, $id, $params);
+        return self::buildEvent($method, $id, $params);
     }
 
     /**
      * Map a JSON-RPC method to the correct concrete event subclass.
      *
-        * @param string $tenant The tenant name of the request. When present, append it to the event type using the at-sign separator.
      * @param string $method The JSON-RPC method name.
      * @param string|int|null $id The normalized JSON-RPC request id.
      * @param array<string, mixed> $params The JSON-RPC params.
@@ -151,16 +145,16 @@ abstract class McpEvent extends RequestResponseEvent implements StoppableInterfa
      * @throws McpMethodNotFoundException  Unknown/unsupported JSON-RPC `method`.
      * @throws McpInvalidParamsException  `tools/call` with missing/invalid `name`.
      */
-    private static function buildEvent(string $tenant, string $method, string|int|null $id, array $params): McpEvent
+    private static function buildEvent(string $method, string|int|null $id, array $params): McpEvent
     {
         return match ($method) {
-            'initialize' => new InitializeEvent($tenant, $id, $params),
-            'tools/list' => new Tools\ListEvent($tenant, $id, $params),
-            'tools/call' => new Tools\CallEvent($tenant, $id, $params),
-            'prompts/list' => new Prompts\ListEvent($tenant, $id, $params),
-            'prompts/get' => new Prompts\GetEvent($tenant, $id, $params),
-            'resources/list' => new Resources\ListEvent($tenant, $id, $params),
-            'resources/read' => new Resources\ReadEvent($tenant, $id, $params),
+            'initialize' => new InitializeEvent($id, $params),
+            'tools/list' => new Tools\ListEvent($id, $params),
+            'tools/call' => new Tools\CallEvent($id, $params),
+            'prompts/list' => new Prompts\ListEvent($id, $params),
+            'prompts/get' => new Prompts\GetEvent($id, $params),
+            'resources/list' => new Resources\ListEvent($id, $params),
+            'resources/read' => new Resources\ReadEvent($id, $params),
             default => throw new McpMethodNotFoundException(
                 'Method not found: ' . $method,
                 $id

@@ -4,9 +4,9 @@ MCP prompts are reusable prompt templates that clients can retrieve via `prompts
 
 ## How It Works
 
-- **Discovery**: `prompts/list` scans each module's `mcp/prompts/*.meta.json` files and includes descriptors visible to the current MCP tenant, including items inherited from parent tenants.
+- **Discovery**: `prompts/list` scans each module's `mcp/prompts/*.meta.json` files and includes all descriptors.
 - **Identification**: The filename (without `.meta.json`) becomes the prompt identifier, rewritten to `mcp-system:<module>:<basename>`.
-- **Retrieval**: `prompts/get` reads the `.meta.json`, checks the same tenant filter, resolves file references, applies `{{arg}}` substitution, and returns the `messages` array. When the prompt exists but the tenant is not allowed, the request is rejected.
+- **Retrieval**: `prompts/get` reads the `.meta.json`, resolves file references, applies `{{arg}}` substitution, and returns the `messages` array.
 
 ## Creating a Prompt
 
@@ -34,26 +34,6 @@ Place a `.meta.json` file in `modules/<your-module>/mcp/prompts/`:
 ```
 
 The `name` field is omitted for static prompts — the filename is the identifier.
-
-If you want a prompt to appear on a tenant-scoped MCP route, add a `tenants` array:
-
-```json
-{
-  "title": "Admin Review",
-  "tenants": ["admin"],
-  "messages": [
-    {
-      "role": "user",
-      "content": {
-        "type": "text",
-        "text": "Review the latest admin alerts."
-      }
-    }
-  ]
-}
-```
-
-Missing `tenants` is treated as `[""]`, which publishes the prompt on `/mcp`. Tenant routes inherit parent catalogues, so `/mcp/oauth/admin` also lists it. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 ### Text from file (for large prompts)
 
@@ -98,7 +78,6 @@ The handler reads the file at `uri` (must use `module://` scheme, must resolve w
 | `title` | no | Human-readable title |
 | `description` | no | One-line description (included in `prompts/get` response) |
 | `arguments` | no | Array of `{ name, description, required }` |
-| `tenants` | no | Tenant names this prompt is published on. Missing means the base `/mcp` route, which tenant routes inherit. See [MCP Tenants](:Zolinga Core:MCP:Tenants). |
 | `messages` | yes (for `prompts/get`) | Array of `{ role, content }` — stripped from `prompts/list` |
 
 ## Wire Format
@@ -135,8 +114,6 @@ The handler reads the file at `uri` (must use `module://` scheme, must resolve w
 - Module existence is explicitly checked against `$api->manifest->moduleNames`.
 - `content.uri` must use `module://` scheme; resolved `realpath()` must be within the module directory.
 - `messages` and internal `uri` fields are stripped from `prompts/list` responses.
-- The optional `tenants` field is consumed by the gateway for both `prompts/list` and `prompts/get` filtering and is not exposed to clients.
-- `prompts/get` returns forbidden when the prompt exists but the current tenant does not inherit it. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 ## Dynamic Prompts
 

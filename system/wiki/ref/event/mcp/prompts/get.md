@@ -4,7 +4,7 @@ The MCP `prompts/get` JSON-RPC method. Dispatched by the [MCP gateway](:Zolinga 
 
 The event type includes the URI scheme as a suffix: `mcp:prompts/get:<scheme>`. For example, a request with `name = "mcp-system:..."` dispatches as `mcp:prompts/get:mcp-system`. This lets handlers register for specific URI schemes.
 
-The system-provided [`\Zolinga\System\Mcp\McpPromptsGetHandler::onGet()`](:ref:class:Zolinga\\System\\Mcp\\McpPromptsGetHandler) handles the `mcp-system` scheme. It parses the name, loads the `.meta.json` descriptor, resolves `content.uri` file references to `content.text`, applies `{{arg}}` placeholder substitution, and returns the `messages` array. The same tenant inheritance used by `prompts/list` is enforced here: a prompt defined for `/mcp` can be fetched from `/mcp/oauth/admin`, but an `admin`-only prompt cannot be fetched from `/mcp`. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
+The system-provided [`\Zolinga\System\Mcp\McpPromptsGetHandler::onGet()`](:ref:class:Zolinga\System\Mcp\McpPromptsGetHandler) handles the `mcp-system` scheme. It parses the name, loads the `.meta.json` descriptor, resolves `content.uri` file references to `content.text`, applies `{{arg}}` placeholder substitution, and returns the `messages` array.
 
 ## Request
 
@@ -64,7 +64,7 @@ curl -X POST https://your-host/mcp \
 |---------------|------|
 | `NOT_FOUND`   | Module does not exist or `.meta.json` file not found. |
 | `BAD_REQUEST` | Required argument missing from `params.arguments`. |
-| `FORBIDDEN`   | The prompt exists but the current tenant does not inherit it. |
+| `FORBIDDEN`   | The prompt exists but cannot be accessed. |
 | `ERROR`       | `messages` field missing from `.meta.json`, `content.uri` uses non-`module://` scheme, or `content.uri` resolves outside module directory. |
 
 ## Security

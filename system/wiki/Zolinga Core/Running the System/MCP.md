@@ -1,12 +1,11 @@
 # MCP (Model Context Protocol)
 
-Expose Zolinga events as [MCP](https://modelcontextprotocol.io/) tools and module files as MCP resources. The gateway accepts JSON-RPC 2.0 requests from MCP clients, dispatches them as [`\Zolinga\System\Events\Mcp\McpEvent`](:Zolinga Core:Events and Listeners:MCP) objects (one concrete subclass per JSON-RPC method) with the `mcp` origin, and serializes the response back as a JSON-RPC 2.0 message. When the request comes through `/mcp/oauth/{tenant}`, the gateway also appends `@{tenant}` to the dispatched event type.
+Expose Zolinga events as [MCP](https://modelcontextprotocol.io/) tools and module files as MCP resources. The gateway accepts JSON-RPC 2.0 requests from MCP clients, dispatches them as [`\Zolinga\System\Events\Mcp\McpEvent`](:Zolinga Core:Events and Listeners:MCP) objects (one concrete subclass per JSON-RPC method) with the `mcp` origin, and serializes the response back as a JSON-RPC 2.0 message.
 
-Three endpoint forms are available:
+Two endpoint forms are available:
 
 - **`/mcp`** — mixed authentication. Some tools require authentication, others are public. Use this for general-purpose access.
 - **`/mcp/oauth`** — always requires authentication. Every request returns HTTP 401 until the client authenticates. Use this when your MCP client expects uniform authentication across all requests (e.g. Hermes).
-- **`/mcp/oauth/{tenant}`** — always requires authentication and appends `@{tenant}` to every dispatched event type. Use this when you want a path-scoped MCP surface such as `/mcp/oauth/admin` with its own `initialize`, `tools/list`, and `tools/call` hooks. Tools, prompts, and resources on this route inherit the base `/mcp` catalogue. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 The gateway supports two MCP capability areas:
 
@@ -17,7 +16,7 @@ This is a non-streaming implementation of MCP — every request returns a single
 
 # Quick Start
 
-These examples use the `/mcp` endpoint (mixed authentication). Replace it with `/mcp/oauth` if you need all requests to require authentication, or with `/mcp/oauth/admin` if you want the requests dispatched as `...@admin` events.
+These examples use the `/mcp` endpoint (mixed authentication). Replace it with `/mcp/oauth` if you need all requests to require authentication.
 
 Send an `initialize` request:
 
@@ -59,7 +58,7 @@ curl -X POST http://localhost:8080/mcp \
   }'
 ```
 
-The gateway translates the JSON-RPC method to a base Zolinga event by replacing `/` with `:`. For `tools/call` specifically, it uses the bare tool name (`params.name`) as the base event type and passes `params.arguments` as the event request. On `/mcp/oauth/{tenant}`, the gateway then appends `@{tenant}` to the dispatched event type. So this request dispatches a `Tools\CallEvent` with `type = "echo"` on `/mcp`, and `type = "echo@admin"` on `/mcp/oauth/admin`. The tool handler sets the **raw structured payload** on `$event->response` (it must conform to the tool's `outputSchema`); the gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope.
+The gateway translates the JSON-RPC method to a base Zolinga event by replacing `/` with `:`. For `tools/call` specifically, it uses the bare tool name (`params.name`) as the base event type and passes `params.arguments` as the event request. So this request dispatches a `Tools\CallEvent` with `type = "echo"` on `/mcp`. The tool handler sets the **raw structured payload** on `$event->response` (it must conform to the tool's `outputSchema`); the gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope.
 
 Response (per the [MCP `tools/call` spec](https://modelcontextprotocol.io/specification/2025-06-18/server/tools)):
 
@@ -80,9 +79,9 @@ Response (per the [MCP `tools/call` spec](https://modelcontextprotocol.io/specif
 }
 ```
 
-## Using the OAuth Endpoints
+## Using the OAuth Endpoint
 
-The `/mcp/oauth` and `/mcp/oauth/{tenant}` endpoints require a valid OAuth Bearer token for all requests. Without authentication, you receive HTTP 401:
+The `/mcp/oauth` endpoint requires a valid OAuth Bearer token for all requests. Without authentication, you receive HTTP 401:
 
 ```bash
 curl -X POST http://localhost:8080/mcp/oauth \
@@ -106,17 +105,6 @@ curl -X POST http://localhost:8080/mcp/oauth \
   -H 'Authorization: Bearer <your-access-token>' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
-
-To use a tenant-scoped route, keep the JSON-RPC payload the same and change only the URL path:
-
-```bash
-curl -X POST http://localhost:8080/mcp/oauth/admin \
-  -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer <your-access-token>' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
-```
-
-That request dispatches `mcp:tools/list@admin`. The catalogue still includes everything defined for `/mcp`, plus any `admin` overrides. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
 
 See [OAuth Authorization](:Zolinga OAuth:Authorization) for the complete OAuth flow.
 
@@ -144,7 +132,7 @@ with `params.name` set to that event name:
 - `event: "<name>"` — the event name is the JSON-RPC tool name. Clients invoke it via `tools/call` with `params.name = "<name>"`.
 - `schema.request` / `schema.response` — each value is a [Zolinga URI](:Zolinga Core:Paths and Zolinga URI) that resolves to a JSON Schema file. The MCP `tools/list` response embeds the parsed schema as `inputSchema` / `outputSchema`. **`schema.response` is required** for the tool to be exposed by `tools/list` — `McpToolsListHandler` logs an error and skips the tool when it is missing.
 
-On `/mcp/oauth/{tenant}`, clients still call the same tool name, but the gateway dispatches the event as `<name>@{tenant}`. Parent listeners still match, so a base `my-module-search` tool is advertised and callable on `/mcp/oauth/admin`. Register `my-module-search@admin` only when you want a tenant-specific override. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
+On `/mcp/oauth`, clients still call the same tool name, and the gateway dispatches the event as `<name>`.
 
 The handler class implements [`ListenerInterface`](:Zolinga Core:Events and Listeners) and receives a [`Tools\CallEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"`. It sets the raw structured payload on `$event->response`; the gateway builds the MCP envelope:
 
@@ -180,11 +168,11 @@ class SearchHandler implements ListenerInterface
 
 # Reserved MCP Events
 
-On the base routes (`/mcp` and `/mcp/oauth`), all non-`tools/call` MCP events are prefixed with `mcp:` by the gateway (e.g. `mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`). On `/mcp/oauth/{tenant}`, the gateway appends `@{tenant}` to that base type (e.g. `mcp:initialize@admin`, `mcp:tools/list@admin`). The `McpToolsListHandler` collector excludes any event whose name starts with `mcp:` from the tool list — they are MCP protocol events, not user-callable tools. `McpHelper::isValidToolName()` also explicitly rejects names starting with `mcp:` so user tools can never collide with the protocol prefix, even though `:` is now an allowed character in tool names.
+On the base routes (`/mcp` and `/mcp/oauth`), all non-`tools/call` MCP events are prefixed with `mcp:` by the gateway (e.g. `mcp:initialize`, `mcp:tools/list`, `mcp:notifications/*`). The `McpToolsListHandler` collector excludes any event whose name starts with `mcp:` from the tool list — they are MCP protocol events, not user-callable tools. `McpHelper::isValidToolName()` also explicitly rejects names starting with `mcp:` so user tools can never collide with the protocol prefix, even though `:` is now an allowed character in tool names.
 
 # Method-to-Event Mapping
 
-The gateway rewrites every JSON-RPC `method` into a base Zolinga event `type`. For most methods this is a slash-to-colon substitution; `tools/call` is expanded to a per-tool event with the tool name appended. On `/mcp/oauth/{tenant}`, append `@{tenant}` to each event type below.
+The gateway rewrites every JSON-RPC `method` into a base Zolinga event `type`. For most methods this is a slash-to-colon substitution; `tools/call` is expanded to a per-tool event with the tool name appended.
 
 | JSON-RPC `method`           | Zolinga event `type`         | `request` source        |
 |-----------------------------|------------------------------|-------------------------|
@@ -206,7 +194,7 @@ For non-`tools/call` methods (initialize, tools/list, notifications/*, etc.):
 | response `error.code`      | derived from `$event->status` (see Error Mapping) |
 | `notifications/*` (no id)  | dispatched, no reply sent |
 
-For `tools/call` invocations, the gateway dispatches a [`Tools\CallEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"` on the base routes, or `type = "<name>@{tenant}"` on `/mcp/oauth/{tenant}`:
+For `tools/call` invocations, the gateway dispatches a [`Tools\CallEvent`](:Zolinga Core:Events and Listeners:MCP) with `type = "<name>"`:
 
 | JSON-RPC 2.0                | Zolinga |
 |----------------------------|---------|
@@ -250,10 +238,10 @@ Not supported. This is a non-streaming implementation of the MCP Streamable HTTP
 
 | Class | Purpose |
 |-------|---------|
-| [`McpServer`](:ref:class:Zolinga\\System\\Mcp\\McpServer) | Stateful per-request orchestrator: parses the body, dispatches, sends the reply. Thin JSON-RPC-to-Zolinga translator: each JSON-RPC `method` becomes a base event `type` by replacing `/` with `:`. `tools/call` uses the bare tool name (`params.name`) as the base event `type` with `params.arguments` as the event request; `/mcp/oauth/{tenant}` then appends `@{tenant}` to the dispatched type. |
-| [`Mcp\McpEvent`](:ref:class:Zolinga\\System\\Events\\Mcp\\McpEvent) | Abstract base event for all MCP JSON-RPC requests. `McpEvent::fromJsonRpc()` validates the envelope, resolves the concrete subclass (`InitializeEvent`, `Tools\ListEvent`, `Tools\CallEvent`, `Prompts\*`, `Resources\*`), and applies the optional `@{tenant}` suffix. |
-| [`McpInitializeHandler`](:ref:class:Zolinga\System\Mcp\McpInitializeHandler) | Listens to the base `mcp:initialize` event and returns the lifecycle payload. Tenant-specific routes can hook the suffixed form such as `mcp:initialize@admin`. |
-| [`McpToolsListHandler`](:ref:class:Zolinga\\System\\Mcp\\McpToolsListHandler) | `onList` for the base `mcp:tools/list` event; returns the default tool catalogue. Tenant-specific routes can hook suffixed events such as `mcp:tools/list@admin` to expose a different catalogue. |
+| [`McpServer`](:ref:class:Zolinga\System\Mcp\McpServer) | Stateful per-request orchestrator: parses the body, dispatches, sends the reply. Thin JSON-RPC-to-Zolinga translator: each JSON-RPC `method` becomes a base event `type` by replacing `/` with `:`. `tools/call` uses the bare tool name (`params.name`) as the base event `type` with `params.arguments` as the event request. |
+| [`Mcp\McpEvent`](:ref:class:Zolinga\System\Events\Mcp\McpEvent) | Abstract base event for all MCP JSON-RPC requests. `McpEvent::fromJsonRpc()` validates the envelope, resolves the concrete subclass (`InitializeEvent`, `Tools\ListEvent`, `Tools\CallEvent`, `Prompts\*`, `Resources\*`). |
+| [`McpInitializeHandler`](:ref:class:Zolinga\System\Mcp\McpInitializeHandler) | Listens to the base `mcp:initialize` event and returns the lifecycle payload. |
+| [`McpToolsListHandler`](:ref:class:Zolinga\System\Mcp\McpToolsListHandler) | `onList` for the base `mcp:tools/list` event; returns the default tool catalogue. |
 | [`McpHelper`](:ref:class:Zolinga\System\Mcp\McpHelper) | Misc helpers (status → error code, response normalization, `envelope()` for `tools/call` results). |
 | `Exceptions\McpException` + subclasses | Top-level errors (`McpParseErrorException`, `McpInvalidRequestException`, `McpMethodNotFoundException`, `McpInvalidParamsException`, `McpInternalErrorException`). |
 
@@ -265,25 +253,18 @@ Use **`/mcp/oauth`** when:
 - You want every request to require authentication — no public tool access.
 - The client triggers OAuth flow by receiving an HTTP 401 response with a `WWW-Authenticate: Bearer` challenge.
 
-Use **`/mcp/oauth/{tenant}`** when:
-
-- You want a separate MCP surface keyed by the URL path.
-- You need different `initialize`, `tools/list`, or tool-call hooks for a named tenant, role, or integration.
-- You want `/mcp/oauth/admin` to dispatch `...@admin` events while still listing tools, prompts, and resources defined for `/mcp`. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
-
 Use **`/mcp`** when:
 
 - You want to expose some tools publicly without authentication.
 - Your MCP client supports per-tool authentication (checks the `right` field in the tool definition).
 - You prefer mixed access: public discovery with protected tools.
 
-The endpoint choice affects both authentication and event naming:
+The endpoint choice affects authentication only:
 
 | Endpoint              | Authentication                                         | Dispatched event type |
 |-----------------------|--------------------------------------------------------|-----------------------|
 | `/mcp`                | Per-tool. Public tools work without auth.              | Base type (`mcp:initialize`, `echo`) |
 | `/mcp/oauth`          | Always. Returns HTTP 401 until client authenticates.   | Base type (`mcp:initialize`, `echo`) |
-| `/mcp/oauth/{tenant}` | Always. Returns HTTP 401 until client authenticates.   | Tenant-suffixed (`mcp:initialize@{tenant}`, `echo@{tenant}`) |
 
 Configure your MCP client with the appropriate endpoint URL:
 
@@ -291,20 +272,15 @@ Configure your MCP client with the appropriate endpoint URL:
 # For clients that need uniform authentication
 https://your-domain.com/mcp/oauth
 
-# For a tenant-scoped MCP surface
-https://your-domain.com/mcp/oauth/admin
-
 # For general-purpose access with mixed authentication
 https://your-domain.com/mcp
 ```
 
 # Security
 
-Configure your web server so that `/mcp`, `/mcp/oauth`, and `/mcp/oauth/{tenant}` are reachable only by trusted origins. Use the `right` field on a listener manifest entry and an [`AuthorizeEvent`](:Zolinga Core:Events and Listeners:Authorization) provider to gate access to specific tools.
+Configure your web server so that `/mcp` and `/mcp/oauth` are reachable only by trusted origins. Use the `right` field on a listener manifest entry and an [`AuthorizeEvent`](:Zolinga Core:Events and Listeners:Authorization) provider to gate access to specific tools.
 
 The `/mcp/oauth` endpoint enforces OAuth authentication at the gateway level — unauthenticated requests receive HTTP 401 with a `WWW-Authenticate: Bearer` header pointing to the OAuth authorization server metadata. Clients must complete the OAuth flow before accessing any tools.
-
-A tenant route such as `/mcp/oauth/admin` is an extra event namespace, not a secret or a permission check by itself. Treat it as routing only. Protect sensitive tools with normal authorization rules.
 
 The `/mcp` endpoint allows per-tool authentication — tools without a `right` field are publicly accessible; tools with a `right` field require a valid OAuth Bearer token in the `Authorization` header. See [OAuth Authorization](:Zolinga OAuth:Authorization) for configuration details.
 

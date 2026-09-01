@@ -102,8 +102,6 @@ class McpResourcesReadHandler extends \Zolinga\System\Mcp\McpHandler
             return;
         }
 
-        parent::assertTenant($meta['tenants'] ?? null, $event->tenant);
-
         $contentPath = $api->fs->toPath($meta['uri']);
         if (!$contentPath || !is_file($contentPath)) {
             $api->log->info('mcp:system', "Resource content file not found: {$meta['uri']}");

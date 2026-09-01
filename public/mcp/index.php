@@ -60,7 +60,7 @@ require($_SERVER['DOCUMENT_ROOT'] . '/../system/loader.php');
 //     header('Mcp-Session-Id: ' . session_id());
 // }
 
-define('MCP_ALLOWED_PATH_REGEX', '/\A\/mcp(\/oauth(\/[A-Za-z0-9\/.-]*)?)?\z/');
+define('MCP_ALLOWED_PATH_REGEX', '/\A\/mcp(\/oauth)?\z/');
 
 $path = $_SERVER['REQUEST_URI'] ?? '';
 if (!preg_match(MCP_ALLOWED_PATH_REGEX, $path)) {
@@ -69,20 +69,15 @@ if (!preg_match(MCP_ALLOWED_PATH_REGEX, $path)) {
     exit;
 }
 
-// We support only /mcp, /mcp/oauth, and /mcp/oauth/* paths. Anything else is a 404.
-// Tenant routes such as /mcp/oauth/admin append the tenant to the dispatched
-// event type, e.g. "mcp:initialize@admin" instead of "mcp:initialize".
-// This lets the system expose route-specific MCP hooks. See McpEvent.
-if (str_starts_with($path, '/mcp/oauth')) {
+// We support only /mcp and /mcp/oauth paths. Anything else is a 404.
+if ($path === '/mcp/oauth') {
     $forceOauth = true && !isset($_GET['noauth']);
-    $tenant = ltrim(str_replace('/mcp/oauth', '', $path), '/');
 } else {
     $forceOauth = false;
-    $tenant = "";
 }
 
 try {
-    (new McpServer())->run($forceOauth, $tenant);
+    (new McpServer())->run($forceOauth);
 } catch (McpException $e) {
     (new McpServer())->sendError($e);
 } finally {

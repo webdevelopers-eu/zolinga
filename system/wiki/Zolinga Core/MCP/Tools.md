@@ -8,8 +8,6 @@ Expose any Zolinga event as an [MCP](https://modelcontextprotocol.io/) tool that
 2. Declare `schema.request` and `schema.response` (JSON Schema files) — `schema.response` is **required** for the tool to appear in `tools/list`.
 3. The listener's event name becomes the tool name. Clients call it via `tools/call` with `params.name`.
 
-On `/mcp/oauth/{tenant}`, clients still send the same tool name, but the gateway dispatches the call as `<tool-name>@{tenant}`. Tenant routes inherit parent tools, so a listener registered as `my-module-search` is advertised and callable on `/mcp/oauth/admin`. Register `my-module-search@admin` when the tool should appear only on that tenant (and its nested tenants). See [MCP Tenants](:Zolinga Core:MCP:Tenants).
-
 ## Manifest Entry
 
 ```json
@@ -54,16 +52,6 @@ class SearchHandler implements ListenerInterface
 
 The handler sets the **raw structured payload** on `$event->response`. The gateway wraps it in the MCP `{ content, isError, structuredContent }` envelope automatically.
 
-## Tenant-Scoped Tool Surfaces
-
-Use `/mcp/oauth/{tenant}` when you need a different MCP surface on the same server. The tenant is taken from the URL path segment after `oauth`.
-
-- `/mcp/oauth` keeps the base MCP event names.
-- `/mcp/oauth/admin` appends `@admin` to dispatched event types.
-- Clients still call the tool as `my-module-search`; the `@admin` suffix is added by the gateway, not by the client.
-
-`/mcp/oauth/admin` therefore lists base `/mcp` tools plus any `...@admin` listeners. A more specific `@admin` listener replaces the inherited base tool of the same name. See [MCP Tenants](:Zolinga Core:MCP:Tenants).
-
 ## Tool Name Rules
 
 - Must match `[A-Za-z0-9_:-]{1,64}`
@@ -76,12 +64,6 @@ Use `/mcp/oauth/{tenant}` when you need a different MCP surface on the same serv
 # List available tools
 curl -X POST https://your-host/mcp \
   -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
-
-# List tools from a tenant-scoped surface
-curl -X POST https://your-host/mcp/oauth/admin \
-  -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer <your-access-token>' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 
 # Call a tool
