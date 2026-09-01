@@ -38,6 +38,7 @@ echo "# User Guide\n\nWelcome to my module." > modules/my-module/mcp/resources/g
 | `description` | no | One-line description |
 | `mimeType` | no | MIME type; determines `text` vs `blob` response format |
 | `icons` | no | Array of icon objects (`src`, `mimeType`, `sizes`) |
+| `zolinga.right` | no | Access restriction; any `$api->isAuthorized()` expression (e.g. `"member of users"`). See [Access Control](#access-control). |
 
 Extra fields are allowed and passed through to the client.
 
@@ -86,11 +87,34 @@ curl -X POST https://your-host/mcp \
   -d '{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"mcp-system://my-module/resources/guide.md"}}'
 ```
 
+## Access Control
+
+Any `.meta.json` descriptor can restrict access to authenticated users by adding a `zolinga.right` field. This works the same way as the `right` property on listeners in `zolinga.json` — the caller must satisfy the declared right or the resource is hidden from `resources/list` and `resources/read` returns `FORBIDDEN`.
+
+```json
+// modules/my-module/mcp/resources/internal-report.md.meta.json
+{
+  "uri": "module://my-module/mcp/resources/internal-report.md",
+  "name": "internal-report.md",
+  "title": "Internal Report",
+  "mimeType": "text/markdown",
+  "zolinga": {
+    "right": "member of users"
+  }
+}
+```
+
+- The `zolinga.right` value is any expression accepted by `$api->isAuthorized()` (e.g. `"member of users"`, a role name, a comma-separated list).
+- When the caller is not authorized, the resource is **omitted** from `resources/list` and `resources/read` returns a `FORBIDDEN` status.
+- The `zolinga` block is stripped from the response before it reaches the client, so the right expression is never leaked.
+- Resources without `zolinga.right` are public — accessible to anyone, including unauthenticated callers.
+
 ## Security
 
 - Internal Zolinga paths are never exposed to clients; all resource URIs are rewritten to `mcp-system://<module>/resources/<basename>`.
 - Directory traversal is blocked: `basename()` is applied to both module and basename components, and the result must match the raw input.
 - Only URI schemes in the `ResourcesEvent::ALLOWED_URI_SCHEMES` whitelist (`mcp-system`, `http`, `https`) are accepted in responses.
+- Access can be restricted per resource via `zolinga.rights` in the `.meta.json` (see Access Control above).
 
 
 # Related
