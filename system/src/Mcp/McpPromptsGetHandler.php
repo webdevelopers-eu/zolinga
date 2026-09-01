@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
+use Zolinga\System\Events\Mcp\AbstractActionEvent;
 use Zolinga\System\Events\Mcp\Prompts\GetEvent;
 use Zolinga\System\Types\StatusEnum;
 
@@ -19,119 +20,63 @@ use Zolinga\System\Types\StatusEnum;
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-22
  */
-class McpPromptsGetHandler extends \Zolinga\System\Mcp\McpHandler
+class McpPromptsGetHandler extends AbstractMcpActionHandler
 {
-    /**
-     * Handle the `prompts/get:mcp-system` event.
-     *
-     * @param GetEvent $event The prompts/get event.
-     * @return void
-     */
-    public function onGet(GetEvent $event): void
-    {
-        $name = $event->request['name'] ?? null;
-        if (!is_string($name) || $name === '') {
-            $event->setStatus(StatusEnum::BAD_REQUEST, 'Missing or empty "name" parameter.');
-            return;
-        }
-
-        $parts = $this->parseName($name);
-        if ($parts === null) {
-            // Invalid mcp-system:<module>:<basename> name format or directory traversal attempt.
-            $event->setStatus(StatusEnum::BAD_REQUEST, 'Invalid prompt name: ' . $name);
-            return;
-        }
-
-        $this->getPrompt($event, $parts['module'], $parts['basename'], $name);
-    }
-
-    /**
-     * Parse a `mcp-system:<module>:<basename>` name into its components.
-     *
-     * @param string $name
-     * @return array{module: string, basename: string}|null
-     */
-    private function parseName(string $name): ?array
-    {
-        $parts = explode(':', $name, 3);
-        if (count($parts) < 3 || $parts[0] !== 'mcp-system') {
-            return null;
-        }
-
-        $module = basename($parts[1]);
-        $basename = basename($parts[2]);
-
-        // Directory traversal protection.
-        if ($module !== $parts[1] || $basename !== $parts[2]) {
-            return null;
-        }
-
-        return ['module' => $module, 'basename' => $basename];
-    }
+    protected const SUBDIR = 'prompts';
+    protected const REQUEST_KEY = 'name';
 
     /**
      * Load and serve a prompt definition.
      *
-     * @param GetEvent $event
+     * @param AbstractActionEvent $event
      * @param string $module
      * @param string $basename
      * @param string $requestName The original name from the request.
      * @return void
      */
-    private function getPrompt(GetEvent $event, string $module, string $basename, string $requestName): void
+    protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestName): void
     {
+        assert($event instanceof GetEvent);
         global $api;
 
-        // Module existence check.
-        if (!in_array($module, $api->manifest->moduleNames, true)) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' for unknown module: $module");
+        $metaPath = $this->resolveMetaPath($module, $basename);
+        if ($metaPath === null) {
+            $api->log->error('system:mcp', "MCP prompt request '$requestName' for unknown module or missing prompt file: $module/$basename");
             $event->setStatus(StatusEnum::NOT_FOUND, 'Prompt not found: ' . $requestName);
             return;
         }
 
-        $zPath = "module://$module/mcp/prompts/$basename.meta.json";
-        $realPath = $api->fs->toPath($zPath);
-        if (!$realPath || !is_file($realPath)) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' for missing prompt file: $zPath");
-            $event->setStatus(StatusEnum::NOT_FOUND, 'Prompt not found: ' . $requestName);
-            return;
-        }
-
-        $meta = json_decode((string) file_get_contents($realPath), true);
-        if (!is_array($meta)) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' ($zPath) has invalid JSON in file: $zPath");
+        $meta = $this->loadMeta($metaPath);
+        if ($meta === null) {
+            $api->log->error('system:mcp', "MCP prompt request '$requestName' has invalid JSON in file: $metaPath");
             $event->setStatus(StatusEnum::ERROR, 'Prompt definition is invalid: ' . $requestName);
             return;
         }
 
-        // Validate messages field.
         if (!isset($meta['messages']) || !is_array($meta['messages'])) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' ($zPath) is missing field 'messages' or field is not an array in file: $zPath");
+            $api->log->error('system:mcp', "MCP prompt request '$requestName' ($metaPath) is missing field 'messages' or field is not an array");
             $event->setStatus(StatusEnum::ERROR, "Prompt definition missing 'messages' field: $requestName");
             return;
         }
 
-        // Validate required arguments.
         $args = $event->request['arguments'] ?? [];
         if (!is_array($args)) {
             $args = [];
         }
         $error = $this->validateArguments($meta['arguments'] ?? [], $args);
         if ($error !== null) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' ($zPath) has invalid arguments: $error");
+            $api->log->error('system:mcp', "MCP prompt request '$requestName' ($metaPath) has invalid arguments: $error");
             $event->setStatus(StatusEnum::BAD_REQUEST, $error);
             return;
         }
 
-        // Resolve messages: file references + placeholder substitution.
-        $messages = $this->resolveMessages($meta['messages'], $args, $module, $zPath);
+        $messages = $this->resolveMessages($meta['messages'], $args, $module, $metaPath);
         if ($messages === null) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' ($zPath) failed to resolve prompt messages");
+            $api->log->error('system:mcp', "MCP prompt request '$requestName' ($metaPath) failed to resolve prompt messages");
             $event->setStatus(StatusEnum::ERROR, 'Failed to resolve prompt messages: ' . $requestName);
             return;
         }
 
-        // Build response.
         $event->response = ['messages' => $messages];
         if (isset($meta['description']) && is_string($meta['description'])) {
             $event->response['description'] = $meta['description'];

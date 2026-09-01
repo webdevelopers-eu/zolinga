@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
+use Zolinga\System\Events\Mcp\AbstractListEvent;
 use Zolinga\System\Events\Mcp\Tools\ListEvent;
 use Zolinga\System\Types\{OriginEnum, StatusEnum};
 use Zolinga\System\Config\Atom\ListenAtom;
@@ -23,20 +24,26 @@ use Zolinga\System\Config\Atom\ListenAtom;
  * payload must conform to the declared schema); tools without one are
  * skipped and an error is logged.
  *
+ * Unlike {@see McpPromptsListHandler} and {@see McpResourcesListHandler},
+ * which discover items from `.meta.json` files, this handler walks the
+ * merged manifest. It therefore overrides {@see onList()} entirely and does
+ * not use the meta-file scan lifecycle in {@see AbstractMcpListHandler}.
+ *
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-06-03
  */
-class McpToolsListHandler extends McpHandler
+class McpToolsListHandler extends AbstractMcpListHandler
 {
     /**
      * Handle `tools/list`. Returns a `{ tools: [...] }` payload describing all
      * listeners that opt in to the `mcp` origin and have a `schema.response`.
      *
-     * @param ListEvent $event
+     * @param AbstractListEvent $event
      * @return void
      */
-    public function onList(ListEvent $event): void
+    public function onList(AbstractListEvent $event): void
     {
+        assert($event instanceof ListEvent);
         $this->collectTools($event);
         $event->setStatus(StatusEnum::OK, 'OK');
     }

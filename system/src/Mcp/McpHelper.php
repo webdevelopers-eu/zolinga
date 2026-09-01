@@ -219,12 +219,15 @@ final class McpHelper
         $isError = !$event->isOk();
         $structured = self::normalizeResponse($event->response);
 
-        $text = $isError
-            ? ($event->message ?: 'Tool returned an error.')
-            : (is_string($structured) ? $structured : json_encode(
+        if ($isError) {
+            $text = $event->message ?: 'Tool returned an error.';
+        } else {
+            $text = is_string($structured) ? $structured : json_encode(
                 $structured,
                 JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-            ));
+            );
+        }
+
         $content = [['type' => 'text', 'text' => $text]];
 
         $envelope = [

@@ -212,19 +212,19 @@ class McpServer
             $event->setStatus(StatusEnum::ERROR, 'Response validation failed: ' . McpHelper::truncateForEcho($e->getMessage()));
         }
 
+        if ($event->status === StatusEnum::UNDETERMINED) {
+            return (new McpMethodNotFoundException(
+                'Method not found: ' . McpHelper::truncateForEcho($event->type),
+                $event->jsonrpcId
+            ))->toPayload();
+        }
+
         if ($event instanceof CallEvent) {
             return [
                 'jsonrpc' => '2.0',
                 'id' => $event->jsonrpcId,
                 'result' => McpHelper::envelope($event),
             ];
-        }
-
-        if ($event->status === StatusEnum::UNDETERMINED) {
-            return (new McpMethodNotFoundException(
-                'Method not found: ' . McpHelper::truncateForEcho($event->type),
-                $event->jsonrpcId
-            ))->toPayload();
         }
 
         if ($event->isOk()) {

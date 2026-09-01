@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zolinga\System\Mcp;
 
+use Zolinga\System\Events\Mcp\AbstractActionEvent;
 use Zolinga\System\Events\Mcp\Resources\ReadEvent;
 use Zolinga\System\Types\StatusEnum;
 
@@ -19,84 +20,36 @@ use Zolinga\System\Types\StatusEnum;
  * @author Daniel Sevcik <danny@zolinga.net>
  * @date 2026-07-22
  */
-class McpResourcesReadHandler extends \Zolinga\System\Mcp\McpHandler
+class McpResourcesReadHandler extends AbstractMcpActionHandler
 {
-    /**
-     * Handle the `resources/read:mcp-system` event.
-     *
-     * @param ReadEvent $event The resources/read event.
-     * @return void
-     */
-    public function onRead(ReadEvent $event): void
-    {
-        $uri = $event->request['uri'] ?? null;
-        if (!is_string($uri) || $uri === '') {
-            $event->setStatus(StatusEnum::BAD_REQUEST, 'Missing or empty "uri" parameter.');
-            return;
-        }
-
-        $parts = $this->parseUri($uri);
-        if ($parts === null) {
-            $event->setStatus(StatusEnum::BAD_REQUEST, 'Invalid resource URI: ' . $uri);
-            return;
-        }
-
-        $this->readResource($event, $parts['module'], $parts['basename'], $uri);
-    }
-
-    /**
-     * Parse a `mcp-system:<module>:<basename>` URI into its components.
-     *
-     * @param string $uri
-     * @return array{module: string, basename: string}|null
-     */
-    private function parseUri(string $uri): ?array
-    {
-        $parts = explode(':', $uri, 3);
-        if (count($parts) < 3) {
-            return null;
-        }
-        if ($parts[0] !== 'mcp-system') {
-            return null;
-        }
-
-        $module = basename($parts[1]);
-        $basename = basename($parts[2]);
-
-        // Directory traversal protection: basename must match the raw value.
-        if ($module !== $parts[1] || $basename !== $parts[2]) {
-            return null;
-        }
-
-        return ['module' => $module, 'basename' => $basename];
-    }
+    protected const SUBDIR = 'resources';
+    protected const REQUEST_KEY = 'uri';
 
     /**
      * Read the resource file and populate the event response.
      *
-     * @param ReadEvent $event
+     * @param AbstractActionEvent $event
      * @param string $module
      * @param string $basename
      * @param string $requestUri The original URI from the request.
      * @return void
      */
-    private function readResource(ReadEvent $event, string $module, string $basename, string $requestUri): void
+    protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestUri): void
     {
+        assert($event instanceof ReadEvent);
         global $api;
 
         $api->log->info('mcp:system', "Reading resource: $requestUri");
 
-        $basename = basename($basename); // Just to be sure.
-        $metaUri = "module://$module/mcp/resources/$basename.meta.json";
-        $metaPath = $api->fs->toPath($metaUri);
-        if (!$metaPath || !is_file($metaPath)) {
-            $api->log->info('mcp:system', "Resource meta not found: $metaUri");
+        $metaPath = $this->resolveMetaPath($module, $basename);
+        if ($metaPath === null) {
+            $api->log->info('mcp:system', "Resource meta not found: $module/$basename");
             $event->setStatus(StatusEnum::NOT_FOUND, 'Resource not found: ' . $requestUri);
             return;
         }
 
-        $meta = json_decode((string) file_get_contents($metaPath), true);
-        if (!is_array($meta) || !isset($meta['uri'])) {
+        $meta = $this->loadMeta($metaPath);
+        if ($meta === null || !isset($meta['uri'])) {
             $api->log->info('mcp:system', "Resource descriptor invalid: $requestUri");
             $event->setStatus(StatusEnum::NOT_FOUND, 'Resource descriptor missing or invalid: ' . $requestUri);
             return;
@@ -123,7 +76,7 @@ class McpResourcesReadHandler extends \Zolinga\System\Mcp\McpHandler
     }
 
     /**
-     * Build the response payload: text for text/* MIME types, blob otherwise.
+     * Build the response payload: text for text/ MIME types, blob otherwise.
      *
      * @param ReadEvent $event
      * @param string $uri

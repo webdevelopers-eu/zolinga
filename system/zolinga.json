@@ -259,7 +259,7 @@
       "event": "mcp:prompts/get:mcp-system*",
       "description": "MCP `prompts/get` request handler for the `mcp-system` URI scheme. Reads a prompt definition by its `mcp-system:<module>:<basename>` name, resolves file references, applies argument substitution, and returns the messages array.",
       "class": "\\Zolinga\\System\\Mcp\\McpPromptsGetHandler",
-      "method": "onGet",
+      "method": "onAction",
       "origin": [
         "mcp"
       ]
