@@ -106,6 +106,24 @@ Rules:
 - `origin: ["mcp"]` is required (or use `"*"` if you also want the listener to fire for non-MCP origins).
 - `schema.response` is **required**; tools without it are skipped by `tools/list` and `$api->log->error()` is called. `schema.request` is optional.
 
+### 4b. Restrict access with `right`
+
+Add a `right` property to the listener to restrict the tool to authorized callers. Tools without `right` are public.
+
+```json
+{
+  "event": "my-tool",
+  "class": "\\MyModule\\Mcp\\MyToolHandler",
+  "method": "onMyTool",
+  "origin": ["mcp"],
+  "right": "oauth2:scope mcp:tools",
+  "description": "...",
+  "schema": { ... }
+}
+```
+
+The `right` value is any expression accepted by `$api->isAuthorized()`. For MCP tools, the convention is `"oauth2:scope <scope-name>"` (e.g. `"oauth2:scope mcp:tools"`) to require a specific OAuth scope from the access token. The `BearerTokenListener` in `zolinga-oauth` converts each space-separated scope in the token to a `oauth2:scope <scope>` right at the `system:authorize` event. RMS rights with the same text also work. This mechanism is identical for `zolinga.json` listener `right` and `.meta.json` `zolinga.right` (resources/prompts).
+
 ### 5. Bump version and reload
 
 1. Bump the module's `version` in `zolinga.json` (any patch+).
