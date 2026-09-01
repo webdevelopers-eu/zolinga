@@ -34,29 +34,20 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
      * @param string $requestName The original name from the request.
      * @return void
      */
-    protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestName): void
+    protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestName): ?array
     {
         assert($event instanceof GetEvent);
         global $api;
 
-        $metaPath = $this->resolveMetaPath($module, $basename);
-        if ($metaPath === null) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' for unknown module or missing prompt file: $module/$basename");
-            $event->setStatus(StatusEnum::NOT_FOUND, 'Prompt not found: ' . $requestName);
-            return;
-        }
-
-        $meta = $this->loadMeta($metaPath);
+        $meta = parent::doAction($event, $module, $basename, $requestName);
         if ($meta === null) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' has invalid JSON in file: $metaPath");
-            $event->setStatus(StatusEnum::ERROR, 'Prompt definition is invalid: ' . $requestName);
-            return;
+            return null;
         }
 
         if (!isset($meta['messages']) || !is_array($meta['messages'])) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' ($metaPath) is missing field 'messages' or field is not an array");
+            $api->log->error('system:mcp', "MCP prompt request '$requestName' is missing field 'messages' or field is not an array");
             $event->setStatus(StatusEnum::ERROR, "Prompt definition missing 'messages' field: $requestName");
-            return;
+            return null;
         }
 
         $args = $event->request['arguments'] ?? [];
@@ -65,16 +56,16 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
         }
         $error = $this->validateArguments($meta['arguments'] ?? [], $args);
         if ($error !== null) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' ($metaPath) has invalid arguments: $error");
+            $api->log->error('system:mcp', "MCP prompt request '$requestName' has invalid arguments: $error");
             $event->setStatus(StatusEnum::BAD_REQUEST, $error);
-            return;
+            return null;
         }
 
-        $messages = $this->resolveMessages($meta['messages'], $args, $module, $metaPath);
+        $messages = $this->resolveMessages($meta['messages'], $args, $module);
         if ($messages === null) {
-            $api->log->error('system:mcp', "MCP prompt request '$requestName' ($metaPath) failed to resolve prompt messages");
+            $api->log->error('system:mcp', "MCP prompt request '$requestName' failed to resolve prompt messages");
             $event->setStatus(StatusEnum::ERROR, 'Failed to resolve prompt messages: ' . $requestName);
-            return;
+            return null;
         }
 
         $event->response = ['messages' => $messages];
@@ -83,6 +74,7 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
         }
 
         $event->setStatus(StatusEnum::OK, 'OK');
+        return null;
     }
 
     /**
@@ -113,10 +105,9 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
      * @param array<int, array<string, mixed>> $messages
      * @param array<string, mixed> $args
      * @param string $module The module name for path containment checks.
-     * @param string $zPath The zPath of the .meta.json file (for logging).
      * @return array<int, array<string, mixed>>|null Resolved messages, or null on error.
      */
-    private function resolveMessages(array $messages, array $args, string $module, string $zPath): ?array
+    private function resolveMessages(array $messages, array $args, string $module): ?array
     {
         global $api;
 
@@ -125,7 +116,7 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
 
         foreach ($messages as $msg) {
             if (!is_array($msg) || !isset($msg['content']) || !is_array($msg['content'])) {
-                $api->log->error('system:mcp', "MCP prompt message in file '$zPath' is invalid or missing 'content' field: " . json_encode($msg));
+                $api->log->error('system:mcp', "MCP prompt message is invalid or missing 'content' field: " . json_encode($msg));
                 continue;
             }
 
@@ -136,7 +127,7 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
                 $uri = $content['uri']; // real path to the file
                 $contentPath = is_string($uri) ? $api->fs->toPath($uri) : null;
                 if (!$contentPath || !file_exists($contentPath)) {
-                    $api->log->error('system:mcp', "Prompt $zPath content.uri file not found: $uri");
+                    $api->log->error('system:mcp', "Prompt content.uri file not found: $uri");
                     continue;
                 }
 
@@ -156,7 +147,7 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
             // Check role is valid (user, system, assistant, or function).
             $role = $msg['role'] ?? '';
             if (!in_array($role, ['user', 'system', 'assistant', 'function'], true)) {
-                $api->log->error('system:mcp', "Prompt $zPath message has invalid 'role' field: " . json_encode($msg) . ". Resetting to role 'user'.");
+                $api->log->error('system:mcp', "Prompt message has invalid 'role' field: " . json_encode($msg) . ". Resetting to role 'user'.");
                 $msg['role'] = 'user';
             }
 

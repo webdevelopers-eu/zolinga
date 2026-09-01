@@ -122,13 +122,40 @@ abstract class AbstractMcpActionHandler extends McpHandler
     }
 
     /**
-     * Perform the type-specific action after the identifier is parsed.
+     * Resolve and load the `.meta.json` file for the given module + basename.
      *
-     * @param AbstractActionEvent $event The action event to populate.
+     * On failure, sets the event status and logs the error (including
+     * `$metaPath`). Descendants should call `parent::doAction()` first;
+     * if it returns null, they must return early.
+     *
+     * @param AbstractActionEvent $event The action event to populate on failure.
      * @param string $module The resolved module name.
      * @param string $basename The resolved file basename.
      * @param string $requestId The original request identifier (for logging).
-     * @return void
+     * @return array<string, mixed>|null The decoded `.meta.json`, or null on failure.
      */
-    abstract protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestId): void;
+    protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestId): ?array
+    {
+        global $api;
+
+        $metaPath = $this->resolveMetaPath($module, $basename);
+        if ($metaPath === null) {
+            $api->log->error('system:mcp', "MCP " . static::SUBDIR . " request '$requestId' for unknown module or missing file: $module/$basename");
+            $event->setStatus(StatusEnum::NOT_FOUND, ucfirst(static::SUBDIR) . ' not found: ' . $requestId);
+            return null;
+        }
+
+        $meta = $this->loadMeta($metaPath);
+        if ($meta === null) {
+            $api->log->error('system:mcp', "MCP " . static::SUBDIR . " request '$requestId' has invalid JSON in file: $metaPath");
+            $event->setStatus(StatusEnum::ERROR, ucfirst(static::SUBDIR) . ' definition is invalid: ' . $requestId);
+            return null;
+        }
+
+        if (!$this->isAuthorizedMeta($meta)) {
+            return null;
+        }
+
+        return $meta;
+    }
 }

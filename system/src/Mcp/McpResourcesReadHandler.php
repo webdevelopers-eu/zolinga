@@ -34,45 +34,43 @@ class McpResourcesReadHandler extends AbstractMcpActionHandler
      * @param string $requestUri The original URI from the request.
      * @return void
      */
-    protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestUri): void
+    protected function doAction(AbstractActionEvent $event, string $module, string $basename, string $requestUri): ?array
     {
         assert($event instanceof ReadEvent);
         global $api;
 
         $api->log->info('mcp:system', "Reading resource: $requestUri");
 
-        $metaPath = $this->resolveMetaPath($module, $basename);
-        if ($metaPath === null) {
-            $api->log->info('mcp:system', "Resource meta not found: $module/$basename");
-            $event->setStatus(StatusEnum::NOT_FOUND, 'Resource not found: ' . $requestUri);
-            return;
+        $meta = parent::doAction($event, $module, $basename, $requestUri);
+        if ($meta === null) {
+            return null;
         }
 
-        $meta = $this->loadMeta($metaPath);
-        if ($meta === null || !isset($meta['uri'])) {
+        if (!isset($meta['uri'])) {
             $api->log->info('mcp:system', "Resource descriptor invalid: $requestUri");
             $event->setStatus(StatusEnum::NOT_FOUND, 'Resource descriptor missing or invalid: ' . $requestUri);
-            return;
+            return null;
         }
 
         $contentPath = $api->fs->toPath($meta['uri']);
         if (!$contentPath || !is_file($contentPath)) {
             $api->log->info('mcp:system', "Resource content file not found: {$meta['uri']}");
             $event->setStatus(StatusEnum::NOT_FOUND, 'Resource content file not found: ' . $requestUri);
-            return;
+            return null;
         }
 
         $contents = file_get_contents($contentPath);
         if ($contents === false) {
             $api->log->info('mcp:system', "Failed to read resource content: $requestUri");
             $event->setStatus(StatusEnum::ERROR, 'Failed to read resource content: ' . $requestUri);
-            return;
+            return null;
         }
 
         $mimeType = $meta['mimeType'] ?? 'application/octet-stream';
         $this->buildResponse($event, $requestUri, $mimeType, $contents);
         $api->log->info('mcp:system', "Resource served: $requestUri ($mimeType, " . strlen($contents) . " bytes)");
         $event->setStatus(StatusEnum::OK, 'OK');
+        return null;
     }
 
     /**

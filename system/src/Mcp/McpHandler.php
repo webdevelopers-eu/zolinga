@@ -14,4 +14,17 @@ use Zolinga\System\Events\ListenerInterface;
  */
 abstract class McpHandler implements ListenerInterface
 {
+    protected function isAuthorizedMeta(array $json): bool
+    {
+        global $api;
+
+        if (is_array($json['zolinga'] ?? null) && isset($json['zolinga']['right'])) {
+            if (!$api->isAuthorized($json['zolinga']['right'])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }

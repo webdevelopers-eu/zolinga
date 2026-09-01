@@ -162,7 +162,9 @@ class Api
         $rightsArr = is_array($rights) ? $rights : [$rights];
         $authEvent = new AuthorizeEvent('system:authorize', AuthorizeEvent::ORIGIN_INTERNAL, $rightsArr);
         $authEvent->dispatch();
-        return $authEvent->isAuthorized();
+        $isAuthorized = $authEvent->isAuthorized();
+
+        return $isAuthorized;
     }
 
     private function processEvent(Event $event, ListenerInterface $listener, string $method): void

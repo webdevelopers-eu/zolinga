@@ -15,7 +15,12 @@ The gateway dispatches one concrete subclass per JSON-RPC method. `McpEvent::fro
 | `resources/read`      | `Mcp\Resources\ReadEvent`                    | `mcp:resources/read:<scheme>`        |
 
 The `resources/read` event type includes the URI scheme as a suffix (e.g. `mcp:resources/read:mcp-system`), allowing handlers to register for specific URI schemes. See [MCP Resources](:Zolinga Core:MCP:Resources) for details.
+| `notifications/initialized` | `Mcp\NotificationEvent`                 | `notifications/initialized`          |
 | anything else         | —                                            | `McpMethodNotFoundException` thrown  |
+
+## Notifications
+
+MCP notifications are JSON-RPC requests without an `id` field. The server does not act on them but accepts `notifications/initialized` (and any future notification method) as a no-op: the event dispatches, no listener is expected, and the gateway replies with **HTTP 204 No Content** — the JSON-RPC notification contract (no response body). This prevents clients that send notifications from failing on an unknown-method error.
 
 The table shows the base event type. Listeners defined for the base `/mcp` route match all requests.
 

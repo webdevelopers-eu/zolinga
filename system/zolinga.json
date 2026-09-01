@@ -1,6 +1,6 @@
 {
   "name": "Zolinga Framework",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Zolinga PHP framework that makes sense.",
   "authors": [
     "Danny Sevcik <danny@zolinga.net>"
@@ -241,7 +241,7 @@
       "event": "mcp:resources/read:mcp-system*",
       "description": "MCP `resources/read` request handler for the `mcp-system` URI scheme. Reads a resource file by its `mcp-system:<module>:<basename>` URI and returns the contents as text or blob.",
       "class": "\\Zolinga\\System\\Mcp\\McpResourcesReadHandler",
-      "method": "onRead",
+      "method": "onAction",
       "origin": [
         "mcp"
       ]

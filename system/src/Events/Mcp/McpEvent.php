@@ -190,8 +190,12 @@ abstract class McpEvent extends RequestResponseEvent implements StoppableInterfa
             'prompts/get' => new Prompts\GetEvent($id, $params),
             'resources/list' => new Resources\ListEvent($id, $params),
             'resources/read' => new Resources\ReadEvent($id, $params),
+            // MCP notifications (no id) are accepted as no-ops; the gateway
+            // replies with HTTP 204. We do not implement them, but some
+            // clients fail if the server errors on unknown methods.
+            'notifications/initialized' => new NotificationEvent($method, $params),
             default => throw new McpMethodNotFoundException(
-                'Method not found: ' . $method,
+                'Method or resource not found: ' . $method,
                 $id
             ),
         };

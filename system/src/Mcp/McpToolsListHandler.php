@@ -122,15 +122,10 @@ class McpToolsListHandler extends AbstractMcpListHandler
             return true;
         }
 
-        // If the user is not logged in, they cannot have any rights.
-        if ($api->user->isGuest()) {
-            return false;
+        if ($api->isAuthorized($atom['right'])) {
+            return true;
         }
-
-        if (!$api->isAuthorized($atom['right'])) {
-            return false;
-        }
-
+        
         return false;
     }
 

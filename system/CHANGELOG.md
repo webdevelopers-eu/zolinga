@@ -4,6 +4,11 @@ All notable changes to the Zolinga System module are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-09-01
+
+### Added
+- MCP `notifications/initialized` notification accepted as a no-op. The gateway now replies with HTTP 204 No Content for JSON-RPC notifications (requests without an `id`), preventing clients that send notifications from failing on an unknown-method error.
+
 ## [1.7.0] - 2026-09-01
 
 ### Removed

@@ -172,10 +172,11 @@ class McpServer
 
         $decoded = json_decode($this->rawBody, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
+            $lastError = json_last_error_msg();
             $api->log->warning('system:mcp', McpHelper::truncateForEcho('MCP parse error'), [
-                'jsonError' => json_last_error_msg(),
+                'jsonError' => $lastError,
             ]);
-            throw new McpParseErrorException('Parse error: ' . json_last_error_msg());
+            throw new McpParseErrorException('Error parsing JSON request: ' . $lastError);
         }
 
         if (!is_array($decoded) || array_is_list($decoded)) {
@@ -196,10 +197,15 @@ class McpServer
      * and an error response is returned instead.
      *
      * @param McpEvent $event
-     * @return array<string, mixed>
+     * @return array<string, mixed>|null Null for notifications (HTTP 204).
      */
-    private function buildResponse(McpEvent $event): array
+    private function buildResponse(McpEvent $event): ?array
     {
+        // JSON-RPC notifications (no id) get no response body — HTTP 204.
+        if ($event->jsonrpcId === null) {
+            return null;
+        }
+
         // Validate the response before producing any output to the client.
         try {
             $event->validateResponse();
@@ -214,7 +220,7 @@ class McpServer
 
         if ($event->status === StatusEnum::UNDETERMINED) {
             return (new McpMethodNotFoundException(
-                'Method not found: ' . McpHelper::truncateForEcho($event->type),
+                'Method or resource not found: ' . McpHelper::truncateForEcho($event->type),
                 $event->jsonrpcId
             ))->toPayload();
         }
@@ -371,6 +377,10 @@ class McpServer
             + [null, null];
         $authInfo = trim(($token[0] ?? '') . ' ' . ($token[1] ? 'crc32=' . dechex(crc32($token[1])) : '')) ?: 'noauth';
         $ua = $_SERVER['HTTP_USER_AGENT'] ?? '-';
+
+        if (isset($_GET['debug'])) {
+            $api->log->info('system:mcp', "🐞 DEBUG: TOKEN = {$token[1]}");
+        }
         
         $api->log->info(
             'system:mcp', 

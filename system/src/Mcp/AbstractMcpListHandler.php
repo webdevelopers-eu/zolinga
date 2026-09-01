@@ -97,16 +97,15 @@ abstract class AbstractMcpListHandler extends McpHandler
             return;
         }
 
-        if (is_array($json['zolinga']) && isset($json['zolinga']['right'])) {
-            if (!$api->isAuthorized($json['zolinga']['right'])) {
-                return;
-            }
+        if (!$this->isAuthorizedMeta($json)) {
+            return;
         }
 
         $basename = basename($metaFile, '.meta.json');
         $uri = "mcp-system:$module:$basename";
 
         $json[static::ID_FIELD] = $uri;
+        unset($json['zolinga']); // to avoid leaking internal rights into the public response
 
         if (!$this->validateMeta($json, $metaFile)) {
             return;
