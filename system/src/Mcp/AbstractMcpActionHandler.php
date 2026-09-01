@@ -136,6 +136,8 @@ abstract class AbstractMcpActionHandler extends McpHandler
         }
 
         if (!$this->isAuthorizedMeta($meta)) {
+            $api->log->info('system:mcp', "MCP " . static::SUBDIR . " request '$mcpUri' denied: insufficient rights");
+            $event->setStatus(StatusEnum::FORBIDDEN, ucfirst(static::SUBDIR) . ' not accessible: ' . $mcpUri);
             return null;
         }
 
