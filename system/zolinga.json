@@ -507,6 +507,8 @@
     "mcp": {
       "# enabled": "Enable or disable MCP (Model Context Protocol) gateway.",
       "enabled": true,
+      "# debug": "DANGER: never enable on production sites - it logs sensitive information",
+      "debug": false,
       "server": {
         "# name": "Server name reported to MCP clients during initialize. If empty, defaults to the baseURL host.",
         "name": "",

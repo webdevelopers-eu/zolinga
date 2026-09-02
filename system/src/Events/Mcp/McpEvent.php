@@ -195,7 +195,7 @@ abstract class McpEvent extends RequestResponseEvent implements StoppableInterfa
             // clients fail if the server errors on unknown methods.
             'notifications/initialized' => new NotificationEvent($method, $params),
             default => throw new McpMethodNotFoundException(
-                'Method or resource not found: ' . $method,
+                'Method or resource not found or user is not authorized: ' . $method,
                 $id
             ),
         };

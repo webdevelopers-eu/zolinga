@@ -59,12 +59,19 @@ abstract class AbstractMcpActionHandler extends McpHandler
     }
 
     /**
-     * Parse a `mcp-system://<module>/<subdir>/<basename>` identifier into its parts.
+     * Parse a `mcp-system://<module>/<subdir>/<basename>` identifier and return 
+     * system path pointing to associated `.meta.json` file. Returns null if invalid or not found.
+     * 
+     * E.g.
+     * 
+     * $action->mcpUriToPath('mcp-system://my-module/resources/my-resource.txt');
+     * 
+     * Returns: `/var/www/example.com/modules/my-module/mcp/resources/my-resource.txt.meta.json`
      *
      * @param string $mcpUri The identifier to parse.
      * @return string|null Null if invalid.
      */
-    private function mcpUriToPath(string $mcpUri): ?string
+    public function mcpUriToPath(string $mcpUri): ?string
     {
         global $api;
 
@@ -79,7 +86,7 @@ abstract class AbstractMcpActionHandler extends McpHandler
         }
 
         $module = basename($parts['host']);
-        $dirname = basename(dirname($parts['path']));
+        $dirname = dirname($parts['path']);
         $basename = basename($parts['path']);
 
         if ($dirname !== static::SUBDIR) {

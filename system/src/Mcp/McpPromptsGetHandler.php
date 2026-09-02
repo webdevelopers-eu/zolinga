@@ -72,7 +72,7 @@ class McpPromptsGetHandler extends AbstractMcpActionHandler
         }
 
         $event->setStatus(StatusEnum::OK, 'OK');
-        return null;
+        return $meta;
     }
 
     /**

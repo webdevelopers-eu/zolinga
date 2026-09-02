@@ -69,7 +69,7 @@ class McpResourcesReadHandler extends AbstractMcpActionHandler
         $this->buildResponse($event, $mcpUri, $mimeType, $contents);
         $api->log->info('mcp:system', "Resource served: $metaPath ($mimeType, " . strlen($contents) . " bytes) ($mcpUri)");
         $event->setStatus(StatusEnum::OK, 'OK');
-        return null;
+        return $meta;
     }
 
     /**
