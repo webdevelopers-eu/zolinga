@@ -60,6 +60,19 @@ event
     The event type in the format of an URI. Example: example.org:api:myEvent
     See Zolinga WIKI's "Zolinga Explorer/Events" article for the list of supported event types.
 
+    You can optionally prefix the event type with an origin using '@' to
+    dispatch the event as if it came from a different source. The format is:
+
+        {origin}@{event}
+
+    Supported origins: cli, remote, mcp, internal. If no origin prefix is
+    given, 'cli' is used by default.
+
+    Examples:
+        zolinga remote@rms:login --username=user@example.com --password=secret
+        zolinga mcp@userSearch --username=admin
+        zolinga internal@my:event --param=value
+
 params
 
     Parameters to the event. The parameters can be in JSON format or in Javascript dot notation.

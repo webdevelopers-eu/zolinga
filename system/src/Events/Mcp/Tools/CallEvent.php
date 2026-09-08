@@ -48,7 +48,7 @@ class CallEvent extends AbstractActionEvent
         $name = $params['name'] ?? null;
         if (!McpHelper::isValidToolName($name)) {
             throw new McpInvalidParamsException(
-                'tools/call "name" must be 1..' . McpHelper::TOOL_NAME_MAX_LENGTH . ' chars of ' . McpHelper::TOOL_NAME_CHAR_CLASS . ' and must not start with "mcp:".',
+                'tools/call name "' . $name . '" must be 1..' . McpHelper::TOOL_NAME_MAX_LENGTH . ' chars of ' . McpHelper::TOOL_NAME_CHAR_CLASS . ' and must not start with "mcp:".',
                 $jsonrpcId
             );
         }

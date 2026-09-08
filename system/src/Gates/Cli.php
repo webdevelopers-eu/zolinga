@@ -6,6 +6,9 @@ namespace Zolinga\System\Gates;
 
 use Zolinga\System\Events\CliRequestResponseEvent;
 use Zolinga\System\Events\Event;
+use Zolinga\System\Events\WebEvent;
+use Zolinga\System\Types\OriginEnum;
+use Zolinga\System\Events\Mcp\Tools\CallEvent;
 
 use const Zolinga\System\ROOT_DIR;
 use const Zolinga\System\START_TIME;
@@ -417,8 +420,27 @@ class Cli
      */
     private function dispatchEvents(): void
     {
-        foreach ($this->parsedArgs as $parsedArgs) {
-            $event = new CliRequestResponseEvent($parsedArgs['type'], CliRequestResponseEvent::ORIGIN_CLI, $parsedArgs['params'], []);
+        foreach ($this->parsedArgs as $k => $parsedArgs) {
+            // The event can have optional origin prefix, e.g. "{origin}@{event}" or just "{event}"
+            if (str_contains($parsedArgs['type'], '@')) {
+                [$originName, $eventType] = explode('@', $parsedArgs['type'], 2);
+                $origin = OriginEnum::tryFrom($originName)
+                    or throw new \Exception("Unknown origin \"$originName\" in event \"{$parsedArgs['type']}\". Supported origins: " . implode(', ', array_column(OriginEnum::cases(), 'value')));
+            } else {
+                $origin = OriginEnum::CLI;
+                $eventType = $parsedArgs['type'];
+            }
+
+            $event = match($origin) {
+                OriginEnum::CLI => new CliRequestResponseEvent($eventType, $origin, $parsedArgs['params'], []),
+                OriginEnum::REMOTE => new WebEvent($eventType, $origin, $parsedArgs['params'], []),
+                OriginEnum::MCP => new CallEvent($k, [
+                    "name" => $eventType,
+                    "arguments" => $parsedArgs['params']
+                ], []),
+                default => new CliRequestResponseEvent($eventType, $origin, $parsedArgs['params'], []),
+            };
+
             $event->dispatch();
             $this->events[] = $event;
         }

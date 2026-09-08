@@ -28,6 +28,31 @@ zolinga \
 
 Run `bin/zolinga --help` to see the available options.
 
+# Origin Prefix
+
+By default, events dispatched from the command line have the `cli` origin. You can override this by prefixing the event type with `{origin}@`:
+
+```
+zolinga {origin}@{event} [params]
+```
+
+Supported origins: `cli`, `remote`, `mcp`, `internal`. If no prefix is given, `cli` is used. An unknown origin is an error.
+
+```shell
+# Dispatch as a remote-origin event (e.g. to test web API handlers)
+zolinga remote@rms:login --username=user@example.com --password=secret
+
+# Dispatch as an MCP tool call
+zolinga mcp@userSearch --username=admin
+
+# Dispatch as an internal event
+zolinga internal@my:event --param=value
+```
+
+This is useful for testing listeners that are restricted to a specific origin without needing to set up a web server or MCP client.
+
+Note: the `@` character is reserved for the origin prefix and cannot appear in event types.
+
 Non-JSON values (e.g. `--test.param=123`) will be converted to int, float, bool, null or string as follows:
 
 - `null` - if the value is `null`

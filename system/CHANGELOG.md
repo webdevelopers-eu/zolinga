@@ -4,6 +4,17 @@ All notable changes to the Zolinga System module are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- CLI origin prefix: events can be dispatched with a fake origin using `{origin}@{event}` syntax, e.g. `bin/zolinga remote@rms:login` or `bin/zolinga mcp@userSearch`. Supported origins: `cli`, `remote`, `mcp`, `internal`. Unknown origins are rejected with an error.
+- CLI event type validation: event types passed on the command line must not contain whitespace, quotes, apostrophes or any of `{}[],;!|`. The `@` character is reserved for the origin prefix.
+
+## [1.7.2] - 2026-09-08
+
+### Changed
+- `CallEvent` error message now includes the invalid tool name value.
+
 ## [1.7.1] - 2026-09-01
 
 ### Added
