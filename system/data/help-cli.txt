@@ -6,6 +6,7 @@ Example:
     zolinga example.org:api:myEvent --system.db.password=123 --system.db.user=me
     zolinga example.org:api:myEvent '{"system":{"db":{"password":"123","user":"me"}}'
     zolinga rms:user --login=john@example.com mcp@userSearch --search.name=john
+    zolinga --server=127.0.0.1:8888
 
 options
 
