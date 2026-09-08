@@ -181,6 +181,22 @@ Expected error response (still in `result`, not a JSON-RPC `error` block):
 - **Returning a non-conforming response**: clients validate `structuredContent` against `outputSchema`; if it doesn't match, they reject the result. Keep the handler and the schema in sync.
 - **Missing PHP `declare(strict_types=1);` or missing `use Zolinga\System\Types\StatusEnum`**: standard PHP code-quality nits that the linter will catch.
 
+## Debugging Tools via CLI
+
+If `zolinga-rms` is installed, you can call MCP tools from the command line as an authenticated user without setting up an OAuth token or MCP client. Use the `mcp@` origin prefix combined with `rms:user --login`:
+
+```bash
+# Log in as a user, then call an MCP tool
+bin/zolinga rms:user --login=admin@example.com mcp@my-tool --arg=hello
+
+# Or log in with --user + --login, then call the tool
+bin/zolinga rms:user --user=admin@example.com --login mcp@my-tool --arg=hello
+```
+
+The `rms:user --login` event runs first and loads the user into `$api->user` via `loginNoPassword()` (no password, no `lastLogin`/`lastLoginFrom` update). The subsequent `mcp@my-tool` event is dispatched with `mcp` origin and the tool's `right` check passes because the user is already loaded.
+
+This is the fastest way to test a tool that requires authorization. See [Command Line](:Zolinga Core:Running the System:Command Line) for the `@` origin prefix and [RMS CLI](:Zolinga RMS:CLI) for the `--login` option.
+
 ## References
 
 - [MCP (Model Context Protocol)](:Zolinga Core:Running the System:MCP) — endpoint overview, request/response shape, headers.

@@ -116,6 +116,22 @@ A successful invocation returns:
 }
 ```
 
+## Debugging Tools via CLI
+
+If `zolinga-rms` is installed, you can call MCP tools from the command line as an authenticated user without setting up an OAuth token or MCP client. Use the `mcp@` origin prefix combined with `rms:user --login`:
+
+```bash
+# Log in as a user, then call an MCP tool
+bin/zolinga rms:user --login=admin@example.com mcp@getPricingList
+
+# Or log in with --user + --login, then call the tool
+bin/zolinga rms:user --user=admin@example.com --login mcp@getPricingList
+```
+
+The `rms:user --login` event runs first and loads the user into `$api->user` via `loginNoPassword()` (no password, no `lastLogin`/`lastLoginFrom` update). The subsequent `mcp@getPricingList` event is dispatched with `mcp` origin and the tool's `right` check passes because the user is already loaded.
+
+See [Command Line](:Zolinga Core:Running the System:Command Line) for the `@` origin prefix and [RMS CLI](:Zolinga RMS:CLI) for the `--login` option.
+
 ## Checklist
 
 - [ ] Manifest entry re-uses existing class+method; only `event`, `origin`, `schema` differ.

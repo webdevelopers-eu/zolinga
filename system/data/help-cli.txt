@@ -1,6 +1,11 @@
 Zolinga CLI
 
-Usage: zolinga [options] [event [params]] [event [params]] ...
+Usage: zolinga [options] [[origin@]event [params]] [[origin@]event [params]] ...
+
+Example:
+    zolinga example.org:api:myEvent --system.db.password=123 --system.db.user=me
+    zolinga example.org:api:myEvent '{"system":{"db":{"password":"123","user":"me"}}'
+    zolinga rms:user --login=john@example.com mcp@userSearch --search.name=john
 
 options
 
