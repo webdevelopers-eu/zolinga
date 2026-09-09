@@ -116,4 +116,3 @@ Notes:
 - `system/wiki/Zolinga Core/Events and Listeners.md`
 - `modules/zolinga-rms/zolinga.json`
 - `modules/zolinga-rms/src/Service.php`
-- `modules/ipdefender/src/Content/VyhledavaniListener.php`
