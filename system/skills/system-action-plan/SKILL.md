@@ -1,6 +1,6 @@
 ---
 name: system-action-plan
-description: Use when creating actionable, trackable plan documents in the /TODO folder — reviews, audits, new features, refactors, migrations, any multi-step work. Covers the TOC-with-progress-counters format, atomic checkbox steps, mandatory validation step per block, heading hierarchy, and concise author-to-author tone.
+description: Use when creating actionable, trackable plan documents in the /TODO folder — reviews, audits, new features, refactors, migrations, any multi-step work. Covers the TOC-with-progress-counters format, atomic checkbox steps each followed by one reasoning paragraph, a mandatory validation step per block, heading hierarchy, and concise author-to-author tone.
 argument-hint: "<plan-name> <topic>"
 ---
 
@@ -31,17 +31,29 @@ Place files in `/TODO/<plan-name>.md`. Structure:
 
 ## <Item 1>
 - [ ] <atomic action step>
+
+  <One paragraph: why this step is necessary. The defect, the impact, and any constraint a naive fix would break. Not a second action.>
+
 - [ ] <atomic action step>
+
+  <One paragraph of reasoning.>
+
 - [ ] Validate: <how to verify this block is done>
 
 ## <Item 2>
 - [ ] <atomic action step>
+
+  <One paragraph of reasoning.>
+
 - [ ] Validate: <how to verify this block is done>
 
 # <Category 2>
 
 ## <Item 3>
 - [ ] <atomic action step>
+
+  <One paragraph of reasoning.>
+
 - [ ] Validate: <how to verify this block is done>
 ```
 
@@ -49,9 +61,9 @@ Place files in `/TODO/<plan-name>.md`. Structure:
 
 1. **TOC at top**: nested list — `#` category headings at top level, `##` items indented under their category. Each line has checkbox + heading + `(checked/total)` counter.
 2. **Heading hierarchy**: `#` for top-level categories (e.g. Security, Maintainability, Performance, or feature areas like "Backend", "Frontend", "Database"). `##` for individual action items under each category.
-3. **Atomic steps**: each checkbox is one concise, actionable sentence. No paragraphs.
+3. **Action step plus reason**: each action checkbox is one concise sentence. Directly under it, indented so it stays with that item, one paragraph says why the step is necessary. State the defect, the impact, and any constraint a naive fix would break. The paragraph is not a second action. TOC lines and the closing `Validate:` checkbox have no reason paragraph.
 4. **Validation step**: every `##` item block ends with a `Validate:` checkbox describing how to confirm the block is complete/correct.
-5. **Concise tone**: write as if to an author who knows the system. No lengthy explanations.
+5. **Concise tone**: write as if to an author who knows the system. The reason is one paragraph, not a design essay.
 6. **Update counters**: when checking a box, update the item's count, the category total, and the TOC counters.
 7. **Check the TOC box** for an item when all its steps are checked; check the category box when all items under it are checked.
 8. **File paths**: reference files by relative path from workspace root, e.g. `modules/foo/src/Bar.php`.
@@ -65,8 +77,8 @@ Place files in `/TODO/<plan-name>.md`. Structure:
 1. Gather requirements (review findings, feature specs, refactor goals, etc.).
 2. **VERIFY each item**: for review plans, read the actual file, grep the code, confirm the issue exists at the stated line. For feature plans, confirm the target files/structures exist. Drop anything that cannot be confirmed.
 3. Group items into `#` category headings (by concern, dimension, or feature area — not by file).
-4. Write `##` items under each category, each with atomic action steps — each step is a concrete action, not an investigation.
-5. Add a `Validate:` step at the end of each `##` item block.
+4. Write `##` items under each category. Each action step is one concrete sentence, then one reasoning paragraph. The step is not an investigation.
+5. Add a `Validate:` step at the end of each `##` item block. Do not add a reason paragraph under it.
 6. Build the nested TOC with `(0/N)` counters.
 7. Save to `/TODO/<plan-name>.md`.
 
