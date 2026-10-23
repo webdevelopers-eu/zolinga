@@ -56,6 +56,14 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? '')) === 'OPTIONS') {
 
 require($_SERVER['DOCUMENT_ROOT'] . '/../system/loader.php');
 
+// Mark this request as coming through the MCP gateway. BearerTokenListener
+// uses this to know it may load the token's user identity for this request
+// (MCP tools authorize against user rights). Remote gate requests never set
+// this, so a Bearer token there can only authorize its OAuth scopes.
+if (!defined('ZOLINGA_MCP_GATEWAY')) {
+    define('ZOLINGA_MCP_GATEWAY', true);
+}
+
 // if (session_status() === PHP_SESSION_ACTIVE && session_id() !== '') {
 //     header('Mcp-Session-Id: ' . session_id());
 // }
