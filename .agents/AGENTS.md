@@ -33,6 +33,7 @@ Repository core skills:
 - `system-install-scripts`
 - `system-content-tags`
 - `system-web-components` — **REQUIRED** for any front-end web component / widget work. Load before creating or modifying custom elements.
+- `system-override-mcp-redirect-page` — overriding the human-facing page browsers see at the MCP gateway URL.
 - `system-translations`
 - `system-custom-api-endpoints`
 - `system-documentation`
