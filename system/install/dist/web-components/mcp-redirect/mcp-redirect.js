@@ -20,8 +20,35 @@ export default class McpRedirect extends WebComponent {
     }
 
     async #init() {
-        await this.loadContent(import.meta.url.replace('.js', '.html'), {
+        const root = await this.loadContent(import.meta.url.replace('.js', '.html'), {
             mode: 'closed'
+        });
+        this.#replaceVars(root);
+    }
+
+    /**
+     * Replace every element carrying a `var` attribute with the current value
+     * of that variable. Keeps the markup domain-agnostic so the same template
+     * works on any host name.
+     *
+     * Supported variables:
+     * - domain: current host name including port, e.g. "v2.ipdefender.eu"
+     *
+     * @param {ShadowRoot|HTMLElement|null} root loaded template root
+     * @returns {void}
+     */
+    #replaceVars(root) {
+        if (!root) return;
+
+        const values = {
+            domain: window.location.host
+        };
+
+        root.querySelectorAll('[var]').forEach((el) => {
+            const name = el.getAttribute('var');
+            if (Object.hasOwn(values, name)) {
+                el.textContent = values[name];
+            }
         });
     }
 }
