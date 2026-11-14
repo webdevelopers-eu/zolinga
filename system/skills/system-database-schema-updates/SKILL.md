@@ -28,21 +28,52 @@ argument-hint: "<module-name> [table-or-view]"
 
 ## Idempotency (IF NOT EXISTS / IF EXISTS)
 
-All DDL statements that support `IF NOT EXISTS` or `IF EXISTS` **must** use them so scripts are safe to run multiple times without failing:
+Every DDL statement in `install/update/` **must** be re-runnable. A given update script can execute more than once against the same database, because "already applied" is recorded per deployment in `data/system/installed/{module}.json`, not in the database. Two deployments sharing one database each replay the script.
+
+Supported by MariaDB (verified against 10.11):
 
 - `CREATE TABLE IF NOT EXISTS ...`
-- `CREATE VIEW IF NOT EXISTS ...`
-- `CREATE INDEX IF NOT EXISTS ...` (MySQL 8.0+; for older versions, check existence first)
-- `ALTER TABLE ... ADD COLUMN IF NOT EXISTS ...` (MySQL 8.0+; for older versions, use a separate check)
-- `DROP TABLE IF EXISTS ...`
-- `DROP VIEW IF EXISTS ...`
-- `DROP INDEX IF EXISTS ...` (MySQL 8.0+)
+- `CREATE VIEW IF NOT EXISTS ...` or `CREATE OR REPLACE VIEW ...` (the two are mutually exclusive)
+- `CREATE INDEX IF NOT EXISTS ...` / `CREATE OR REPLACE INDEX ...`
+- `ALTER TABLE ... ADD COLUMN IF NOT EXISTS ...`
+- `ALTER TABLE ... ADD INDEX IF NOT EXISTS ...`
+- `ALTER TABLE ... ADD UNIQUE INDEX IF NOT EXISTS ...`
+- `ALTER TABLE ... ADD FOREIGN KEY IF NOT EXISTS ...`
+- `ALTER TABLE ... DROP COLUMN IF EXISTS ...`
+- `ALTER TABLE ... DROP INDEX IF EXISTS ...`
+- `ALTER TABLE ... MODIFY COLUMN IF EXISTS ...` / `CHANGE COLUMN IF EXISTS ...`
+- `DROP TABLE IF EXISTS ...`, `DROP VIEW IF EXISTS ...`, `DROP INDEX IF EXISTS ...`, `DROP TRIGGER IF EXISTS ...`
 
-For MySQL versions that do not support `IF NOT EXISTS` on a given statement (e.g. `ADD COLUMN` before 8.0), wrap the operation in a conditional check using a `DO` block or a stored procedure that queries `INFORMATION_SCHEMA`.
+MySQL does not accept `IF (NOT) EXISTS` on `ADD COLUMN`, `ADD INDEX`, or `CREATE INDEX`. On MySQL, guard those by querying `INFORMATION_SCHEMA.COLUMNS` / `STATISTICS` first.
+
+### Never drop columns in an update script
+
+Leave a superseded column in place as an unused nullable column instead of `DROP COLUMN`. A drop is destructive, unrepeatable on a deployment that already ran the script, and breaks any build still reading the column. An unused column costs storage and nothing else.
+
+Changing a unique key is the one legitimate exception: `DROP INDEX IF EXISTS old_name` followed by `ADD UNIQUE INDEX IF NOT EXISTS new_name`.
+
+### Guard every backfill
+
+A `DML` statement in an update script must produce the same result when run twice. Predicate it on the state it is intended to initialise:
+
+```sql
+-- Wrong: a second run resets the marker and erases what was already accounted for.
+UPDATE ipdInvoices SET billingCountedUntil = UNIX_TIMESTAMP() WHERE end IS NULL;
+
+-- Right: only drafts that were never initialised.
+UPDATE ipdInvoices SET billingCountedUntil = UNIX_TIMESTAMP()
+WHERE end IS NULL AND billingCountedUntil IS NULL;
+```
+
+### Additive changes keep older builds working
+
+When one database serves two builds, an added column must be `NULL`able with no default, because an older build's `INSERT` omits it. Read paths are usually already safe: explicit column lists tolerate extra columns, and models that map a fixed field set ignore columns they do not declare. Check for `SELECT *` consumers before relying on that.
 
 ## Validation
 
 - Ensure update scripts are additive and ordered.
+- Re-read the finished script for any statement lacking `IF (NOT) EXISTS`.
+- Confirm no `DROP COLUMN` and that every `UPDATE`/`INSERT` backfill is predicated.
 - Ensure schema changes map to expected model/query usage.
 
 ## Documentation Abstract

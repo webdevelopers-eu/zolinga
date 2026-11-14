@@ -35,6 +35,12 @@ This means:
 - `install/update/` must contain **only incremental deltas** (ALTER TABLE ADD COLUMN, etc.).
 - Never move a script from `install/install/` to `install/update/` — it will be skipped on existing installations.
 
+### "Applied" is per deployment, not per database
+
+What has already run is recorded in `data/system/installed/{module}.json`, relative to that checkout. When several deployments point at one database — a beta sharing production's DB, or a staging clone — each keeps its own record and **each replays the same update script**. That is why update scripts must be idempotent: the second deployment's run has to be a no-op, not a `Duplicate column name` error. See the `system-database-schema-updates` skill for the required `IF (NOT) EXISTS` forms, the no-`DROP COLUMN` rule, and guarded backfills.
+
+Deployment order matters with a shared database: migrate first, then deploy code. New code against an un-migrated schema fails on the missing column, while old code against a migrated schema keeps working as long as the change is additive and nullable.
+
 ### Database schemas: complete install + incremental updates
 
 For database schemas (and analogously for any other artifact):
@@ -43,8 +49,9 @@ For database schemas (and analogously for any other artifact):
 2. **`install/update/`** — each schema change gets its **own new file** (e.g., `040-add-column-foo.sql`). Never edit an existing update script.
 
 If you add a column to a table:
-- Add a new `install/update/040-add-column-foo.sql` with `ALTER TABLE … ADD COLUMN …`.
+- Add a new `install/update/040-add-column-foo.sql` with `ALTER TABLE … ADD COLUMN IF NOT EXISTS …`.
 - Also update the `install/install/` CREATE TABLE statement to include the new column.
+- Make the column `NULL`able with no default if an older build sharing the database still inserts into that table.
 
 ## Naming Convention
 
@@ -105,9 +112,10 @@ No install script is needed for dist files — the symlink is created automatica
 
 1. **New module**: Create `install/install/` scripts for complete from-scratch setup.
 2. **Schema change**: Add a new numbered script to `install/update/` AND update the corresponding `install/install/` script to reflect the current full state.
-3. **Bug in update script**: Do NOT edit the broken script. Add a new fix script with a higher number.
-4. **Trigger install/update**: Bump the module version in `zolinga.json`, then run `bin/zolinga` (no parameters). The system detects the version change, rescans manifests, and runs pending install/update scripts.
-5. **Add custom script type**: Create a listener for `system:install:script:{ext}` event with `internal` origin. See `system/wiki/Zolinga Core/Module Installation and Updates.md`.
+3. **Make it re-runnable**: every statement idempotent, no column drops, backfills predicated on the state they initialise.
+4. **Bug in update script**: Do NOT edit the broken script. Add a new fix script with a higher number.
+5. **Trigger install/update**: Bump the module version in `zolinga.json`, then run `bin/zolinga` (no parameters). The system detects the version change, rescans manifests, and runs pending install/update scripts.
+6. **Add custom script type**: Create a listener for `system:install:script:{ext}` event with `internal` origin. See `system/wiki/Zolinga Core/Module Installation and Updates.md`.
 
 ## Related Skills
 
